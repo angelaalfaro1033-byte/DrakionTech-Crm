@@ -1,0 +1,77 @@
+﻿.contacto-form {
+    max-width: 720px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Header */
+
+.contacto-form-header {
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 1rem;
+}
+
+    .contacto-form-header h3 {
+        margin: 0;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+.contacto-form-subtitle {
+    margin-top: 0.25rem;
+    font-size: 0.9rem;
+    color: #6b7280;
+}
+
+/* Campos */
+
+.contacto-form .form-label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #374151;
+}
+
+.contacto-form .form-control,
+.contacto-form .form-select {
+    border-radius: 10px;
+    font-size: 0.9rem;
+    padding: 0.6rem 0.75rem;
+}
+
+    /* Focus */
+
+    .contacto-form .form-control:focus,
+    .contacto-form .form-select:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 0.15rem rgba(99, 102, 241, 0.15);
+    }
+
+/* Botones */
+
+.contacto-form button.btn-primary {
+    padding: 0.55rem 1.5rem;
+    font-weight: 600;
+    border-radius: 10px;
+}
+
+.contacto-form a.btn-link {
+    margin-left: 0.75rem;
+    color: #6b7280;
+    text-decoration: none;
+}
+
+    .contacto-form a.btn-link:hover {
+        text-decoration: underline;
+    }
+
+/* Validaciones */
+
+.contacto-form .validation-summary-errors {
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    color: #b91c1c;
+}

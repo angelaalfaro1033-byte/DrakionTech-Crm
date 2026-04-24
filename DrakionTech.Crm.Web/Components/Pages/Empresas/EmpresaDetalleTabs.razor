@@ -1,0 +1,38 @@
+﻿@inject NavigationManager Navigation
+
+<div class="empresa-tabs">
+    <ul class="nav nav-tabs mb-3">
+
+        <li class="nav-item">
+            <a class="nav-link @IsActive("contactos")"
+               href="@($"/empresas/{EmpresaId}/contactos")">
+                Contactos
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link @IsActive("oportunidades")"
+               href="@($"/empresas/{EmpresaId}/oportunidades")">
+                Oportunidades
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link @IsActive("actividades")"
+               href="@($"/empresas/{EmpresaId}/actividades")">
+                Actividades
+            </a>
+        </li>
+
+    </ul>
+</div>
+
+@code {
+    [Parameter] public int EmpresaId { get; set; }
+
+    private string IsActive(string tab)
+    {
+        var uri = new Uri(Navigation.Uri).AbsolutePath;
+        return uri.EndsWith($"/{tab}") ? "active" : string.Empty;
+    }
+}

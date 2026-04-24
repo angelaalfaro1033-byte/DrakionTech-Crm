@@ -1,0 +1,57 @@
+﻿@using DrakionTech.Crm.Business.DTOs.Empleado
+
+<EditForm Model="@Model" OnValidSubmit="OnValidSubmit" class="form-container">
+    <DataAnnotationsValidator />
+    <ValidationSummary class="validation-summary" />
+
+    <div class="form-card">
+        <h3 class="form-title">Información del Empleado</h3>
+
+        <div class="form-grid">
+            <div class="form-field">
+                <label>Nombre</label>
+                <InputText @bind-Value="Model.Nombre" class="input-control" />
+            </div>
+
+            <div class="form-field">
+                <label>Apellido</label>
+                <InputText @bind-Value="Model.Apellido" class="input-control" />
+            </div>
+
+            <div class="form-field">
+                <label>Correo</label>
+                <InputText @bind-Value="Model.Email" class="input-control" />
+            </div>
+
+            <div class="form-field">
+                <label>Cargo</label>
+                <InputText @bind-Value="Model.Cargo" class="input-control" />
+            </div>
+
+            <div class="form-field full-width">
+                <label>Rol</label>
+                <InputText @bind-Value="Model.Rol" class="input-control" />
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn primary">
+                @TextoBoton
+            </button>
+
+            @if (OnCancel.HasDelegate)
+            {
+                <button type="button" class="btn secondary" @onclick="OnCancel">
+                    Cancelar
+                </button>
+            }
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public CrearEmpleadoDto Model { get; set; } = new();
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public string TextoBoton { get; set; } = "Guardar";
+}

@@ -1,0 +1,97 @@
+﻿@page "/empleados"
+
+@using DrakionTech.Crm.Business.Interfaces
+@using DrakionTech.Crm.Business.DTOs.Empleado
+
+@inject IEmpleadoService EmpleadoService
+
+<div class="empleados-container">
+
+    <div class="empresas-header">
+
+        <div class="header-text">
+            <h1 class="empresas-title">Empleados</h1>
+            <p class="empresas-subtitle">Gestiona los empleados del CRM</p>
+        </div>
+
+        <div>
+            <a class="btn btn-primary" href="/empleados/crear">
+                + Nuevo Empleado
+            </a>
+        </div>
+
+    </div>
+
+    <div class="ui-card">
+        <table class="ui-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Cargo</th>
+                    <th>Estado</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var item in empleados)
+                {
+                    <tr>
+                        <td>@item.Nombre @item.Apellido</td>
+
+                        <td class="email-cell" title="@item.Email">
+                            @item.Email
+                        </td>
+
+                        <td>@item.Cargo</td>
+
+                        <td>
+                            <span class="badge @(item.Activo ? "badge-success" : "badge-danger")">
+                                @(item.Activo ? "Activo" : "Inactivo")
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <div class="ui-actions">
+
+                                <a href="/empleados/editar/@item.Id" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+
+                                @if (item.Activo)
+                                {
+                                    <a href="#" @onclick="() => Desactivar(item.Id)" @onclick:preventDefault title="Desactivar">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                }
+
+                            </div>
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+@code {
+    private List<EmpleadoListDto> empleados = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Cargar();
+    }
+
+    private async Task Cargar()
+    {
+        empleados = await EmpleadoService.ObtenerTodosAsync();
+    }
+
+    private async Task Desactivar(int id)
+    {
+        await EmpleadoService.DesactivarAsync(id);
+        await Cargar();
+    }
+}

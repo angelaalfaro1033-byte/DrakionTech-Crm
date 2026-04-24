@@ -1,0 +1,23 @@
+﻿@* @inherits ErrorBoundary
+
+<div class="alert alert-danger">
+    <h4>Ha ocurrido un error</h4>
+    <p>@ErrorMessage</p>
+</div>
+
+@code {
+    protected string ErrorMessage { get; set; } = "Error inesperado";
+
+    protected override Task OnErrorAsync(Exception exception)
+    {
+        ErrorMessage = exception switch
+        {
+            DrakionTech.Crm.Business.Exceptions.EntidadNoEncontradaException ex => ex.Message,
+            DrakionTech.Crm.Business.Exceptions.ReglaNegocioException ex => ex.Message,
+            DrakionTech.Crm.Business.Exceptions.OperacionNoPermitidaException ex => ex.Message,
+            _ => "Ha ocurrido un error inesperado"
+        };
+
+        return Task.CompletedTask;
+    }
+} *@

@@ -1,0 +1,98 @@
+﻿@page "/"
+
+<div class="home-container">
+
+    <div class="home-header">
+        <h1>Bienvenido</h1>
+        <p>Gestiona tu CRM de forma rápida y sencilla</p>
+    </div>
+
+    <h3 class="section-title">Acciones rápidas</h3>
+
+    <div class="actions-grid">
+
+        <!-- EMPRESA -->
+        <div class="action-card @(loadingCard == "empresa" ? "loading" : "")" @onclick="GoEmpresa">
+            @if (loadingCard == "empresa")
+            {
+                <div class="card-loading">
+                    <div class="spinner small"></div>
+                </div>
+            }
+
+            <div class="icon">
+                <i class="bi bi-building"></i>
+            </div>
+            <span>Nueva Empresa</span>
+        </div>
+
+        <!-- USUARIO -->
+        <div class="action-card @(loadingCard == "usuario" ? "loading" : "")" @onclick="GoUsuario">
+            @if (loadingCard == "usuario")
+            {
+                <div class="card-loading">
+                    <div class="spinner small"></div>
+                </div>
+            }
+
+            <div class="icon">
+                <i class="bi bi-person-plus"></i>
+            </div>
+            <span>Nuevo Usuario</span>
+        </div>
+
+        <!-- EMPLEADO -->
+        <div class="action-card @(loadingCard == "empleado" ? "loading" : "")" @onclick="GoEmpleado">
+            @if (loadingCard == "empleado")
+            {
+                <div class="card-loading">
+                    <div class="spinner small"></div>
+                </div>
+            }
+
+            <div class="icon">
+                <i class="bi bi-people"></i>
+            </div>
+            <span>Nuevo Empleado</span>
+        </div>
+
+        <!-- EVENTOS -->
+        <div class="action-card @(loadingCard == "eventos" ? "loading" : "")" @onclick="GoEventos">
+            @if (loadingCard == "eventos")
+            {
+                <div class="card-loading">
+                    <div class="spinner small"></div>
+                </div>
+            }
+
+            <div class="icon">
+                <i class="bi bi-calendar-event"></i>
+            </div>
+            <span>Nuevo Evento</span>
+        </div>
+
+    </div>
+
+</div>
+@code {
+    [Inject] private NavigationManager Nav { get; set; } = default!;
+
+    private string? loadingCard;
+
+    private async Task NavigateWithLoading(string key, string url)
+    {
+        if (loadingCard != null) return;
+
+        loadingCard = key;
+        StateHasChanged();
+
+        await Task.Delay(150);
+
+        Nav.NavigateTo(url);
+    }
+
+    private Task GoEmpresa() => NavigateWithLoading("empresa", "/empresas/crear");
+    private Task GoUsuario() => NavigateWithLoading("usuario", "/usuarios-internos/nuevo");
+    private Task GoEmpleado() => NavigateWithLoading("empleado", "/empleados");
+    private Task GoEventos() => NavigateWithLoading("eventos", "/google-eventos");
+}

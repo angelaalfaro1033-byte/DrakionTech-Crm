@@ -1,0 +1,46 @@
+﻿.oportunidad-form-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.oportunidad-form-card {
+    width: 100%;
+    max-width: 700px;
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.oportunidad-form-title {
+    margin-bottom: 0.25rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.oportunidad-form-subtitle {
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    color: #6b7280;
+}
+
+/* Inputs */
+.oportunidad-form-card .form-label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #374151;
+}
+
+.oportunidad-form-card .form-control {
+    border-radius: 10px;
+    padding: 0.55rem 0.75rem;
+}
+
+/* Botones */
+.oportunidad-form-card button,
+.oportunidad-form-card a.btn {
+    min-width: 140px;
+    font-weight: 600;
+    border-radius: 10px;
+}

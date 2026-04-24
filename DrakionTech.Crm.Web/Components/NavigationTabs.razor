@@ -1,0 +1,71 @@
+﻿@inject NavigationManager Nav
+
+<div class="crm-navbar">
+    <ul class="crm-nav">
+
+        <li class="@GetNavClass("/")">
+            <a href="/">
+                <i class="bi bi-house"></i>
+                Inicio
+            </a>
+        </li>
+
+        <li class="@GetNavClass("/empresas")">
+            <a href="/empresas">
+                <i class="bi bi-building"></i>
+                Empresas
+            </a>
+        </li>
+
+        <li class="@GetNavClass("/usuarios-internos")">
+            <a href="/usuarios-internos">
+                <i class="bi bi-person"></i>
+                Usuarios
+            </a>
+        </li>
+
+        <li class="@GetNavClass("/empleados")">
+            <a href="/empleados">
+                <i class="bi bi-person-badge"></i>
+                Empleados
+            </a>
+        </li>
+
+        <li class="@GetNavClass("/google-eventos")">
+            <a href="/google-eventos">
+                <i class="bi bi-calendar-event"></i>
+                Google Eventos
+            </a>
+        </li>
+
+    </ul>
+</div>
+
+@code {
+
+    protected override void OnInitialized()
+    {
+        Nav.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Nav.LocationChanged -= OnLocationChanged;
+    }
+
+    private string GetNavClass(string url)
+    {
+        var current = Nav.ToBaseRelativePath(Nav.Uri);
+        current = "/" + current;
+
+        if (url == "/")
+            return current == "/" ? "nav-item active" : "nav-item";
+
+        return current.StartsWith(url) ? "nav-item active" : "nav-item";
+    }
+}

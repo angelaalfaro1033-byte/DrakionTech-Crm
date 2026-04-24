@@ -1,0 +1,57 @@
+﻿@typeparam TValue
+
+<InputText class="form-control"
+           placeholder="@Placeholder"
+           @bind-Value="Texto" />
+
+@code {
+    [Parameter] public TValue Value { get; set; } = default!;
+    [Parameter] public EventCallback<TValue> ValueChanged { get; set; }
+
+    [Parameter] public string Placeholder { get; set; } = "DD/MM/AAAA";
+    [Parameter] public string Format { get; set; } = "dd/MM/yyyy";
+    [Parameter] public bool Nullable { get; set; }
+
+    private string? Texto
+    {
+        get
+        {
+            if (Value == null)
+                return null;
+
+            // DateTime (no nullable)
+            if (Value is DateTime fecha)
+                return fecha.ToString(Format);
+
+            // DateTime? (nullable)
+            if (Value is DateTime?)
+            {
+                var fechaNullable = (DateTime?)(object)Value!;
+                return fechaNullable?.ToString(Format);
+            }
+
+            return null;
+        }
+        set
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                if (Nullable)
+                {
+                    ValueChanged.InvokeAsync(default!);
+                }
+                return;
+            }
+
+            if (DateTime.TryParseExact(
+                value,
+                Format,
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out var fecha))
+            {
+                ValueChanged.InvokeAsync((TValue)(object)fecha);
+            }
+        }
+    }
+}

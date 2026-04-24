@@ -1,0 +1,169 @@
+﻿@page "/empresas/{EmpresaId:int}/contactos"
+
+@inject IEmpresaService EmpresaService
+@inject IContactoService ContactoService
+
+@if (empresa is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <EmpresaComponente Empresa="empresa">
+        <div class="empresa-contactos">
+
+            <div class="empresa-section-header">
+                <div>
+                    <h5>Contactos</h5>
+                </div>
+
+                <a class="btn btn-primary"
+                   href="/empresas/@EmpresaId/contactos/crear">
+                    <i class="bi bi-plus-lg me-1"></i>
+                    Nuevo contacto
+                </a>
+            </div>
+
+            @if (contactos is null)
+            {
+                <p>Cargando contactos...</p>
+            }
+            else if (!contactos.Any())
+            {
+                <div class="alert alert-info">
+                    Esta empresa no tiene contactos registrados.
+                </div>
+            }
+            else
+            {
+                <div class=" mt-3 mb-3 row">
+                    <div class="col-md-6">
+                        <input class="form-control"
+                               placeholder="Buscar contacto..."
+                               @bind="busqueda"
+                               @bind:event="oninput" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <select class="form-control"
+                                @bind="rolSeleccionado">
+                            <option value="">-- Todos los roles --</option>
+
+                            @foreach (var rol in roles)
+                            {
+                                <option value="@rol">@rol</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="empresa-table">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Rol</th>
+                                <th>Fecha creación (dd/mm/aaaa)</th>
+                                <th class="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var contacto in contactosFiltrados!)
+                            {
+                                <tr>
+                                    <td>@contacto.NombreCompleto</td>
+                                    <td>@contacto.Email</td>
+                                    <td>@contacto.Telefono</td>
+                                    <td>@contacto.RolNombre</td>
+                                    <td>@contacto.FechaCreacion.ToString("dd/MM/yyyy")</td>
+                                    <td class="text-end">
+                                        <a class="btn btn-sm btn-outline-primary"
+                                           href="/contactos/editar/@contacto.Id">
+                                            Editar
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </EmpresaComponente>
+}
+
+@code {
+    [Parameter] public int EmpresaId { get; set; }
+
+    private EmpresaDto? empresa;
+
+    private IEnumerable<ContactoDto>? contactos;
+    private IEnumerable<ContactoDto>? contactosFiltrados;
+
+    private List<string> roles = new();
+
+    private string? _busqueda;
+    private string? _rolSeleccionado;
+
+    private string? busqueda
+    {
+        get => _busqueda;
+        set
+        {
+            _busqueda = value;
+            AplicarFiltros();
+        }
+    }
+
+    private string? rolSeleccionado
+    {
+        get => _rolSeleccionado;
+        set
+        {
+            _rolSeleccionado = value;
+            AplicarFiltros();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        empresa = await EmpresaService.ObtenerPorIdAsync(EmpresaId);
+        contactos = await ContactoService.ObtenerPorEmpresaAsync(EmpresaId);
+
+        contactosFiltrados = contactos;
+
+        roles = contactos
+            .Where(c => !string.IsNullOrWhiteSpace(c.RolNombre))
+            .Select(c => c.RolNombre!)
+            .Distinct()
+            .OrderBy(r => r)
+            .ToList();
+    }
+
+    private void AplicarFiltros()
+    {
+        if (contactos is null) return;
+
+        var query = contactos.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(busqueda))
+        {
+            var texto = busqueda.ToLower();
+
+            query = query.Where(c =>
+                (c.NombreCompleto != null && c.NombreCompleto.ToLower().Contains(texto)) ||
+                (c.Email != null && c.Email.ToLower().Contains(texto)) ||
+                (c.Telefono != null && c.Telefono.ToLower().Contains(texto))
+            );
+        }
+
+        if (!string.IsNullOrWhiteSpace(rolSeleccionado))
+        {
+            query = query.Where(c => c.RolNombre == rolSeleccionado);
+        }
+
+        contactosFiltrados = query.ToList();
+    }
+}

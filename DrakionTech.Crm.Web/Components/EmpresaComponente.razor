@@ -1,0 +1,27 @@
+﻿@if (Empresa is null)
+{
+    <p>Cargando empresa...</p>
+}
+else
+{
+    <div class="mb-4">
+        <h3 class="mb-0">@Empresa.Nombre</h3>
+        <small class="text-muted">
+            @Empresa.Nit · @Empresa.PaisNombre
+        </small>
+    </div>
+
+    <EmpresaDetalleTabs EmpresaId="@Empresa.Id" />
+
+    <div class="mt-3">
+        @ChildContent
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public EmpresaDto Empresa { get; set; } = default!;
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

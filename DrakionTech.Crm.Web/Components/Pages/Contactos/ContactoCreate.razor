@@ -1,0 +1,94 @@
+﻿@page "/empresas/{EmpresaId:int}/contactos/crear"
+
+@inject IContactoService ContactoService
+@inject NavigationManager Navigation
+
+<div class="contacto-form">
+
+    <div class="contacto-form-header">
+        <h3>Nuevo Contacto</h3>
+        <p class="contacto-form-subtitle">
+            Completa la información del contacto
+        </p>
+    </div>
+
+    @if (!roles.Any())
+    {
+        <div class="alert alert-warning">
+            No hay roles configurados en el sistema.
+        </div>
+    }
+    else
+    {
+        <EditForm Model="@modelo" OnValidSubmit="Guardar" FormName="CrearContactoForm">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label class="form-label">Nombre</label>
+                <InputText class="form-control"
+                           @bind-Value="modelo.Nombre" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Apellido</label>
+                <InputText class="form-control"
+                           @bind-Value="modelo.Apellido" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <InputText class="form-control"
+                           @bind-Value="modelo.Email" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Teléfono</label>
+                <InputText class="form-control"
+                           @bind-Value="modelo.Telefono" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Rol</label>
+                <InputSelect class="form-control" @bind-Value="modelo.RolContactoId">
+                    @foreach (var rol in roles)
+                    {
+                        <option value="@rol.Id">@rol.Nombre</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                Guardar
+            </button>
+
+            <a class="btn btn-link"
+               href="/empresas/@EmpresaId/contactos">
+                Cancelar
+            </a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    [Parameter] public int EmpresaId { get; set; }
+
+    private CrearContactoDto modelo = new();
+    private List<CatalogoDto> roles = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        modelo.EmpresaId = EmpresaId;
+
+        roles = (await ContactoService.ObtenerRolesContactoAsync()).ToList();
+
+        if (roles.Any())
+            modelo.RolContactoId = roles.First().Id;
+    }
+
+    private async Task Guardar()
+    {
+        await ContactoService.CrearAsync(modelo);
+        Navigation.NavigateTo($"/empresas/{EmpresaId}/contactos");
+    }
+}

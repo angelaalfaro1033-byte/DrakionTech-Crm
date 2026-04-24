@@ -1,0 +1,127 @@
+﻿@page "/empresas/{EmpresaId:int}/actividades/crear"
+
+@inject IActividadService ActividadService
+@inject IContactoService ContactoService
+@inject IOportunidadService OportunidadService
+@inject NavigationManager Navigation
+
+<div class="actividad-form-container">
+    <div class="actividad-form-card">
+        <h3 class="actividad-form-title">
+            Nueva actividad
+        </h3>
+
+        <p class="actividad-form-subtitle">
+            Registra una interacción realizada con la empresa
+        </p>
+
+        <EditForm Model="@modelo"
+                  OnValidSubmit="Guardar"
+                  FormName="CrearActividadForm">
+
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <!-- Tipo -->
+            <div class="mb-3">
+                <label class="form-label">Tipo de actividad</label>
+
+                <InputSelect class="form-control" @bind-Value="modelo.TipoActividadId">
+                    <option value="">-- Seleccione --</option>
+                    @foreach (var tipo in tiposActividad)
+                    {
+                        <option value="@tipo.Id">@tipo.Nombre</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <!-- Fecha -->
+            <div class="mb-3">
+                <label class="form-label">Fecha</label>
+                <InputDate TValue="DateTime"
+                           class="form-control"
+                           @bind-Value="modelo.Fecha" />
+            </div>
+
+            <!-- Resultado -->
+            <div class="mb-3">
+                <label class="form-label">Resultado</label>
+                <InputText class="form-control"
+                           @bind-Value="modelo.Resultado" />
+                <div class="form-text">
+                    Ejemplo: Reunión realizada, Cliente interesado, No contestó
+                </div>
+            </div>
+
+            <!-- Contacto (opcional) -->
+            <div class="mb-3">
+                <label class="form-label">Contacto (opcional)</label>
+                <InputSelect class="form-control"
+                             @bind-Value="modelo.ContactoId">
+                    <option value="">-- Sin contacto --</option>
+                    @foreach (var c in contactos)
+                    {
+                        <option value="@c.Id">@c.NombreCompleto</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <!-- Oportunidad (opcional) -->
+            <div class="mb-3">
+                <label class="form-label">Oportunidad (opcional)</label>
+                <InputSelect class="form-control"
+                             @bind-Value="modelo.OportunidadId">
+                    <option value="">-- Sin oportunidad --</option>
+                    @foreach (var o in oportunidades)
+                    {
+                        <option value="@o.Id">@o.NombreProyecto</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <!-- Notas -->
+            <div class="mb-3">
+                <label class="form-label">Notas</label>
+                <InputTextArea class="form-control"
+                               rows="4"
+                               @bind-Value="modelo.Notas" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                Guardar
+            </button>
+
+            <a class="btn btn-secondary ms-2"
+               href="/empresas/@EmpresaId/actividades">
+                Cancelar
+            </a>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int EmpresaId { get; set; }
+
+    private IEnumerable<TipoActividadDto> tiposActividad = [];
+    private CrearActividadDto modelo = new();
+    private IEnumerable<ContactoDto> contactos = [];
+    private IEnumerable<OportunidadDto> oportunidades = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        modelo.EmpresaId = EmpresaId;
+        modelo.Fecha = DateTime.Today;
+        modelo.EstadoActividadId = 1;
+        modelo.UsuarioInternoId = 2;
+        contactos = await ContactoService.ObtenerPorEmpresaAsync(EmpresaId);
+        oportunidades = await OportunidadService.ObtenerPorEmpresaAsync(EmpresaId);
+
+        tiposActividad = await ActividadService.ObtenerTiposActividadAsync();
+    }
+
+    private async Task Guardar()
+    {
+        await ActividadService.CrearAsync(modelo);
+        Navigation.NavigateTo($"/empresas/{EmpresaId}/actividades");
+    }
+}

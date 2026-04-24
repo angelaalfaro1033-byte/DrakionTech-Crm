@@ -1,0 +1,38 @@
+﻿@page "/empleados/crear"
+
+@using DrakionTech.Crm.Business.DTOs.Empleado
+@inject IEmpleadoService EmpleadoService
+@inject NavigationManager Nav
+
+<div class="empleados-container">
+
+    <div class="empresas-header">
+        <div>
+            <h1 class="empresas-title">Crear empleado</h1>
+            <p class="empresas-subtitle">Registra un nuevo empleado</p>
+        </div>
+    </div>
+
+    <div class="ui-card">
+        <EmpleadoForm Model="empleado"
+                      OnValidSubmit="Guardar"
+                      OnCancel="Cancelar"
+                      TextoBoton="Crear" />
+    </div>
+
+</div>
+
+@code {
+    private CrearEmpleadoDto empleado = new();
+
+    private async Task Guardar()
+    {
+        await EmpleadoService.CrearAsync(empleado);
+        Nav.NavigateTo("/empleados");
+    }
+
+    private void Cancelar()
+    {
+        Nav.NavigateTo("/empleados");
+    }
+}

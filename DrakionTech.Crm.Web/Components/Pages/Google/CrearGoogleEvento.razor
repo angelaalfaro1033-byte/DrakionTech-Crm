@@ -1,0 +1,274 @@
+﻿@using DrakionTech.Crm.Business.DTOs.Google
+@using DrakionTech.Crm.Business.DTOs.Empleado
+
+@inject IGoogleCalendarService GoogleService
+@inject IEmpleadoService EmpleadoService
+@inject IEmpresaService EmpresaService
+
+<div class="card p-3 mb-3">
+    <h5>Crear evento</h5>
+
+    <!-- TITULO -->
+    <label>Título predefinido</label>
+    <select class="form-select mb-2" @bind="tituloBase">
+        <option value="">-- Seleccionar --</option>
+        @foreach (var titulo in titulosPredefinidos)
+        {
+            <option value="@titulo">@titulo</option>
+        }
+    </select>
+
+    <input class="form-control mb-2"
+           placeholder="Título personalizado"
+           @bind="tituloManual" />
+
+    <!-- EMPRESA -->
+    <h6 class="mt-3">Empresa</h6>
+
+    <select class="form-select mb-2" @bind="empresaSeleccionadaId">
+        <option value="">-- Seleccionar empresa --</option>
+        @foreach (var emp in empresas)
+        {
+            <option value="@emp.Id">
+                @emp.Nombre (@emp.Nit)
+            </option>
+        }
+    </select>
+
+    @if (empresaSeleccionadaId != null && empresasDict.ContainsKey(empresaSeleccionadaId.Value))
+    {
+        var emp = empresasDict[empresaSeleccionadaId.Value];
+
+        <div class="alert alert-info p-2">
+            Empresa seleccionada: <strong>@emp.Nombre</strong> (@emp.Nit)
+        </div>
+    }
+
+    <!-- TIPO EVENTO -->
+    <label>Tipo de evento</label>
+    <select class="form-select mb-2" @bind="tipoEvento">
+        <option value="Presencial">Presencial</option>
+        <option value="Virtual">Virtual (Google Meet)</option>
+    </select>
+
+    @if (tipoEvento == "Presencial")
+    {
+        <input class="form-control mb-2"
+               placeholder="Ubicación"
+               @bind="nuevo.Ubicacion" />
+    }
+    else
+    {
+        <div class="alert alert-info">
+            Se generará automáticamente un enlace de Google Meet
+        </div>
+    }
+
+    <textarea class="form-control mb-2"
+              placeholder="Descripción"
+              @bind="nuevo.Descripcion"></textarea>
+
+    <!-- FILE INPUT CONTROLADO -->
+    <InputFile @key="fileInputKey"
+               OnChange="OnFileSelected"
+               multiple
+               class="form-control mb-2" />
+
+    <!-- PARTICIPANTES -->
+    <h6 class="mt-3">Participantes (Empleados)</h6>
+
+    <div class="border p-2 rounded" style="max-height: 200px; overflow-y:auto;">
+        @foreach (var emp in empleados)
+        {
+            <div class="form-check">
+                <input class="form-check-input"
+                       type="checkbox"
+                       checked="@correosSeleccionados.Contains(emp.Email)"
+                       @onchange="(e) => ToggleEmpleado(emp.Email, e.Value)" />
+
+                <label class="form-check-label">
+                    @emp.Nombre (@emp.Email)
+                </label>
+            </div>
+        }
+    </div>
+
+    <!-- FECHAS -->
+    <input type="datetime-local" class="form-control mb-2" @bind="fechaInicio" />
+    <input type="datetime-local" class="form-control mb-2" @bind="fechaFin" />
+
+    <button class="btn btn-success" @onclick="CrearEvento">
+        Crear evento
+    </button>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback OnEventoCreado { get; set; }
+
+    private string tipoEvento = "Presencial";
+
+    private List<EmpresaDto> empresas = new();
+    private Dictionary<int, EmpresaDto> empresasDict = new();
+
+    private int? empresaSeleccionadaId;
+    private List<EmpleadoListDto> empleados = new();
+
+    private string? tituloBase;
+    private string? tituloManual;
+
+    private HashSet<string> correosSeleccionados = new();
+    private List<ArchivoAdjuntoDto> archivos = new();
+
+    private DateTime fechaInicio;
+    private DateTime fechaFin;
+
+    private CrearGoogleEventoDto nuevo = new();
+
+    private List<string> titulosPredefinidos = new()
+    {
+        "Reunión con cliente",
+        "Seguimiento interno",
+        "Capacitación",
+        "Presentación de proyecto",
+        "Llamada comercial"
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        fechaInicio = DateTime.Now;
+        fechaFin = DateTime.Now.AddHours(1);
+
+        var empresasList = (await EmpresaService.ObtenerTodasAsync()).ToList();
+        empresas = empresasList;
+        empresasDict = empresasList.ToDictionary(x => x.Id);
+
+        empleados = await EmpleadoService.ObtenerTodosAsync();
+    }
+
+    private async Task OnFileSelected(InputFileChangeEventArgs e)
+    {
+        archivos.Clear();
+
+        foreach (var file in e.GetMultipleFiles())
+        {
+            using var ms = new MemoryStream();
+
+            await file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024)
+                      .CopyToAsync(ms);
+
+            archivos.Add(new ArchivoAdjuntoDto
+                {
+                    Nombre = file.Name,
+                    MimeType = file.ContentType,
+                    Contenido = ms.ToArray()
+                });
+        }
+    }
+
+    private void ToggleEmpleado(string email, object value)
+    {
+        if ((bool)value)
+            correosSeleccionados.Add(email);
+        else
+            correosSeleccionados.Remove(email);
+    }
+
+    private void OnTituloSeleccionado(ChangeEventArgs e)
+    {
+        tituloBase = e.Value?.ToString();
+    }
+
+    private void OnEmpresaSeleccionada(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int empresaId))
+        {
+            empresaSeleccionadaId = empresaId;
+        }
+    }
+
+    private async Task CrearEvento()
+    {
+        if (fechaFin <= fechaInicio)
+            return;
+
+        var dto = BuildDto();
+
+        await GoogleService.CrearEventoAsync(dto);
+
+        await OnEventoCreado.InvokeAsync();
+
+        ResetFormulario();
+    }
+
+    private CrearGoogleEventoDto BuildDto()
+    {
+        return new CrearGoogleEventoDto
+            {
+                FechaInicio = fechaInicio,
+                FechaFin = fechaFin,
+                Archivos = archivos,
+                CorreosEmpleados = correosSeleccionados.ToList(),
+                Titulo = ConstruirTitulo(),
+                EmpresaId = empresaSeleccionadaId,
+                EmpresaNombre = GetEmpresaNombre(),
+                EmpresaNit = GetEmpresaNit(),
+                Ubicacion = tipoEvento == "Presencial" ? nuevo.Ubicacion : null,
+                Descripcion = nuevo.Descripcion,
+                EsVirtual = tipoEvento == "Virtual"
+            };
+    }
+
+    private string ConstruirTitulo()
+    {
+        var partes = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(tituloBase))
+            partes.Add(tituloBase);
+
+        if (!string.IsNullOrWhiteSpace(tituloManual))
+            partes.Add(tituloManual);
+
+        if (empresaSeleccionadaId is int id && empresasDict.TryGetValue(id, out var empresa))
+            partes.Add(empresa.Nombre);
+
+        return string.Join(" - ", partes);
+    }
+
+    private string? GetEmpresaNombre()
+    {
+        if (empresaSeleccionadaId is int id && empresasDict.TryGetValue(id, out var empresa))
+            return empresa.Nombre;
+
+        return null;
+    }
+
+    private string? GetEmpresaNit()
+    {
+        if (empresaSeleccionadaId is int id && empresasDict.TryGetValue(id, out var empresa))
+            return empresa.Nit;
+
+        return null;
+    }
+
+    private int fileInputKey = 0;
+
+    private void ResetFormulario()
+    {
+        nuevo = new();
+
+        fechaInicio = DateTime.Now;
+        fechaFin = DateTime.Now.AddHours(1);
+
+        archivos.Clear();
+        correosSeleccionados.Clear();
+
+        empresaSeleccionadaId = null;
+        tituloBase = null;
+        tituloManual = null;
+
+        tipoEvento = "Presencial";
+
+        fileInputKey++; 
+    }
+}  

@@ -1,0 +1,101 @@
+﻿@page "/empleados/editar/{id:int}"
+
+@using DrakionTech.Crm.Business.DTOs.Empleado
+@inject IEmpleadoService EmpleadoService
+@inject NavigationManager Nav
+
+<div class="empleados-container">
+
+    <div class="empresas-header">
+        <div>
+            <h1 class="empresas-title">Editar empleado</h1>
+            <p class="empresas-subtitle">Actualiza la información</p>
+        </div>
+    </div>
+
+    @if (cargando)
+    {
+        <div class="ui-card">
+            <p>Cargando información...</p>
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(error))
+    {
+        <div class="ui-card">
+            <p class="text-danger">@error</p>
+        </div>
+    }
+    else
+    {
+        <!-- FORM -->
+        <div class="ui-card">
+            <EmpleadoForm Model="empleado"
+                          OnValidSubmit="Guardar"
+                          OnCancel="Cancelar"
+                          TextoBoton="Actualizar" />
+        </div>
+    }
+
+</div>
+
+@code {
+    [Parameter] public int id { get; set; }
+
+    private CrearEmpleadoDto empleado = new();
+    private bool cargando = true;
+    private string? error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var e = await EmpleadoService.ObtenerPorIdAsync(id);
+
+            empleado = new CrearEmpleadoDto
+                {
+                    Nombre = e.Nombre,
+                    Apellido = e.Apellido,
+                    Email = e.Email,
+                    Cargo = e.Cargo,
+                    Rol = e.Rol
+                };
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+
+    private async Task Guardar()
+    {
+        try
+        {
+            var dto = new ActualizarEmpleadoDto
+                {
+                    Id = id,
+                    Nombre = empleado.Nombre,
+                    Apellido = empleado.Apellido,
+                    Email = empleado.Email,
+                    Cargo = empleado.Cargo,
+                    Rol = empleado.Rol
+                };
+
+            await EmpleadoService.EditarAsync(dto);
+
+            Nav.NavigateTo("/empleados");
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+    }
+
+    private void Cancelar()
+    {
+        Nav.NavigateTo("/empleados");
+    }
+}

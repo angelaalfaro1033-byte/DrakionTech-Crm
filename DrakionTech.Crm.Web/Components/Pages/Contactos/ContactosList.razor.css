@@ -1,0 +1,9 @@
+﻿/* Contenedor específico */
+.empresa-contactos {
+    margin-top: 1rem;
+}
+
+/* Ajustes propios de contactos */
+.contactos-table td:nth-child(2) {
+    white-space: nowrap;
+}

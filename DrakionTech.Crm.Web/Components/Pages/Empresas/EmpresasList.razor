@@ -1,0 +1,173 @@
+﻿@page "/empresas"
+
+@inject IEmpresaService EmpresaService
+@inject IJSRuntime JS
+
+<div class="empresas-container">
+
+    <!-- HEADER -->
+    <div class="empresas-header">
+        <div>
+            <h1 class="empresas-title">Empresas</h1>
+            <p class="empresas-subtitle">Gestiona las empresas de tu CRM</p>
+        </div>
+
+        <a class="btn btn-primary" href="/empresas/crear">
+            + Nueva Empresa
+        </a>
+    </div>
+
+    @if (empresas is null)
+    {
+        <p>Cargando empresas...</p>
+    }
+    else if (!empresas.Any())
+    {
+        <div class="alert alert-info">
+            No hay empresas registradas.
+        </div>
+    }
+    else
+    {
+        <!-- TOOLBAR -->
+        <div class="ui-toolbar">
+
+            <div class="ui-search">
+                <i class="bi bi-search"></i>
+                <input class="form-control"
+                       placeholder="Buscar por nombre, NIT o correo..."
+                       @bind="busqueda"
+                       @bind:event="oninput" />
+            </div>
+
+            <select class="form-select" @bind="sectorSeleccionado">
+                <option value="">Todos los sectores</option>
+                @foreach (var sector in sectores)
+                {
+                    <option value="@sector">@sector</option>
+                }
+            </select>
+
+        </div>
+
+        <!-- TABLA -->
+        <div class="ui-card">
+            <table class="ui-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>NIT</th>
+                        <th>País</th>
+                        <th>Email</th>
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var empresa in empresasFiltradas!)
+                    {
+                        <tr>
+                            <td class="fw-semibold">
+                                <a href="/empresas/@empresa.Id" class="link-empresa">
+                                    @empresa.Nombre
+                                </a>
+                            </td>
+
+                            <td>@empresa.Nit</td>
+                            <td>@empresa.PaisNombre</td>
+                            <td>@empresa.Correo</td>
+
+                            <td class="acciones text-end">
+                                <div class="ui-actions">
+                                    <a href="/empresas/@empresa.Id" title="Ver">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+
+                                    <a href="/empresas/editar/@empresa.Id" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@code {
+    private IEnumerable<EmpresaDto>? empresas;
+    private IEnumerable<EmpresaDto>? empresasFiltradas;
+
+    private string? _busqueda;
+    private string? _sectorSeleccionado;
+
+    private string? busqueda
+    {
+        get => _busqueda;
+        set
+        {
+            _busqueda = value;
+            AplicarFiltros();
+        }
+    }
+
+    private string? sectorSeleccionado
+    {
+        get => _sectorSeleccionado;
+        set
+        {
+            _sectorSeleccionado = value;
+            AplicarFiltros();
+        }
+    }
+
+    private List<string> sectores = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        empresas = await EmpresaService.ObtenerTodasAsync();
+        empresasFiltradas = empresas;
+
+        sectores = empresas
+            .Where(e => !string.IsNullOrWhiteSpace(e.SectorNombre))
+            .Select(e => e.SectorNombre!)
+            .Distinct()
+            .OrderBy(s => s)
+            .ToList();
+    }
+
+    private void AplicarFiltros()
+    {
+        if (empresas is null) return;
+
+        var query = empresas.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(busqueda))
+        {
+            var texto = busqueda.ToLower();
+
+            query = query.Where(e =>
+                (e.Nombre != null && e.Nombre.ToLower().Contains(texto)) ||
+                (e.Nit != null && e.Nit.ToLower().Contains(texto)) ||
+                (e.Correo != null && e.Correo.ToLower().Contains(texto))
+            );
+        }
+
+        if (!string.IsNullOrWhiteSpace(sectorSeleccionado))
+        {
+            query = query.Where(e => e.SectorNombre == sectorSeleccionado);
+        }
+
+        empresasFiltradas = query.ToList();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initTooltips");
+        }
+    }
+}

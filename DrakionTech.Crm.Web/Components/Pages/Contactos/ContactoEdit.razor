@@ -1,0 +1,115 @@
+﻿@page "/contactos/editar/{ContactoId:int}"
+
+@inject IContactoService ContactoService
+@inject NavigationManager Navigation
+
+<div class="contacto-form">
+
+    <div class="contacto-form-header">
+        <h3>Editar Contacto</h3>
+        <p class="contacto-form-subtitle">
+            Actualiza la información del contacto
+        </p>
+    </div>
+
+    @if (modelo is null)
+    {
+        <p>Cargando contacto...</p>
+    }
+    else if (!roles.Any())
+    {
+        <div class="alert alert-warning">
+            No hay roles configurados en el sistema.
+        </div>
+    }
+    else
+    {
+        <EditForm Model="@modelo" OnValidSubmit="Guardar" FormName="EditarContactoForm">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label class="form-label">Empresa</label>
+                <input class="form-control"
+                       value="@empresaNombre"
+                       disabled />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Nombre</label>
+                <InputText class="form-control" @bind-Value="modelo.Nombre" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Apellido</label>
+                <InputText class="form-control" @bind-Value="modelo.Apellido" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <InputText class="form-control"
+                           @bind-Value="modelo.Email" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Teléfono</label>
+                <InputText class="form-control"
+                           @bind-Value="modelo.Telefono" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Rol</label>
+                <InputSelect class="form-control" @bind-Value="modelo.RolContactoId">
+                    @foreach (var rol in roles)
+                    {
+                        <option value="@rol.Id">@rol.Nombre</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                Guardar cambios
+            </button>
+
+            <a class="btn btn-link"
+               href="/empresas/@empresaId/contactos">
+                Cancelar
+            </a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    [Parameter] public int ContactoId { get; set; } // Cambiado a int
+
+    private ActualizarContactoDto? modelo;
+    private List<CatalogoDto> roles = new();
+
+    private int empresaId; // Cambiado a int
+    private string empresaNombre = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        roles = (await ContactoService.ObtenerRolesContactoAsync()).ToList();
+
+        var contacto = await ContactoService.ObtenerPorIdAsync(ContactoId);
+
+        empresaId = contacto.EmpresaId;
+        empresaNombre = contacto.EmpresaNombre;
+
+        modelo = new ActualizarContactoDto
+            {
+                Nombre = contacto.Nombre,
+                Apellido = contacto.Apellido,
+                Email = contacto.Email,
+                Telefono = contacto.Telefono,
+                RolContactoId = contacto.RolContactoId // Ahora int
+            };
+    }
+
+    private async Task Guardar()
+    {
+        await ContactoService.ActualizarAsync(ContactoId, modelo!);
+        Navigation.NavigateTo($"/empresas/{empresaId}/contactos");
+    }
+}

@@ -1,0 +1,112 @@
+﻿@page "/empresas/{EmpresaId:int}/oportunidades/etapa/{OportunidadId:int}"
+@using DrakionTech.Crm.Web.Components.Shared
+
+@inject IOportunidadService OportunidadService
+@inject NavigationManager Navigation
+
+<div class="etapa-container">
+    <div class="etapa-info-card">
+        <h3>Cambiar etapa de oportunidad</h3>
+
+        @if (oportunidad is null)
+        {
+            <p>Cargando información de la oportunidad...</p>
+        }
+        else
+        {
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">@oportunidad.NombreProyecto</h5>
+
+                    <p class="mb-1">
+                        <strong>Valor estimado:</strong>
+                        @oportunidad.ValorEstimado.ToString("C")
+                    </p>
+
+                    <p class="mb-1">
+                        <strong>Etapa actual:</strong>
+                        <span class="badge bg-secondary">
+                            @((EtapaOportunidad)oportunidad.Etapa)
+                        </span>
+                    </p>
+
+                    <p class="mb-0">
+                        <strong>Fecha creación:</strong>
+                        @oportunidad.FechaCreacion.ToString("dd/MM/yyyy")
+                    </p>
+                </div>
+            </div>
+
+            <div class="etapa-form-card">
+                <EditForm Model="@modelo"
+                          OnValidSubmit="Guardar"
+                          FormName="CambiarEtapaForm">
+
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="mb-3">
+                        <label class="form-label">Nueva etapa</label>
+                        <InputSelect class="form-control" @bind-Value="modelo.NuevaEtapa">
+                            @foreach (var etapa in etapas)
+                            {
+                                <option value="@etapa.Valor">
+                                    @etapa.Nombre
+                                </option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Guardar cambio
+                    </button>
+
+                    <a class="btn btn-secondary ms-2"
+                       href="/empresas/@EmpresaId/oportunidades">
+                        Cancelar
+                    </a>
+                </EditForm>
+            </div>
+        }
+    </div>
+</div>
+@code {
+    [Parameter] public int EmpresaId { get; set; }
+    [Parameter] public int OportunidadId { get; set; }
+
+    private OportunidadDto? oportunidad;
+    private IEnumerable<OpcionEnumDto> etapas = [];
+    private string etapaActualTexto = string.Empty;
+
+    private CambiarEtapaModel modelo = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        etapas = OportunidadService.ObtenerEtapas();
+
+        oportunidad = await OportunidadService.ObtenerPorIdAsync(OportunidadId);
+
+        modelo.NuevaEtapa = oportunidad.Etapa;
+
+        etapaActualTexto = etapas
+            .First(e => e.Valor == oportunidad.Etapa)
+            .Nombre;
+    }
+
+    private async Task Guardar()
+    {
+        await OportunidadService.CambiarEtapaAsync(
+            OportunidadId,
+            (EtapaOportunidad)modelo.NuevaEtapa
+        );
+
+        Navigation.NavigateTo(
+            $"/empresas/{EmpresaId}/oportunidades"
+        );
+    }
+
+    private class CambiarEtapaModel
+    {
+        public int NuevaEtapa { get; set; }
+    }
+}

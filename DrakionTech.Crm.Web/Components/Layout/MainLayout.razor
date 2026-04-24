@@ -1,0 +1,26 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager Nav
+
+<header class="app-header">
+    <div class="header-left">
+        <a href="/" class="logo-link">
+            <img src="images/logo/Logo_Negro.svg"
+                 alt="CRM"
+                 class="logo-img" />
+        </a>
+
+        <NavigationTabs />
+    </div>
+</header>
+
+<main class="app-main">
+    <article class="content">
+        @Body
+    </article>
+</main>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>

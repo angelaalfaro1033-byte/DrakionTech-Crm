@@ -1,0 +1,116 @@
+﻿@page "/google-eventos"
+
+@using DrakionTech.Crm.Data.Entities
+@inject GoogleEventoReadService EventoService
+@inject GoogleEventoSyncService SyncService
+
+<div class="empleados-container">
+
+    <!-- HEADER -->
+    <div class="empresas-header">
+        <div>
+            <h1 class="empresas-title">Eventos</h1>
+            <p class="empresas-subtitle">Eventos sincronizados desde Google Calendar</p>
+        </div>
+
+        <button class="btn btn-primary" @onclick="Sincronizar">
+            Sincronizar
+        </button>
+    </div>
+
+    <!-- ACCIÓN -->
+    <div class="ui-card mb-3">
+        <CrearGoogleEvento OnEventoCreado="Sincronizar" />
+    </div>
+
+    <!-- TABLA -->
+    <div class="ui-card">
+        @if (!eventos.Any())
+        {
+            <div class="empresa-empty">
+                No hay eventos disponibles.
+            </div>
+        }
+        else
+        {
+            <table class="ui-table">
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Inicio</th>
+                        <th>Fin</th>
+                        <th>Ubicación</th>
+                        <th>Descripción</th>
+                        <th>Archivos</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var e in eventos)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@e.Titulo</td>
+
+                            <td>@(e.FechaInicio?.ToString("dd/MM/yyyy HH:mm"))</td>
+                            <td>@(e.FechaFin?.ToString("dd/MM/yyyy HH:mm"))</td>
+
+                            <td>@e.Ubicacion</td>
+
+                            <td class="text-muted">
+                                @LimpiarHtml(e.Descripcion)
+                            </td>
+
+                            <td>
+                                @if (e.Archivos != null && e.Archivos.Any())
+                                {
+                                    <div class="archivos-list">
+                                        @foreach (var archivo in e.Archivos)
+                                        {
+                                            <a href="@archivo.Url" target="_blank">
+                                                <i class="bi bi-paperclip"></i> @archivo.Nombre
+                                            </a>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Sin archivos</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+</div>
+}
+
+@code {
+    private List<GoogleEvento> eventos = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Sincronizar();
+    }
+
+    private async Task CargarEventos()
+    {
+        eventos = await EventoService.ObtenerEventosAsync();
+    }
+
+    private async Task Sincronizar()
+    {
+        await SyncService.SincronizarAsync();
+        await CargarEventos();
+    }
+
+    private string LimpiarHtml(string? html)
+    {
+        if (string.IsNullOrEmpty(html))
+            return "";
+
+        return System.Text.RegularExpressions.Regex.Replace(html, "<.*?>", "");
+    }
+}

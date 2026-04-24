@@ -1,0 +1,89 @@
+﻿/* HEADER DE SECCIÓN */
+.empresa-section-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.empresa-section-header h5 {
+    margin: 0;
+    font-weight: 600;
+}
+
+.empresa-section-header small {
+    color: var(--bs-secondary-color);
+    line-height: 1.4;
+}
+
+/* CTA */
+.empresa-section-header .btn-primary {
+    align-self: flex-start;
+    padding: 0.45rem 1.2rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+}
+
+/* TABLA BASE */
+.empresa-table-wrapper {
+    background-color: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+}
+
+.empresa-table {
+    width: 100%;
+    margin-bottom: 0;
+    border-collapse: collapse;
+}
+
+/* Header */
+.empresa-table thead {
+    background-color: #f9fafb;
+}
+
+.empresa-table th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    color: #6b7280;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0.75rem;
+}
+
+/* Celdas */
+.empresa-table td {
+    vertical-align: middle;
+    font-size: 0.9rem;
+    color: #374151;
+    padding: 0.75rem;
+}
+
+/* Hover */
+.empresa-table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+/* BADGES */
+.empresa-table .badge {
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
+}
+
+/* ACCIONES */
+.empresa-table .btn-sm {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.6rem;
+    border-radius: 8px;
+}
+
+/* ESTADO VACÍO */
+.empresa-empty {
+    text-align: center;
+    padding: 2rem;
+    color: #6b7280;
+}

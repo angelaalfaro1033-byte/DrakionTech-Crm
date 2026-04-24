@@ -1,0 +1,96 @@
+﻿@page "/empresas/{EmpresaId:int}/oportunidades"
+
+@inject IEmpresaService EmpresaService
+@inject IOportunidadService OportunidadService
+
+@if (empresa is null || oportunidades is null)
+{
+    <p>Cargando oportunidades...</p>
+}
+else
+{
+    <EmpresaComponente Empresa="empresa">
+        <div class="empresa-section-header">
+            <div>
+                <h5>Oportunidades</h5>
+                <small>Gestión de oportunidades comerciales</small>
+            </div>
+
+            <a class="btn btn-primary"
+               href="/empresas/@EmpresaId/oportunidades/crear">
+                <i class="bi bi-plus-lg me-1"></i>
+                Nueva oportunidad
+            </a>
+        </div>
+
+        @if (!oportunidades.Any())
+        {
+            <div class="alert alert-info">
+                Esta empresa no tiene oportunidades registradas.
+            </div>
+        }
+        else
+        {
+            <div class="empresa-table">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Proyecto</th>
+                            <th>Valor estimado</th>
+                            <th>Etapa</th>
+                            <th>Fecha creación</th>
+                            <th>Acciones</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var o in oportunidades)
+                        {
+                            <tr>
+                                <td>@o.NombreProyecto</td>
+
+                                <td>
+                                    @o.ValorEstimado.ToString("C0",
+                                    new System.Globalization.CultureInfo("es-CO"))
+                        </td>
+
+                        <td>
+                            <span class="badge oportunidades-etapa bg-info">
+                                @o.EtapaNombre
+                            </span>
+                        </td>
+
+                        <td>@o.FechaCreacion.ToString("dd/MM/yyyy")</td>
+
+                        <td>
+                            <a class="btn btn-sm btn-secondary me-1"
+                                href="/empresas/@EmpresaId/oportunidades/editar/@o.Id">
+                                Editar
+                            </a>
+
+                            <a class="btn btn-sm btn-warning me-1"
+                                href="/empresas/@EmpresaId/oportunidades/etapa/@o.Id">
+                                Cambiar etapa
+                            </a>
+                        </td>
+                    </tr>
+                            }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </EmpresaComponente>
+}
+
+@code {
+    [Parameter] public int EmpresaId { get; set; }
+
+    private EmpresaDto? empresa;
+    private IEnumerable<OportunidadDto>? oportunidades;
+
+    protected override async Task OnInitializedAsync()
+    {
+        empresa = await EmpresaService.ObtenerPorIdAsync(EmpresaId);
+        oportunidades = await OportunidadService.ObtenerPorEmpresaAsync(EmpresaId);
+    }
+}

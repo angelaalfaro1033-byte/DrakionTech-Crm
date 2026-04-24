@@ -1,0 +1,44 @@
+﻿.empresas-container {
+    padding: 24px;
+}
+
+/* HEADER */
+.empresas-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.empresas-title {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.empresas-subtitle {
+    margin: 0;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+/* LINKS */
+.link-empresa {
+    text-decoration: none;
+    color: #212529;
+}
+
+    .link-empresa:hover {
+        color: var(--primary);
+    }
+
+/* ACCIONES */
+.acciones a {
+    margin-left: 10px;
+    color: var(--primary);
+    font-size: 16px;
+}
+
+    .acciones a:hover {
+        color: #1d4ed8;
+    }

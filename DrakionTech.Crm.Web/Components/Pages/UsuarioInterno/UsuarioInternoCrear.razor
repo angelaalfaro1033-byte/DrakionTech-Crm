@@ -1,0 +1,57 @@
+﻿@page "/usuarios-internos/nuevo"
+
+@inject IUsuarioInternoService UsuarioService
+@inject NavigationManager Nav
+
+<h3>Nuevo Usuario Interno</h3>
+
+<EditForm Model="model" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Nombre</label>
+        <InputText class="form-control"
+                   @bind-Value="model.Nombre" />
+    </div>
+
+    <div class="mb-3">
+        <label>Apellido</label>
+        <InputText class="form-control"
+                   @bind-Value="model.Apellido" />
+    </div>
+
+    <div class="mb-3">
+        <label>Email</label>
+        <InputText class="form-control"
+                   @bind-Value="model.Email" />
+    </div>
+
+    <div class="mb-3">
+        <label>Teléfono</label>
+        <InputText class="form-control"
+                   @bind-Value="model.Telefono" />
+    </div>
+
+    <button class="btn btn-success">Guardar</button>
+    <button type="button"
+            class="btn btn-secondary ms-2"
+            @onclick="Cancelar">
+        Cancelar
+    </button>
+
+</EditForm>
+
+@code {
+
+    private CrearUsuarioInternoDto model = new();
+
+    private async Task Guardar()
+    {
+        await UsuarioService.CrearAsync(model);
+        Nav.NavigateTo("/usuarios-internos");
+    }
+
+    private void Cancelar()
+        => Nav.NavigateTo("/usuarios-internos");
+}

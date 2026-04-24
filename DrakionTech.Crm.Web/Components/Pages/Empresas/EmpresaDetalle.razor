@@ -1,0 +1,30 @@
+﻿@page "/empresas/{EmpresaId:int}"
+
+@inject IEmpresaService EmpresaService
+@inject NavigationManager Navigation
+
+@if (empresa is null)
+{
+    <p>Cargando empresa...</p>
+}
+else
+{
+    <EmpresaComponente Empresa="empresa" />
+}
+
+@code {
+    [Parameter] public int EmpresaId { get; set; }
+    private EmpresaDto? empresa;
+
+    protected override async Task OnInitializedAsync()
+    {
+        empresa = await EmpresaService.ObtenerPorIdAsync(EmpresaId);
+
+        var path = new Uri(Navigation.Uri).AbsolutePath;
+
+        if (path == $"/empresas/{EmpresaId}")
+        {
+            Navigation.NavigateTo($"/empresas/{EmpresaId}/contactos", true);
+        }
+    }
+}

@@ -1,0 +1,195 @@
+﻿@page "/empresas/{EmpresaId:int}/actividades"
+@using DrakionTech.Crm.Data.Entities.Enums
+@inject IEmpresaService EmpresaService
+@inject IActividadService ActividadService
+
+@if (empresa is null || actividades is null)
+{
+    <p>Cargando actividades...</p>
+}
+else
+{
+    <EmpresaComponente Empresa="empresa">
+        <div class="empresa-actividades">
+            <div class="empresa-section-header">
+                <div>
+                    <h5>Actividades</h5>
+                    <small>Historial de interacciones</small>
+                </div>
+
+                <a class="btn btn-primary"
+                   href="/empresas/@EmpresaId/actividades/crear">
+                    <i class="bi bi-plus-lg me-1"></i>
+                    Nueva actividad
+                </a>
+            </div>
+
+            @if (!actividades.Any())
+            {
+                <div class="alert alert-info">
+                    No hay actividades registradas.
+                </div>
+            }
+            else
+            {
+                <div class="mt-3 mb-3 row">
+
+                    <div class="col-md-4">
+                        <input type="date"
+                               class="form-control"
+                               @bind="fechaSeleccionada" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <select class="form-control"
+                                @bind="tipoSeleccionado">
+                            <option value="">-- Todos los tipos --</option>
+
+                            @foreach (var tipo in tipos)
+                            {
+                                <option value="@tipo">@tipo</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <select class="form-control"
+                                @bind="oportunidadSeleccionada">
+                            <option value="">-- Todas las oportunidades --</option>
+
+                            @foreach (var op in oportunidades)
+                            {
+                                <option value="@op">@op</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="empresa-table">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Fecha</th>
+                                <th>Resultado</th>
+                                <th>Creación</th>
+                                <th class="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var a in actividadesFiltradas!)
+                            {
+                                <tr>
+                                    <td>@a.TipoActividadNombre</td>
+                                    <td>@a.Fecha.ToString("dd/MM/yyyy")</td>
+                                    <td>@a.Resultado</td>
+                                    <td>@a.FechaCreacion.ToString("dd/MM/yyyy")</td>
+                                    <td class="text-end">
+                                        <a class="btn btn-sm btn-outline-primary"
+                                           href="/empresas/@EmpresaId/actividades/editar/@a.Id">
+                                            Editar
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </EmpresaComponente>
+}
+
+@code {
+    [Parameter] public int EmpresaId { get; set; }
+
+    private EmpresaDto? empresa;
+
+    private IEnumerable<ActividadDto>? actividades;
+    private IEnumerable<ActividadDto>? actividadesFiltradas;
+    private List<string> tipos = new();
+    private List<string> oportunidades = new();
+
+    private DateTime? _fechaSeleccionada;
+    private string? _tipoSeleccionado;
+    private string? _oportunidadSeleccionada;
+
+    private DateTime? fechaSeleccionada
+    {
+        get => _fechaSeleccionada;
+        set
+        {
+            _fechaSeleccionada = value;
+            AplicarFiltros();
+        }
+    }
+
+    private string? tipoSeleccionado
+    {
+        get => _tipoSeleccionado;
+        set
+        {
+            _tipoSeleccionado = value;
+            AplicarFiltros();
+        }
+    }
+
+    private string? oportunidadSeleccionada
+    {
+        get => _oportunidadSeleccionada;
+        set
+        {
+            _oportunidadSeleccionada = value;
+            AplicarFiltros();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        empresa = await EmpresaService.ObtenerPorIdAsync(EmpresaId);
+        actividades = await ActividadService.ObtenerPorEmpresaAsync(EmpresaId);
+
+        actividadesFiltradas = actividades;
+
+        tipos = actividades
+            .Where(a => !string.IsNullOrWhiteSpace(a.TipoActividadNombre))
+            .Select(a => a.TipoActividadNombre!)
+            .Distinct()
+            .OrderBy(t => t)
+            .ToList();
+
+        oportunidades = actividades
+            .Where(a => !string.IsNullOrWhiteSpace(a.OportunidadNombre))
+            .Select(a => a.OportunidadNombre!)
+            .Distinct()
+            .OrderBy(o => o)
+            .ToList();
+    }
+
+    private void AplicarFiltros()
+    {
+        if (actividades is null) return;
+
+        var query = actividades.AsQueryable();
+
+        if (fechaSeleccionada.HasValue)
+        {
+            query = query.Where(a =>
+                a.Fecha.Date == fechaSeleccionada.Value.Date);
+        }
+
+        if (!string.IsNullOrWhiteSpace(tipoSeleccionado))
+        {
+            query = query.Where(a =>
+                a.TipoActividadNombre == tipoSeleccionado);
+        }
+
+        if (!string.IsNullOrWhiteSpace(oportunidadSeleccionada))
+        {
+            query = query.Where(a =>
+                a.OportunidadNombre == oportunidadSeleccionada);
+        }
+
+        actividadesFiltradas = query.ToList();
+    }
+}

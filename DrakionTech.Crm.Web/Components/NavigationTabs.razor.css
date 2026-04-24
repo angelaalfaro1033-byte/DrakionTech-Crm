@@ -1,0 +1,49 @@
+﻿.crm-navbar {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+.crm-nav {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+    .crm-nav .nav-item a {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 4px;
+        color: #6b7280;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 14px;
+        position: relative;
+    }
+
+    .crm-nav i {
+        font-size: 16px;
+    }
+
+    .crm-nav .nav-item a:hover {
+        color: #111827;
+    }
+
+    .crm-nav .nav-item.active a {
+        color: #2563eb;
+    }
+
+        .crm-nav .nav-item.active a::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -8px;
+            width: 100%;
+            height: 2px;
+            background: #2563eb;
+            border-radius: 2px;
+        }

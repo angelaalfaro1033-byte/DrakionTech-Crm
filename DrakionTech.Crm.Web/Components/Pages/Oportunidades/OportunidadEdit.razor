@@ -1,0 +1,91 @@
+﻿@page "/empresas/{EmpresaId:int}/oportunidades/editar/{OportunidadId:int}"
+
+@inject IOportunidadService OportunidadService
+@inject NavigationManager Navigation
+
+<div class="oportunidad-form-container">
+    <div class="oportunidad-form-card">
+
+        <h3 class="oportunidad-form-title">
+            Editar Oportunidad
+        </h3>
+
+        <p class="oportunidad-form-subtitle">
+            Completa la información del proyecto comercial
+        </p>
+
+            @if (modelo is null)
+            {
+                <p>Cargando...</p>
+            }
+            else
+            {
+                <EditForm Model="@modelo"
+                            OnValidSubmit="Guardar"
+                            FormName="EditarOportunidadForm">
+
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="mb-3">
+                        <label class="form-label">Nombre del proyecto</label>
+                        <InputText class="form-control"
+                                    @bind-Value="modelo.NombreProyecto" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Valor estimado</label>
+                        <InputNumber class="form-control"
+                                        @bind-Value="modelo.ValorEstimado" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Fecha estimada de cierre</label>
+                        <InputDate class="form-control"
+                                    @bind-Value="modelo.FechaEstimadaCierre" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Descripción</label>
+                        <InputTextArea class="form-control"
+                                        @bind-Value="modelo.Descripcion" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Guardar cambios
+                    </button>
+
+                    <a class="btn btn-secondary ms-2"
+                        href="/empresas/@EmpresaId/oportunidades">
+                        Cancelar
+                    </a>
+                </EditForm>
+            }
+    </div>
+</div>
+
+@code {
+    [Parameter] public int EmpresaId { get; set; }
+    [Parameter] public int OportunidadId { get; set; }
+
+    private ActualizarOportunidadDto? modelo;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var oportunidad = await OportunidadService.ObtenerPorIdAsync(OportunidadId);
+
+        modelo = new ActualizarOportunidadDto
+        {
+            NombreProyecto = oportunidad.NombreProyecto,
+            ValorEstimado = oportunidad.ValorEstimado,
+            FechaEstimadaCierre = oportunidad.FechaEstimadaCierre,
+            Descripcion = oportunidad.Descripcion
+        };
+    }
+
+    private async Task Guardar()
+    {
+        await OportunidadService.ActualizarAsync(OportunidadId, modelo!);
+        Navigation.NavigateTo($"/empresas/{EmpresaId}/oportunidades");
+    }
+}
