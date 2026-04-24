@@ -3,13 +3,18 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36511.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrakionTech.Crm.Web", "DrakionTech.Crm.Web\DrakionTech.Crm.Web.csproj", "{0168A0FD-61B5-41F2-BFD1-FA76B97A6670}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DrakionTech.Crm.Web", "DrakionTech.Crm.Web\DrakionTech.Crm.Web.csproj", "{0168A0FD-61B5-41F2-BFD1-FA76B97A6670}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrakionTech.Crm.Business", "DrakionTech.Crm.Business\DrakionTech.Crm.Business.csproj", "{48AE07C4-3E8E-4D51-8D75-5405E35187AD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DrakionTech.Crm.Business", "DrakionTech.Crm.Business\DrakionTech.Crm.Business.csproj", "{48AE07C4-3E8E-4D51-8D75-5405E35187AD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrakionTech.Crm.Data", "DrakionTech.Crm.Data\DrakionTech.Crm.Data.csproj", "{56C416B5-A611-4FF7-AE5E-11CAE0005EF9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DrakionTech.Crm.Data", "DrakionTech.Crm.Data\DrakionTech.Crm.Data.csproj", "{56C416B5-A611-4FF7-AE5E-11CAE0005EF9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrakionTech.Crm.Tests", "DrakionTech.Crm.Tests\DrakionTech.Crm.Tests.csproj", "{C7F45106-42AE-4EF9-BB4A-6CF7E1C3D8E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DrakionTech.Crm.Tests", "DrakionTech.Crm.Tests\DrakionTech.Crm.Tests.csproj", "{C7F45106-42AE-4EF9-BB4A-6CF7E1C3D8E0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Elementos de la solución", "Elementos de la solución", "{4DD1CC2E-B0D8-480A-B4AE-7466E244E23F}"
+	ProjectSection(SolutionItems) = preProject
+		appsettings.Development.json = appsettings.Development.json
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
