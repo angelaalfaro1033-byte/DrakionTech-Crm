@@ -386,3 +386,13 @@ appsettings.Local.json
 # =========================
 .env
 .env.*
+
+# Google OAuth
+credentials.json
+**/credentials.json
+
+token.json
+**/token.json
+
+Google.Apis.Auth.OAuth2.Responses.*
+tokens/
