@@ -24,6 +24,7 @@ namespace DrakionTech.Crm.Data.Context
         public DbSet<Estado> Estados { get; set; } = null!;
         public DbSet<PrefijoTelefonico> PrefijosTelefonicos => Set<PrefijoTelefonico>();
         public DbSet<RolContacto> RolesContacto => Set<RolContacto>();
+        public DbSet<RolUsuario> RolesUsuario => Set<RolUsuario>();
         public DbSet<UsuarioInterno> UsuariosInternos => Set<UsuarioInterno>();
         public DbSet<EstadoActividad> EstadosActividad => Set<EstadoActividad>();
         public DbSet<TipoActividad> TiposActividad => Set<TipoActividad>();
@@ -47,6 +48,7 @@ namespace DrakionTech.Crm.Data.Context
             modelBuilder.ApplyConfiguration(new EstadoConfiguration());
             modelBuilder.ApplyConfiguration(new PrefijoTelefonicoConfiguration());
             modelBuilder.ApplyConfiguration(new RolContactoConfiguration());
+            modelBuilder.ApplyConfiguration(new RolUsuarioConfiguration());
             modelBuilder.ApplyConfiguration(new UsuarioInternoConfiguration());
             modelBuilder.ApplyConfiguration(new EstadoActividadConfiguration());
             modelBuilder.ApplyConfiguration(new TipoActividadConfiguration());

@@ -170,5 +170,9 @@
         public static readonly int EstadoActividadProgramada = 1;
         public static readonly int EstadoActividadCompletada = 2;
         public static readonly int EstadoActividadCancelada = 3;
+
+        // ===== ROLES DE UUSUARIO =====
+        public static readonly int RolUsuarioAdministrador = 1;
+        public static readonly int RolUsuarioMarketing = 2;
     }
 }
