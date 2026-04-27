@@ -1,0 +1,50 @@
+﻿@page "/roles/crear"
+
+@using DrakionTech.Crm.Business.DTOs.RolUsuario
+@using DrakionTech.Crm.Business.Interfaces
+
+@inject IRolUsuarioService RolUsuarioService
+@inject NavigationManager Nav
+
+<div class="roles-container">
+
+    <div class="empresas-header">
+        <div>
+            <h1 class="empresas-title">Crear rol</h1>
+            <p class="empresas-subtitle">Registra un nuevo rol</p>
+        </div>
+    </div>
+
+    <div class="ui-card">
+        <EditForm Model="rol" OnValidSubmit="Guardar">
+            <DataAnnotationsValidator />
+
+            <div class="mb-3">
+                <label class="form-label">Nombre</label>
+                <InputText class="form-control" @bind-Value="rol.Nombre" placeholder="Nombre del rol" />
+                <ValidationMessage For="@(() => rol.Nombre)" />
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Crear</button>
+                <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+            </div>
+        </EditForm>
+    </div>
+
+</div>
+
+@code {
+    private RolUsuarioDto rol = new();
+
+    private async Task Guardar()
+    {
+        await RolUsuarioService.CrearAsync(rol);
+        Nav.NavigateTo("/roles");
+    }
+
+    private void Cancelar()
+    {
+        Nav.NavigateTo("/roles");
+    }
+}
