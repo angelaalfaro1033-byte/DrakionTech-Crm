@@ -1,0 +1,92 @@
+﻿@page "/roles/editar/{id:int}"
+
+@using DrakionTech.Crm.Business.DTOs.RolUsuario
+@using DrakionTech.Crm.Business.Interfaces
+
+@inject IRolUsuarioService RolUsuarioService
+@inject NavigationManager Nav
+
+<div class="roles-container">
+
+    <div class="empresas-header">
+        <div>
+            <h1 class="empresas-title">Editar rol</h1>
+            <p class="empresas-subtitle">Actualiza la información</p>
+        </div>
+    </div>
+
+    @if (cargando)
+    {
+        <div class="ui-card">
+            <p>Cargando información...</p>
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(error))
+    {
+        <div class="ui-card">
+            <p class="text-danger">@error</p>
+        </div>
+    }
+    else
+    {
+        <div class="ui-card">
+            <EditForm Model="rol" OnValidSubmit="Guardar">
+                <DataAnnotationsValidator />
+
+                <div class="mb-3">
+                    <label class="form-label">Nombre</label>
+                    <InputText class="form-control" @bind-Value="rol.Nombre" placeholder="Nombre del rol" />
+                    <ValidationMessage For="@(() => rol.Nombre)" />
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Actualizar</button>
+                    <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+                </div>
+            </EditForm>
+        </div>
+    }
+
+</div>
+
+@code {
+    [Parameter] public int id { get; set; }
+
+    private RolUsuarioDto rol = new();
+    private bool cargando = true;
+    private string? error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            rol = await RolUsuarioService.ObtenerPorIdAsync(id);
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+
+    private async Task Guardar()
+    {
+        try
+        {
+            await RolUsuarioService.EditarAsync(rol);
+            Nav.NavigateTo("/roles");
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+    }
+
+    private void Cancelar()
+    {
+        Nav.NavigateTo("/roles");
+    }
+}

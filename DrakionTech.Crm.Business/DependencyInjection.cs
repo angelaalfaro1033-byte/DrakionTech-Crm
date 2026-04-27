@@ -22,11 +22,13 @@ namespace DrakionTech.Crm.Business
             services.AddScoped<IPaisService, PaisService>();
             services.AddScoped<ICiudadService, CiudadService>();
             services.AddScoped<ISectorService, SectorService>();
+            services.AddScoped<IEmpleadoService, EmpleadoService>();
             services.AddScoped<IEstadoService, EstadoService>();
             services.AddScoped<IPrefijoTelefonicoService, PrefijoTelefonicoService>();
             services.AddScoped<IUsuarioInternoService, UsuarioInternoService>();
             services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
             services.AddScoped<GoogleEventoSyncService>();
+            services.AddScoped<IRolUsuarioService, RolUsuarioService>();
 
             return services;
         }
