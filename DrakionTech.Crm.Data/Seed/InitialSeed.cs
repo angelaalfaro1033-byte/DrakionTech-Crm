@@ -17,6 +17,7 @@ namespace DrakionTech.Crm.Data.Seed
             SeedPrefijosTelefonicos(modelBuilder);
             SeedTiposActividad(modelBuilder);
             SeedEstadosActividad(modelBuilder);
+            SeedEmailTemplates(modelBuilder);
         }
 
         private static void SeedPaises(ModelBuilder modelBuilder)
@@ -329,6 +330,22 @@ namespace DrakionTech.Crm.Data.Seed
                 {
                     Id = SeedIds.EstadoActividadCancelada,
                     Nombre = "Cancelada",
+                    Activo = true
+                }
+            );
+        }
+        private static void SeedEmailTemplates(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<EmailTemplate>().HasData(
+                new EmailTemplate
+                {
+                    Id = 1,
+                    Nombre = "ActivacionCuenta",
+                    TemplateHtml = @"
+                <h1>Hola {{Nombre}}</h1>
+                <p>Haz clic en el siguiente enlace para activar tu cuenta:</p>
+                <a href='{{ActivationLink}}'>Activar cuenta</a>
+            ",
                     Activo = true
                 }
             );

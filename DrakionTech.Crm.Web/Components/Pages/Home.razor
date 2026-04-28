@@ -1,5 +1,5 @@
 ﻿@page "/"
-
+@attribute [Authorize]
 <div class="home-container">
 
     <div class="home-header">
@@ -72,7 +72,9 @@
         </div>
 
     </div>
-
+    <form method="post" action="/account/logout">
+        <button type="submit">Cerrar sesión</button>
+    </form>
 </div>
 @code {
     [Inject] private NavigationManager Nav { get; set; } = default!;

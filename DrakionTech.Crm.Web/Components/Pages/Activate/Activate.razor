@@ -1,0 +1,46 @@
+﻿@page "/activate"
+@using Microsoft.AspNetCore.Components
+@inject IEmpleadoService EmpleadoService
+@inject NavigationManager Nav
+
+<h3>Activar cuenta</h3>
+
+@if (!string.IsNullOrEmpty(Message))
+{
+    <p>@Message</p>
+}
+
+<input type="password" @bind="Password" placeholder="Contraseña" />
+<button @onclick="Activar">Activar</button>
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string? Token { get; set; }
+
+    private string? Password;
+    private string? Message;
+
+    private async Task Activar()
+    {
+        if (string.IsNullOrWhiteSpace(Token) || string.IsNullOrWhiteSpace(Password))
+        {
+            Message = "Datos inválidos";
+            return;
+        }
+
+        var result = await EmpleadoService.ActivarCuentaAsync(Token, Password);
+
+        if (result)
+        {
+            Message = "Cuenta activada correctamente";
+
+            await Task.Delay(1500);
+            Nav.NavigateTo("/login");
+        }
+        else
+        {
+            Message = "Token inválido o expirado";
+        }
+    }
+}

@@ -1,5 +1,5 @@
 ﻿@page "/empleados/editar/{id:int}"
-
+@attribute [Authorize]
 @using DrakionTech.Crm.Business.DTOs.Empleado
 @inject IEmpleadoService EmpleadoService
 @inject NavigationManager Nav

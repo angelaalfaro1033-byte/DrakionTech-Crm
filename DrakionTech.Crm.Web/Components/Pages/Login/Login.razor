@@ -1,0 +1,29 @@
+﻿@page "/login"
+@layout EmptyLayout
+@attribute [AllowAnonymous]
+
+<div>
+    <h3>Iniciar sesión</h3>
+
+    @if (Error is not null)
+    {
+        <p style="color:red">@Error</p>
+    }
+
+    <form method="post" action="/account/login">
+        <input name="email" type="email" placeholder="Correo electrónico" />
+        <input name="password" type="password" placeholder="Contraseña" />
+        <button type="submit">Ingresar</button>
+    </form>
+</div>
+
+@code {
+    [SupplyParameterFromQuery] private string? error { get; set; }
+
+    private string? Error => error switch
+    {
+        "credenciales" => "Correo o contraseña incorrectos.",
+        "inactivo" => "Tu cuenta no está activada.",
+        _ => null
+    };
+}

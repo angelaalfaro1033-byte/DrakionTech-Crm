@@ -1,5 +1,5 @@
 ﻿@page "/empresas/{EmpresaId:int}/contactos"
-
+@attribute [Authorize]
 @inject IEmpresaService EmpresaService
 @inject IContactoService ContactoService
 

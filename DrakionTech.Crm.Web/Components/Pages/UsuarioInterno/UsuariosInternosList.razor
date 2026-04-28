@@ -1,11 +1,10 @@
 ﻿@page "/usuarios-internos"
-
+@attribute [Authorize]
 @inject IUsuarioInternoService UsuarioService
 @inject NavigationManager Nav
 
 <div class="usuarios-container">
 
-    <!-- HEADER -->
     <div class="usuarios-header">
         <div>
             <h1 class="usuarios-title">Usuarios Internos</h1>
@@ -29,7 +28,6 @@
     }
     else
     {
-        <!-- TOOLBAR -->
         <div class="ui-toolbar">
 
             <div class="ui-search">
@@ -48,7 +46,6 @@
 
         </div>
 
-        <!-- TABLA -->
         <div class="ui-card">
             <table class="ui-table">
                 <thead>
@@ -136,7 +133,6 @@
 
         var query = usuarios.AsQueryable();
 
-        // 🔍 Búsqueda
         if (!string.IsNullOrWhiteSpace(busqueda))
         {
             var texto = busqueda.ToLower();
@@ -149,7 +145,6 @@
             );
         }
 
-        // 📌 Filtro estado
         if (!string.IsNullOrWhiteSpace(estadoSeleccionado))
         {
             var activo = bool.Parse(estadoSeleccionado);

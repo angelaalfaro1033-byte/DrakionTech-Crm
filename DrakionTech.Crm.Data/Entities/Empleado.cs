@@ -15,5 +15,12 @@
 
         public DateTime FechaCreacion { get; set; } = DateTime.Now;
         public DateTime? FechaModificacion { get; set; }
+        public string? PasswordHash { get; set; }
+
+        public bool IsActive { get; set; } = false;
+
+        public string? ActivationToken { get; set; }
+
+        public DateTime? ActivationTokenExpiration { get; set; }
     }
 }

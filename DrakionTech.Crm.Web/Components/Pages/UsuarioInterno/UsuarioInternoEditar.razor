@@ -1,5 +1,5 @@
 ﻿@page "/usuarios-internos/{Id:int}"
-
+@attribute [Authorize]
 @inject IUsuarioInternoService UsuarioService
 @inject NavigationManager Nav
 
