@@ -7,9 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Interfaces\IEmailTemplateRepository.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="12.0.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.27.0" />
+    <PackageReference Include="BCrypt.Net-Next" Version="4.1.0" />
     <PackageReference Include="Dapper" Version="2.1.66" />
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="Google.Apis.Auth" Version="1.73.0" />
@@ -36,6 +41,10 @@
     <Folder Include="NewFolder2\" />
     <Folder Include="NewFolder3\" />
     <Folder Include="NewFolder\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Interfaces\IEmailTemplateRepository.cs" />
   </ItemGroup>
 
 </Project>

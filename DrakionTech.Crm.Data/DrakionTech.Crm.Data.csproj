@@ -41,6 +41,11 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Empleado.Designer.cs</LastGenOutput>
     </Compile>
+    <Compile Update="Entities\Empleado.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Empleado.cs</DependentUpon>
+    </Compile>
     <Compile Update="Repositories\EmpleadoRepository.cs">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>EmpleadoRepository.Designer.cs</LastGenOutput>

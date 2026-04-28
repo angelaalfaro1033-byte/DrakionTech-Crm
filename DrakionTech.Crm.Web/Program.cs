@@ -8,6 +8,8 @@ using DrakionTech.Crm.Web.Components;
 using DrakionTech.Crm.Data.Repositories;
 using static GoogleDriveService;
 using DrakionTech.Crm.Data.Repositories.Interfaces;
+using DrakionTech.Crm.Business.Services.Email;
+using DrakionTech.Crm.Business.Configurations;
 //using DrakionTech.Crm.Web.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,8 +26,13 @@ builder.Services.AddAutoMapper(typeof(CrmMappingProfile));
 //Whatsapp
 builder.Services.Configure<WhatsAppOptions>(
     builder.Configuration.GetSection("WhatsApp"));
-
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("Email"));
 builder.Services.AddHttpClient<IWhatsAppNotificationService, WhatsAppNotificationService>();
+builder.Services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
+builder.Services.AddScoped<IEmailTemplateRenderer, EmailTemplateRenderer>();
+builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 //empleado
 builder.Services.AddScoped<IEmpleadoRepository, EmpleadoRepository>();
 builder.Services.AddScoped<IEmpleadoService, EmpleadoService>();
