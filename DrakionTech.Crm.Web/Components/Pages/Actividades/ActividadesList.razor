@@ -2,7 +2,7 @@
 @using DrakionTech.Crm.Data.Entities.Enums
 @inject IEmpresaService EmpresaService
 @inject IActividadService ActividadService
-
+@attribute [Authorize]
 @if (empresa is null || actividades is null)
 {
     <p>Cargando actividades...</p>

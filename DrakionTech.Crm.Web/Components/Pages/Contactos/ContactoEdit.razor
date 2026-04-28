@@ -1,5 +1,5 @@
 ﻿@page "/contactos/editar/{ContactoId:int}"
-
+@attribute [Authorize]
 @inject IContactoService ContactoService
 @inject NavigationManager Navigation
 

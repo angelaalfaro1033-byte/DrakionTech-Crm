@@ -1,6 +1,6 @@
 ﻿@page "/empresas/editar/{EmpresaId:int}"
 @rendermode InteractiveServer
-
+@attribute [Authorize]
 @inject IEmpresaService EmpresaService
 @inject IPaisService PaisService
 @inject ICiudadService CiudadService

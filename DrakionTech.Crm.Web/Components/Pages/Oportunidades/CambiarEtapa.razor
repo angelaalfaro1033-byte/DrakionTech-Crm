@@ -1,6 +1,6 @@
 ﻿@page "/empresas/{EmpresaId:int}/oportunidades/etapa/{OportunidadId:int}"
 @using DrakionTech.Crm.Web.Components.Shared
-
+@attribute [Authorize]
 @inject IOportunidadService OportunidadService
 @inject NavigationManager Navigation
 

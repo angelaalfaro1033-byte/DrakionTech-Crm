@@ -1,5 +1,5 @@
 ﻿@page "/empresas/{EmpresaId:int}"
-
+@attribute [Authorize]
 @inject IEmpresaService EmpresaService
 @inject NavigationManager Navigation
 

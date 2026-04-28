@@ -1,5 +1,5 @@
 ﻿@page "/empresas/{EmpresaId:int}/oportunidades"
-
+@attribute [Authorize]
 @inject IEmpresaService EmpresaService
 @inject IOportunidadService OportunidadService
 

@@ -1,5 +1,5 @@
 ﻿@page "/google-eventos"
-
+@attribute [Authorize]
 @using DrakionTech.Crm.Data.Entities
 @inject GoogleEventoReadService EventoService
 @inject GoogleEventoSyncService SyncService

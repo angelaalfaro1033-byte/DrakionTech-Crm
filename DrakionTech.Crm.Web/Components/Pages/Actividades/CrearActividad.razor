@@ -1,5 +1,5 @@
 ﻿@page "/empresas/{EmpresaId:int}/actividades/crear"
-
+@attribute [Authorize]
 @inject IActividadService ActividadService
 @inject IContactoService ContactoService
 @inject IOportunidadService OportunidadService

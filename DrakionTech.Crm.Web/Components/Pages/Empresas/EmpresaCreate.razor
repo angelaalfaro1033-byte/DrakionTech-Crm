@@ -1,6 +1,6 @@
 ﻿@page "/empresas/crear"
 @rendermode InteractiveServer
-
+@attribute [Authorize]
 @inject IEmpresaService EmpresaService
 @inject IPaisService PaisService
 @inject ICiudadService CiudadService

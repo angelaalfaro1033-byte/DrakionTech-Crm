@@ -1,5 +1,5 @@
 ﻿@page "/empresas/{EmpresaId:int}/contactos/crear"
-
+@attribute [Authorize]
 @inject IContactoService ContactoService
 @inject NavigationManager Navigation
 
