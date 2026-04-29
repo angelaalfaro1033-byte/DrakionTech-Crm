@@ -1,95 +1,87 @@
 ﻿@page "/"
 @attribute [Authorize]
-<div class="home-container">
 
+<div class="home-container">
     <div class="home-header">
-        <h1>Bienvenido</h1>
-        <p>Gestiona tu CRM de forma rápida y sencilla</p>
+        <h1>Bienvenido de nuevo</h1>
+        <p>¿Qué quieres hacer hoy?</p>
     </div>
 
-    <h3 class="section-title">Acciones rápidas</h3>
+    <p class="section-title">Acciones rápidas</p>
 
     <div class="actions-grid">
-
-        <!-- EMPRESA -->
         <div class="action-card @(loadingCard == "empresa" ? "loading" : "")" @onclick="GoEmpresa">
             @if (loadingCard == "empresa")
             {
-                <div class="card-loading">
-                    <div class="spinner small"></div>
-                </div>
+                <div class="card-loading"><div class="spinner small"></div></div>
             }
-
-            <div class="icon">
-                <i class="bi bi-building"></i>
+            <div class="card-icon-wrap" style="background:#eff6ff;">
+                <i class="bi bi-building" style="color:#2563eb;"></i>
             </div>
-            <span>Nueva Empresa</span>
+            <div class="card-text">
+                <span class="card-title">Nueva Empresa</span>
+                <span class="card-desc">Registra un cliente o prospecto</span>
+            </div>
+            <i class="bi bi-arrow-right card-arrow"></i>
         </div>
 
-        <!-- USUARIO -->
         <div class="action-card @(loadingCard == "usuario" ? "loading" : "")" @onclick="GoUsuario">
             @if (loadingCard == "usuario")
             {
-                <div class="card-loading">
-                    <div class="spinner small"></div>
-                </div>
+                <div class="card-loading"><div class="spinner small"></div></div>
             }
-
-            <div class="icon">
-                <i class="bi bi-person-plus"></i>
+            <div class="card-icon-wrap" style="background:#f0fdf4;">
+                <i class="bi bi-person-plus" style="color:#16a34a;"></i>
             </div>
-            <span>Nuevo Usuario</span>
+            <div class="card-text">
+                <span class="card-title">Nuevo Usuario</span>
+                <span class="card-desc">Agrega acceso al sistema</span>
+            </div>
+            <i class="bi bi-arrow-right card-arrow"></i>
         </div>
 
-        <!-- EMPLEADO -->
         <div class="action-card @(loadingCard == "empleado" ? "loading" : "")" @onclick="GoEmpleado">
             @if (loadingCard == "empleado")
             {
-                <div class="card-loading">
-                    <div class="spinner small"></div>
-                </div>
+                <div class="card-loading"><div class="spinner small"></div></div>
             }
-
-            <div class="icon">
-                <i class="bi bi-people"></i>
+            <div class="card-icon-wrap" style="background:#fdf4ff;">
+                <i class="bi bi-people" style="color:#9333ea;"></i>
             </div>
-            <span>Nuevo Empleado</span>
+            <div class="card-text">
+                <span class="card-title">Nuevo Empleado</span>
+                <span class="card-desc">Gestiona tu equipo de trabajo</span>
+            </div>
+            <i class="bi bi-arrow-right card-arrow"></i>
         </div>
 
-        <!-- EVENTOS -->
         <div class="action-card @(loadingCard == "eventos" ? "loading" : "")" @onclick="GoEventos">
             @if (loadingCard == "eventos")
             {
-                <div class="card-loading">
-                    <div class="spinner small"></div>
-                </div>
+                <div class="card-loading"><div class="spinner small"></div></div>
             }
-
-            <div class="icon">
-                <i class="bi bi-calendar-event"></i>
+            <div class="card-icon-wrap" style="background:#fff7ed;">
+                <i class="bi bi-calendar-event" style="color:#ea580c;"></i>
             </div>
-            <span>Nuevo Evento</span>
+            <div class="card-text">
+                <span class="card-title">Nuevo Evento</span>
+                <span class="card-desc">Programa en Google Calendar</span>
+            </div>
+            <i class="bi bi-arrow-right card-arrow"></i>
         </div>
-
     </div>
-    <form method="post" action="/account/logout">
-        <button type="submit">Cerrar sesión</button>
-    </form>
 </div>
+
 @code {
     [Inject] private NavigationManager Nav { get; set; } = default!;
-
     private string? loadingCard;
 
     private async Task NavigateWithLoading(string key, string url)
     {
         if (loadingCard != null) return;
-
         loadingCard = key;
         StateHasChanged();
-
         await Task.Delay(150);
-
         Nav.NavigateTo(url);
     }
 
