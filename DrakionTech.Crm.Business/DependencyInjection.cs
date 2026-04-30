@@ -29,6 +29,7 @@ namespace DrakionTech.Crm.Business
             services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
             services.AddScoped<GoogleEventoSyncService>();
             services.AddScoped<IRolUsuarioService, RolUsuarioService>();
+            services.AddScoped<IEspecialidadService, EspecialidadService>();
 
             return services;
         }

@@ -1,0 +1,96 @@
+﻿@page "/especialidades/editar/{id:int}"
+
+@using DrakionTech.Crm.Business.DTOs.Especialidad
+@using DrakionTech.Crm.Business.DTOs.RolUsuario
+@using DrakionTech.Crm.Business.Interfaces
+
+@inject IEspecialidadService EspecialidadService
+@inject IRolUsuarioService RolUsuarioService
+@inject NavigationManager Nav
+
+<div class="roles-container">
+
+    <div class="empresas-header">
+        <div>
+            <h1 class="empresas-title">Editar especialidad</h1>
+            <p class="empresas-subtitle">Actualiza la información</p>
+        </div>
+    </div>
+
+    @if (cargando)
+    {
+        <div class="ui-card"><p>Cargando información...</p></div>
+    }
+    else if (!string.IsNullOrEmpty(error))
+    {
+        <div class="ui-card"><p class="text-danger">@error</p></div>
+    }
+    else
+    {
+        <div class="ui-card">
+            <EditForm Model="especialidad" OnValidSubmit="Guardar">
+                <DataAnnotationsValidator />
+
+                <div class="mb-3">
+                    <label class="form-label">Nombre</label>
+                    <InputText class="form-control" @bind-Value="especialidad.Nombre" />
+                    <ValidationMessage For="@(() => especialidad.Nombre)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Descripción</label>
+                    <InputTextArea class="form-control" @bind-Value="especialidad.Descripcion" rows="3" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Rol asociado</label>
+                    <InputSelect class="form-select" @bind-Value="especialidad.RolUsuarioId">
+                        <option value="0">-- Selecciona un rol --</option>
+                        @foreach (var rol in roles)
+                        {
+                            <option value="@rol.Id">@rol.Nombre</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Actualizar</button>
+                    <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+                </div>
+            </EditForm>
+        </div>
+    }
+
+</div>
+
+@code {
+    [Parameter] public int id { get; set; }
+
+    private EspecialidadDto especialidad = new();
+    private List<RolUsuarioDto> roles = new();
+    private bool cargando = true;
+    private string? error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            roles = await RolUsuarioService.ObtenerTodosAsync();
+            especialidad = await EspecialidadService.ObtenerPorIdAsync(id);
+        }
+        catch (Exception ex) { error = ex.Message; }
+        finally { cargando = false; }
+    }
+
+    private async Task Guardar()
+    {
+        try
+        {
+            await EspecialidadService.EditarAsync(especialidad);
+            Nav.NavigateTo("/especialidades");
+        }
+        catch (Exception ex) { error = ex.Message; }
+    }
+
+    private void Cancelar() => Nav.NavigateTo("/especialidades");
+}

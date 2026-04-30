@@ -1,4 +1,5 @@
 ﻿using DrakionTech.Crm.Business.DTOs.RolUsuario;
+using DrakionTech.Crm.Data.Entities;
 
 namespace DrakionTech.Crm.Business.Interfaces
 {

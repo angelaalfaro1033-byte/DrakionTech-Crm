@@ -1,0 +1,71 @@
+﻿@page "/especialidades/crear"
+
+@using DrakionTech.Crm.Business.DTOs.Especialidad
+@using DrakionTech.Crm.Business.DTOs.RolUsuario
+@using DrakionTech.Crm.Business.Interfaces
+
+@inject IEspecialidadService EspecialidadService
+@inject IRolUsuarioService RolUsuarioService
+@inject NavigationManager Nav
+
+<div class="roles-container">
+
+    <div class="empresas-header">
+        <div>
+            <h1 class="empresas-title">Crear especialidad</h1>
+            <p class="empresas-subtitle">Registra una nueva especialidad</p>
+        </div>
+    </div>
+
+    <div class="ui-card">
+        <EditForm Model="especialidad" OnValidSubmit="Guardar">
+            <DataAnnotationsValidator />
+
+            <div class="mb-3">
+                <label class="form-label">Nombre</label>
+                <InputText class="form-control" @bind-Value="especialidad.Nombre" placeholder="Nombre de la especialidad" />
+                <ValidationMessage For="@(() => especialidad.Nombre)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Descripción</label>
+                <InputTextArea class="form-control" @bind-Value="especialidad.Descripcion" placeholder="Descripción opcional" rows="3" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Rol asociado</label>
+                <InputSelect class="form-select" @bind-Value="especialidad.RolUsuarioId">
+                    <option value="0">-- Selecciona un rol --</option>
+                    @foreach (var rol in roles)
+                    {
+                        <option value="@rol.Id">@rol.Nombre</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Crear</button>
+                <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+            </div>
+        </EditForm>
+    </div>
+
+</div>
+
+@code {
+    private EspecialidadDto especialidad = new();
+    private List<RolUsuarioDto> roles = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        roles = await RolUsuarioService.ObtenerTodosAsync();
+    }
+
+    private async Task Guardar()
+    {
+        await EspecialidadService.CrearAsync(especialidad);
+        Nav.NavigateTo("/especialidades");
+    }
+
+    private void Cancelar() => Nav.NavigateTo("/especialidades");
+}

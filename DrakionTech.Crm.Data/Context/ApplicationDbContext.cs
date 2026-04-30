@@ -25,6 +25,7 @@ namespace DrakionTech.Crm.Data.Context
         public DbSet<PrefijoTelefonico> PrefijosTelefonicos => Set<PrefijoTelefonico>();
         public DbSet<RolContacto> RolesContacto => Set<RolContacto>();
         public DbSet<RolUsuario> RolesUsuario => Set<RolUsuario>();
+        public DbSet<Especialidad> Especialidades => Set<Especialidad>();
         public DbSet<UsuarioInterno> UsuariosInternos => Set<UsuarioInterno>();
         public DbSet<EstadoActividad> EstadosActividad => Set<EstadoActividad>();
         public DbSet<TipoActividad> TiposActividad => Set<TipoActividad>();
@@ -32,7 +33,6 @@ namespace DrakionTech.Crm.Data.Context
         public DbSet<GoogleEvento> GoogleEventos { get; set; } = null!;
         public DbSet<Empleado> Empleados { get; set; }
         public DbSet<GoogleEventoArchivo> GoogleEventoArchivos { get; set; }
-
         public DbSet<EmailTemplate> EmailTemplates { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -51,6 +51,7 @@ namespace DrakionTech.Crm.Data.Context
             modelBuilder.ApplyConfiguration(new PrefijoTelefonicoConfiguration());
             modelBuilder.ApplyConfiguration(new RolContactoConfiguration());
             modelBuilder.ApplyConfiguration(new RolUsuarioConfiguration());
+            modelBuilder.ApplyConfiguration(new EspecialidadConfiguration());
             modelBuilder.ApplyConfiguration(new UsuarioInternoConfiguration());
             modelBuilder.ApplyConfiguration(new EstadoActividadConfiguration());
             modelBuilder.ApplyConfiguration(new TipoActividadConfiguration());
