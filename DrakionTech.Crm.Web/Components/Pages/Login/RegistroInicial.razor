@@ -3,6 +3,7 @@
 @attribute [AllowAnonymous]
 @using DrakionTech.Crm.Data.Repositories.Interfaces
 @inject IEmpleadoRepository Repo
+@inject NavigationManager Nav
 
 <div class="login-wrapper">
     <div class="login-card registro-card">
@@ -32,21 +33,23 @@
         }
         else
         {
-            <form method="post" action="/account/registro-inicial" class="login-form">
+            <div class="login-form">
 
                 <div class="registro-row">
                     <div class="field-group">
                         <label class="field-label">Nombre</label>
                         <div class="field-input-wrap">
                             <i class="bi bi-person field-icon"></i>
-                            <input name="nombre" type="text" class="field-input" placeholder="Juan" required />
+                            <input type="text" class="field-input" placeholder="Juan"
+                                   @bind="Nombre" @bind:event="oninput" />
                         </div>
                     </div>
                     <div class="field-group">
                         <label class="field-label">Apellido</label>
                         <div class="field-input-wrap">
                             <i class="bi bi-person field-icon"></i>
-                            <input name="apellido" type="text" class="field-input" placeholder="Pérez" required />
+                            <input type="text" class="field-input" placeholder="Pérez"
+                                   @bind="Apellido" @bind:event="oninput" />
                         </div>
                     </div>
                 </div>
@@ -55,7 +58,8 @@
                     <label class="field-label">Correo electrónico</label>
                     <div class="field-input-wrap">
                         <i class="bi bi-envelope field-icon"></i>
-                        <input name="email" type="email" class="field-input" placeholder="admin@empresa.com" required />
+                        <input type="email" class="field-input" placeholder="admin@empresa.com"
+                               @bind="Email" @bind:event="oninput" />
                     </div>
                 </div>
 
@@ -63,24 +67,71 @@
                     <label class="field-label">Contraseña</label>
                     <div class="field-input-wrap">
                         <i class="bi bi-lock field-icon"></i>
-                        <input name="password" type="password" class="field-input" placeholder="Mínimo 8 caracteres" required />
+                        <input type="password" class="field-input" placeholder="Mínimo 8 caracteres"
+                               @bind="Password" @bind:event="oninput" />
                     </div>
+                    @if (!string.IsNullOrEmpty(Password))
+                    {
+                        <div class="password-strength">
+                            <div class="strength-bar">
+                                <div class="strength-fill strength-@FuerzaClase" style="width: @FuerzaPorcentaje%"></div>
+                            </div>
+                            <span class="strength-label strength-@FuerzaClase">@FuerzaTexto</span>
+                        </div>
+                        <ul class="password-rules">
+                            <li class="@(TieneLongitud ? "rule-ok" : "rule-pending")">
+                                <i class="bi @(TieneLongitud ? "bi-check-circle-fill" : "bi-circle")"></i>
+                                8 caracteres mínimo
+                            </li>
+                            <li class="@(TieneMayuscula ? "rule-ok" : "rule-pending")">
+                                <i class="bi @(TieneMayuscula ? "bi-check-circle-fill" : "bi-circle")"></i>
+                                Una letra mayúscula
+                            </li>
+                            <li class="@(TieneMinuscula ? "rule-ok" : "rule-pending")">
+                                <i class="bi @(TieneMinuscula ? "bi-check-circle-fill" : "bi-circle")"></i>
+                                Una letra minúscula
+                            </li>
+                            <li class="@(TieneNumero ? "rule-ok" : "rule-pending")">
+                                <i class="bi @(TieneNumero ? "bi-check-circle-fill" : "bi-circle")"></i>
+                                Un número
+                            </li>
+                            <li class="@(TieneEspecial ? "rule-ok" : "rule-pending")">
+                                <i class="bi @(TieneEspecial ? "bi-check-circle-fill" : "bi-circle")"></i>
+                                Un carácter especial (!&#64;&#35;$...)
+                            </li>
+                        </ul>
+                    }
                 </div>
 
                 <div class="field-group">
                     <label class="field-label">Confirmar contraseña</label>
                     <div class="field-input-wrap">
                         <i class="bi bi-lock-fill field-icon"></i>
-                        <input name="confirmar" type="password" class="field-input" placeholder="Repite tu contraseña" required />
+                        <input type="password"
+                               class="field-input @ConfirmacionClase"
+                               placeholder="Repite tu contraseña"
+                               @bind="Confirmar" @bind:event="oninput" />
+                        @if (!string.IsNullOrEmpty(Confirmar))
+                        {
+                            <i class="bi @ConfirmacionIcono field-icon-right"></i>
+                        }
                     </div>
                 </div>
 
-                <button type="submit" class="login-btn">
-                    Crear cuenta
-                    <i class="bi bi-arrow-right"></i>
+                <button class="login-btn" @onclick="Registrar" disabled="@Cargando">
+                    @if (Cargando)
+                    {
+                        <span class="spinner"></span>
+                        <span>Creando cuenta...</span>
+                    }
+                    else
+                    {
+                        <span>Crear cuenta</span>
+                        <i class="bi bi-arrow-right"></i>
+                    }
                 </button>
 
-            </form>
+            </div>
 
             <div class="login-footer">
                 <span>¿Ya tienes una cuenta?</span>
@@ -92,9 +143,14 @@
 </div>
 
 @code {
-    [SupplyParameterFromQuery] private string? error { get; set; }
-
-    private bool SistemaConUsuarios { get; set; }
+    private string? Nombre;
+    private string? Apellido;
+    private string? Email;
+    private string? Password;
+    private string? Confirmar;
+    private string? Error;
+    private bool Cargando;
+    private bool SistemaConUsuarios;
 
     protected override async Task OnInitializedAsync()
     {
@@ -102,11 +158,91 @@
         SistemaConUsuarios = usuarios.Any();
     }
 
-    private string? Error => error switch
+    private bool TieneLongitud  => Password?.Length >= 8;
+    private bool TieneMayuscula => Password?.Any(char.IsUpper) ?? false;
+    private bool TieneMinuscula => Password?.Any(char.IsLower) ?? false;
+    private bool TieneNumero    => Password?.Any(char.IsDigit) ?? false;
+    private bool TieneEspecial  => Password?.Any(c => "!@#$%^&*()_+-=[]{}|;':\",./<>?".Contains(c)) ?? false;
+    private bool PasswordValida => TieneLongitud && TieneMayuscula && TieneMinuscula && TieneNumero && TieneEspecial;
+
+    private int FuerzaPorcentaje
     {
-        "campos" => "Todos los campos son obligatorios.",
-        "passwords" => "Las contraseñas no coinciden.",
-        "longitud" => "La contraseña debe tener al menos 8 caracteres.",
-        _ => null
+        get
+        {
+            if (string.IsNullOrEmpty(Password)) return 0;
+            int reglas = new[] { TieneLongitud, TieneMayuscula, TieneMinuscula, TieneNumero, TieneEspecial }
+                             .Count(r => r);
+            return reglas switch { 1 => 20, 2 => 40, 3 => 60, 4 => 80, 5 => 100, _ => 0 };
+        }
+    }
+
+    private string FuerzaClase => FuerzaPorcentaje switch
+    {
+        <= 20 => "debil",
+        <= 40 => "media",
+        <= 80 => "buena",
+        100   => "fuerte",
+        _     => "debil"
     };
+
+    private string FuerzaTexto => FuerzaClase switch
+    {
+        "debil"  => "Débil",
+        "media"  => "Regular",
+        "buena"  => "Buena",
+        "fuerte" => "Fuerte",
+        _        => ""
+    };
+
+    private bool Coinciden        => !string.IsNullOrEmpty(Password) && Password == Confirmar;
+    private string ConfirmacionClase => string.IsNullOrEmpty(Confirmar) ? "" : Coinciden ? "input-ok" : "input-error";
+    private string ConfirmacionIcono => Coinciden ? "bi-check-circle-fill icon-ok" : "bi-x-circle-fill icon-error";
+
+    private async Task Registrar()
+    {
+        Error = null;
+
+        if (string.IsNullOrWhiteSpace(Nombre)   || string.IsNullOrWhiteSpace(Apellido) ||
+            string.IsNullOrWhiteSpace(Email)     || string.IsNullOrWhiteSpace(Password) ||
+            string.IsNullOrWhiteSpace(Confirmar))
+        {
+            Error = "Todos los campos son obligatorios.";
+            return;
+        }
+
+        if (!PasswordValida)
+        {
+            Error = "La contraseña no cumple con los requisitos mínimos.";
+            return;
+        }
+
+        if (!Coinciden)
+        {
+            Error = "Las contraseñas no coinciden.";
+            return;
+        }
+
+        var usuarios = await Repo.GetAllAsync();
+        if (usuarios.Any())
+        {
+            SistemaConUsuarios = true;
+            return;
+        }
+        Cargando = true;
+
+        // Llamar al endpoint directamente
+        var http = new HttpClient { BaseAddress = new Uri(Nav.BaseUri) };
+        var form = new Dictionary<string, string>
+            {
+                ["nombre"] = Nombre!,
+                ["apellido"] = Apellido!,
+                ["email"] = Email!,
+                ["password"] = Password!,
+                ["confirmar"] = Confirmar!
+            };
+
+        await http.PostAsync("/account/registro-inicial", new FormUrlEncodedContent(form));
+        Cargando = false;
+        Nav.NavigateTo("/login?mensaje=cuenta-creada");
+    }
 }

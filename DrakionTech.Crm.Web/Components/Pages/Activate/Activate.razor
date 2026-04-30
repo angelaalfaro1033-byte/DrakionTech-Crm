@@ -44,6 +44,7 @@
             }
 
             <div class="login-form">
+
                 <div class="field-group">
                     <label class="field-label">Nueva contraseña</label>
                     <div class="field-input-wrap">
@@ -62,6 +63,28 @@
                             </div>
                             <span class="strength-label strength-@FuerzaClase">@FuerzaTexto</span>
                         </div>
+                        <ul class="password-rules">
+                            <li class="@(TieneLongitud  ? "rule-ok" : "rule-pending")">
+                                <i class="bi @(TieneLongitud  ? "bi-check-circle-fill" : "bi-circle")"></i>
+                                8 caracteres mínimo
+                            </li>
+                            <li class="@(TieneMayuscula ? "rule-ok" : "rule-pending")">
+                                <i class="bi @(TieneMayuscula ? "bi-check-circle-fill" : "bi-circle")"></i>
+                                Una letra mayúscula
+                            </li>
+                            <li class="@(TieneMinuscula ? "rule-ok" : "rule-pending")">
+                                <i class="bi @(TieneMinuscula ? "bi-check-circle-fill" : "bi-circle")"></i>
+                                Una letra minúscula
+                            </li>
+                            <li class="@(TieneNumero    ? "rule-ok" : "rule-pending")">
+                                <i class="bi @(TieneNumero    ? "bi-check-circle-fill" : "bi-circle")"></i>
+                                Un número
+                            </li>
+                            <li class="@(TieneEspecial ? "rule-ok" : "rule-pending")">
+                                <i class="bi @(TieneEspecial ? "bi-check-circle-fill" : "bi-circle")"></i>
+                                Un carácter especial (!&#64;&#35;$...)
+                            </li>
+                        </ul>
                     }
                 </div>
 
@@ -70,7 +93,7 @@
                     <div class="field-input-wrap">
                         <i class="bi bi-lock-fill field-icon"></i>
                         <input type="password"
-                               class="field-input @(ConfirmacionClase)"
+                               class="field-input @ConfirmacionClase"
                                placeholder="Repite tu contraseña"
                                @bind="Confirmar"
                                @bind:event="oninput" />
@@ -93,6 +116,7 @@
                         <i class="bi bi-arrow-right"></i>
                     }
                 </button>
+
             </div>
         }
 
@@ -111,45 +135,52 @@
     private bool Activado;
     private bool TokenInvalido;
 
-    private int FuerzaPorcentaje => Password switch
+    private bool TieneLongitud  => Password?.Length >= 8;
+    private bool TieneMayuscula => Password?.Any(char.IsUpper) ?? false;
+    private bool TieneMinuscula => Password?.Any(char.IsLower) ?? false;
+    private bool TieneNumero    => Password?.Any(char.IsDigit) ?? false;
+    private bool TieneEspecial  => Password?.Any(c => "!@#$%^&*()_+-=[]{}|;':\",./<>?".Contains(c)) ?? false;
+    private bool PasswordValida => TieneLongitud && TieneMayuscula && TieneMinuscula && TieneNumero && TieneEspecial;
+
+    private int FuerzaPorcentaje
     {
-        var p when p!.Length < 6 => 25,
-        var p when p.Length < 8 => 50,
-        var p when p.Length >= 8 && !TieneVariedad(p) => 65,
-        var p when p.Length >= 8 && TieneVariedad(p) => 100,
-        _ => 0
-    };
+        get
+        {
+            if (string.IsNullOrEmpty(Password)) return 0;
+            int reglas = new[] { TieneLongitud, TieneMayuscula, TieneMinuscula, TieneNumero, TieneEspecial }
+                             .Count(r => r);
+            return reglas switch { 1 => 20, 2 => 40, 3 => 60, 4 => 80, 5 => 100, _ => 0 };
+        }
+    }
 
     private string FuerzaClase => FuerzaPorcentaje switch
     {
-        25 => "debil",
-        50 => "media",
-        65 => "buena",
-        100 => "fuerte",
-        _ => "debil"
+        <= 20 => "debil",
+        <= 40 => "media",
+        <= 80 => "buena",
+        100   => "fuerte",
+        _     => "debil"
     };
 
     private string FuerzaTexto => FuerzaClase switch
     {
-        "debil" => "Débil",
-        "media" => "Regular",
-        "buena" => "Buena",
+        "debil"  => "Débil",
+        "media"  => "Regular",
+        "buena"  => "Buena",
         "fuerte" => "Fuerte",
-        _ => ""
+        _        => ""
     };
 
-    private static bool TieneVariedad(string p) =>
-        p.Any(char.IsUpper) && p.Any(char.IsDigit);
+    private bool Coinciden =>
+        !string.IsNullOrEmpty(Password) &&
+        !string.IsNullOrEmpty(Confirmar) &&
+        Password == Confirmar;
 
-    private bool Coinciden => !string.IsNullOrEmpty(Password) &&
-                              !string.IsNullOrEmpty(Confirmar) &&
-                              Password == Confirmar;
+    private string ConfirmacionClase =>
+        string.IsNullOrEmpty(Confirmar) ? "" : Coinciden ? "input-ok" : "input-error";
 
-    private string ConfirmacionClase => string.IsNullOrEmpty(Confirmar) ? "" :
-                                        Coinciden ? "input-ok" : "input-error";
-
-    private string ConfirmacionIcono => Coinciden ? "bi-check-circle-fill icon-ok"
-                                                  : "bi-x-circle-fill icon-error";
+    private string ConfirmacionIcono =>
+        Coinciden ? "bi-check-circle-fill icon-ok" : "bi-x-circle-fill icon-error";
 
     private async Task Activar()
     {
@@ -167,13 +198,13 @@
             return;
         }
 
-        if (Password.Length < 8)
+        if (!PasswordValida)
         {
-            Error = "La contraseña debe tener al menos 8 caracteres.";
+            Error = "La contraseña no cumple con todos los requisitos.";
             return;
         }
 
-        if (Password != Confirmar)
+        if (!Coinciden)
         {
             Error = "Las contraseñas no coinciden.";
             return;
