@@ -1,0 +1,32 @@
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace DrakionTech.Crm.Data.Migrations
+{
+    /// <inheritdoc />
+    public partial class EstilosCorreoYvistas : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.UpdateData(
+                table: "EmailTemplates",
+                keyColumn: "Id",
+                keyValue: 1,
+                column: "TemplateHtml",
+                value: "\r\n<!DOCTYPE html>\r\n<html>\r\n<head>\r\n  <meta charset='utf-8' />\r\n  <meta name='viewport' content='width=device-width, initial-scale=1.0' />\r\n</head>\r\n<body style='margin:0;padding:0;background-color:#f5f4f0;font-family:Arial,sans-serif;'>\r\n\r\n  <table width='100%' cellpadding='0' cellspacing='0' style='background-color:#f5f4f0;padding:40px 0;'>\r\n    <tr>\r\n      <td align='center'>\r\n        <table width='560' cellpadding='0' cellspacing='0' style='background-color:#ffffff;border-radius:20px;border:1px solid #e8e6e0;overflow:hidden;'>\r\n\r\n          <!-- HEADER -->\r\n          <tr>\r\n            <td style='background-color:#111827;padding:32px 40px;text-align:center;'>\r\n              <p style='margin:0;font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;'>DrakionTech CRM</p>\r\n              <p style='margin:6px 0 0;font-size:13px;color:#9ca3af;'>Plataforma de gestión comercial</p>\r\n            </td>\r\n          </tr>\r\n\r\n          <!-- ÍCONO -->\r\n          <tr>\r\n            <td align='center' style='padding:36px 40px 0;'>\r\n              <div style='width:64px;height:64px;background-color:#eff6ff;border-radius:16px;display:inline-flex;align-items:center;justify-content:center;'>\r\n                <span style='font-size:30px;'>🔐</span>\r\n              </div>\r\n            </td>\r\n          </tr>\r\n\r\n          <!-- CONTENIDO -->\r\n          <tr>\r\n            <td style='padding:24px 40px 16px;text-align:center;'>\r\n              <h1 style='margin:0 0 10px;font-size:24px;font-weight:700;color:#111827;letter-spacing:-0.4px;'>Hola, {{Nombre}} 👋</h1>\r\n              <p style='margin:0;font-size:15px;color:#6b7280;line-height:1.7;'>\r\n                Tu cuenta en DrakionTech CRM ha sido creada.<br/>\r\n                Haz clic en el botón para activarla y comenzar.\r\n              </p>\r\n            </td>\r\n          </tr>\r\n\r\n          <!-- BOTÓN -->\r\n          <tr>\r\n            <td align='center' style='padding:28px 40px;'>\r\n              <a href='{{ActivationLink}}'\r\n                 style='display:inline-block;background-color:#111827;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:14px 36px;border-radius:12px;letter-spacing:0.01em;'>\r\n                Activar mi cuenta →\r\n              </a>\r\n            </td>\r\n          </tr>\r\n\r\n          <!-- AVISO ENLACE -->\r\n          <tr>\r\n            <td style='padding:0 40px 24px;text-align:center;'>\r\n              <p style='margin:0;font-size:12px;color:#9ca3af;line-height:1.6;'>\r\n                Si el botón no funciona, copia y pega este enlace en tu navegador:<br/>\r\n                <span style='color:#2563eb;word-break:break-all;'>{{ActivationLink}}</span>\r\n              </p>\r\n            </td>\r\n          </tr>\r\n\r\n          <!-- DIVIDER -->\r\n          <tr>\r\n            <td style='padding:0 40px;'>\r\n              <div style='height:1px;background-color:#f3f4f6;'></div>\r\n            </td>\r\n          </tr>\r\n\r\n          <!-- FOOTER -->\r\n          <tr>\r\n            <td style='padding:24px 40px;text-align:center;'>\r\n              <p style='margin:0;font-size:12px;color:#9ca3af;line-height:1.6;'>\r\n                Este correo fue enviado automáticamente por DrakionTech CRM.<br/>\r\n                Si no solicitaste esto, puedes ignorar este mensaje.\r\n              </p>\r\n            </td>\r\n          </tr>\r\n\r\n        </table>\r\n      </td>\r\n    </tr>\r\n  </table>\r\n\r\n</body>\r\n</html>\r\n");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.UpdateData(
+                table: "EmailTemplates",
+                keyColumn: "Id",
+                keyValue: 1,
+                column: "TemplateHtml",
+                value: "\r\n                <h1>Hola {{Nombre}}</h1>\r\n                <p>Haz clic en el siguiente enlace para activar tu cuenta:</p>\r\n                <a href='{{ActivationLink}}'>Activar cuenta</a>\r\n            ");
+        }
+    }
+}

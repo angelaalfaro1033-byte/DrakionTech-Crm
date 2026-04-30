@@ -15,7 +15,7 @@
     border: 1px solid #e8e6e0;
     padding: 48px 44px;
     width: 100%;
-    max-width: 420px;
+    max-width: 520px;
     box-shadow: 0 2px 40px rgba(0,0,0,0.06);
 }
 
@@ -24,29 +24,17 @@
     margin-bottom: 36px;
 }
 
-.login-icon {
-    width: 56px;
-    height: 56px;
-    background: #111827;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 20px;
-    font-size: 22px;
-    color: #ffffff;
+.login-logo {
+    height: 40px;
+    width: auto;
+    margin-bottom: 12px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.login-title {
-    font-size: 24px;
-    font-weight: 700;
-    color: #111827;
-    margin: 0 0 6px;
-    letter-spacing: -0.5px;
-}
-
-.login-subtitle {
-    font-size: 14px;
+.registro-subtitulo {
+    font-size: 13px;
     color: #9aa0a6;
     margin: 0;
     font-weight: 400;
@@ -65,10 +53,29 @@
     gap: 8px;
 }
 
+.login-success {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
 .login-form {
     display: flex;
     flex-direction: column;
     gap: 20px;
+}
+
+.registro-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
 }
 
 .field-group {
@@ -148,14 +155,7 @@
     .login-btn:active {
         transform: scale(0.98);
     }
-.login-logo {
-    height: 40px;
-    width: auto;
-    margin-bottom: 16px;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-}
+
 .login-footer {
     margin-top: 1.25rem;
     text-align: center;
@@ -173,20 +173,14 @@
         .login-footer a:hover {
             color: #111827;
         }
-.login-footer {
-    margin-top: 1.25rem;
-    text-align: center;
-    font-size: 0.82rem;
-    color: #9ca3af;
-}
 
-    .login-footer a {
-        color: #6b7280;
-        text-decoration: underline;
-        margin-left: 0.25rem;
-        transition: color 0.2s;
+@media (max-width: 520px) {
+    .registro-row {
+        grid-template-columns: 1fr;
     }
 
-        .login-footer a:hover {
-            color: #111827;
-        }
+    .login-card {
+        padding: 36px 24px;
+        max-width: 100%;
+    }
+}

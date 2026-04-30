@@ -24,29 +24,17 @@
     margin-bottom: 36px;
 }
 
-.login-icon {
-    width: 56px;
-    height: 56px;
-    background: #111827;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 20px;
-    font-size: 22px;
-    color: #ffffff;
+.login-logo {
+    height: 40px;
+    width: auto;
+    margin-bottom: 12px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.login-title {
-    font-size: 24px;
-    font-weight: 700;
-    color: #111827;
-    margin: 0 0 6px;
-    letter-spacing: -0.5px;
-}
-
-.login-subtitle {
-    font-size: 14px;
+.activate-subtitulo {
+    font-size: 13px;
     color: #9aa0a6;
     margin: 0;
     font-weight: 400;
@@ -98,12 +86,29 @@
     pointer-events: none;
 }
 
+.field-icon-right {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    pointer-events: none;
+}
+
+.icon-ok {
+    color: #16a34a;
+}
+
+.icon-error {
+    color: #dc2626;
+}
+
 .field-input {
     width: 100%;
     height: 46px;
     border: 1px solid #e5e7eb;
     border-radius: 12px;
-    padding: 0 14px 0 40px;
+    padding: 0 40px 0 40px;
     font-size: 14px;
     font-family: 'Poppins', sans-serif;
     color: #111827;
@@ -122,6 +127,73 @@
         background: #ffffff;
     }
 
+    .field-input.input-ok {
+        border-color: #16a34a;
+    }
+
+    .field-input.input-error {
+        border-color: #dc2626;
+    }
+
+.password-strength {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.strength-bar {
+    flex: 1;
+    height: 4px;
+    background: #e5e7eb;
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.strength-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.3s, background 0.3s;
+}
+
+    .strength-fill.strength-debil {
+        background: #ef4444;
+    }
+
+    .strength-fill.strength-media {
+        background: #f97316;
+    }
+
+    .strength-fill.strength-buena {
+        background: #eab308;
+    }
+
+    .strength-fill.strength-fuerte {
+        background: #16a34a;
+    }
+
+.strength-label {
+    font-size: 11px;
+    font-weight: 600;
+    min-width: 44px;
+    text-align: right;
+}
+
+    .strength-label.strength-debil {
+        color: #ef4444;
+    }
+
+    .strength-label.strength-media {
+        color: #f97316;
+    }
+
+    .strength-label.strength-buena {
+        color: #eab308;
+    }
+
+    .strength-label.strength-fuerte {
+        color: #16a34a;
+    }
 .login-btn {
     height: 48px;
     background: #111827;
@@ -148,14 +220,62 @@
     .login-btn:active {
         transform: scale(0.98);
     }
-.login-logo {
-    height: 40px;
-    width: auto;
-    margin-bottom: 16px;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
+
+    .login-btn:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+    }
+
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
 }
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.activate-success {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 0;
+    text-align: center;
+}
+
+.activate-success-icon {
+    width: 64px;
+    height: 64px;
+    background: #f0fdf4;
+    border: 2px solid #bbf7d0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: #16a34a;
+}
+
+.activate-success-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+
+.activate-success-sub {
+    font-size: 13px;
+    color: #9aa0a6;
+    margin: 0;
+}
+
 .login-footer {
     margin-top: 1.25rem;
     text-align: center;
@@ -173,20 +293,9 @@
         .login-footer a:hover {
             color: #111827;
         }
-.login-footer {
-    margin-top: 1.25rem;
-    text-align: center;
-    font-size: 0.82rem;
-    color: #9ca3af;
-}
 
-    .login-footer a {
-        color: #6b7280;
-        text-decoration: underline;
-        margin-left: 0.25rem;
-        transition: color 0.2s;
+@media (max-width: 480px) {
+    .login-card {
+        padding: 36px 24px;
     }
-
-        .login-footer a:hover {
-            color: #111827;
-        }
+}

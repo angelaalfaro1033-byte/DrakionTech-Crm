@@ -342,10 +342,82 @@ namespace DrakionTech.Crm.Data.Seed
                     Id = 1,
                     Nombre = "ActivacionCuenta",
                     TemplateHtml = @"
-                <h1>Hola {{Nombre}}</h1>
-                <p>Haz clic en el siguiente enlace para activar tu cuenta:</p>
-                <a href='{{ActivationLink}}'>Activar cuenta</a>
-            ",
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8' />
+  <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+</head>
+<body style='margin:0;padding:0;background-color:#f5f4f0;font-family:Arial,sans-serif;'>
+  <table width='100%' cellpadding='0' cellspacing='0' style='background-color:#f5f4f0;padding:40px 0;'>
+    <tr>
+      <td align='center'>
+        <table width='560' cellpadding='0' cellspacing='0' style='background-color:#ffffff;border-radius:20px;border:1px solid #e8e6e0;overflow:hidden;'>
+          <!-- HEADER -->
+          <tr>
+            <td style='background-color:#111827;padding:32px 40px;text-align:center;'>
+              <p style='margin:0;font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;'>DrakionTech CRM</p>
+              <p style='margin:6px 0 0;font-size:13px;color:#9ca3af;'>Plataforma de gestión comercial</p>
+            </td>
+          </tr>
+          <!-- ÍCONO -->
+          <tr>
+            <td align='center' style='padding:36px 40px 0;'>
+              <div style='width:64px;height:64px;background-color:#f3f4f6;border-radius:16px;display:inline-block;text-align:center;line-height:64px;'>
+                <span style='font-size:28px;color:#374151;font-weight:700;'>&#128274;</span>
+              </div>
+            </td>
+          </tr>
+          <!-- CONTENIDO -->
+          <tr>
+            <td style='padding:24px 40px 16px;text-align:center;'>
+              <h1 style='margin:0 0 10px;font-size:24px;font-weight:700;color:#111827;letter-spacing:-0.4px;'>Hola, {{Nombre}}</h1>
+              <p style='margin:0;font-size:15px;color:#6b7280;line-height:1.7;'>
+                Tu cuenta en DrakionTech CRM ha sido creada.<br/>
+                Haz clic en el botón para activarla y comenzar.
+              </p>
+            </td>
+          </tr>
+          <!-- BOTÓN -->
+          <tr>
+            <td align='center' style='padding:28px 40px;'>
+              <a href='{{ActivationLink}}'
+                 style='display:inline-block;background-color:#111827;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:14px 36px;border-radius:12px;letter-spacing:0.01em;'>
+                Activar mi cuenta &rarr;
+              </a>
+            </td>
+          </tr>
+          <!-- AVISO ENLACE -->
+          <tr>
+            <td style='padding:0 40px 24px;text-align:center;'>
+              <p style='margin:0;font-size:12px;color:#9ca3af;line-height:1.6;'>
+                Si el bot&oacute;n no funciona, copia y pega este enlace en tu navegador:<br/>
+                <span style='color:#2563eb;word-break:break-all;'>{{ActivationLink}}</span>
+              </p>
+            </td>
+          </tr>
+          <!-- DIVIDER -->
+          <tr>
+            <td style='padding:0 40px;'>
+              <div style='height:1px;background-color:#f3f4f6;'></div>
+            </td>
+          </tr>
+          <!-- FOOTER -->
+          <tr>
+            <td style='padding:24px 40px;text-align:center;'>
+              <p style='margin:0;font-size:12px;color:#9ca3af;line-height:1.6;'>
+                Este correo fue enviado autom&aacute;ticamente por DrakionTech CRM.<br/>
+                Si no solicitaste esto, puedes ignorar este mensaje.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+",
                     Activo = true
                 }
             );

@@ -5,8 +5,16 @@
 <div class="login-wrapper">
     <div class="login-card">
         <div class="login-header">
-                <img src="images/logo/Logo_Negro.svg" alt="DrakionTech CRM" class="login-logo" />
+            <img src="images/logo/Logo_Negro.svg" alt="DrakionTech CRM" class="login-logo" />
         </div>
+
+        @if (Mensaje is not null)
+        {
+            <div class="login-success">
+                <i class="bi bi-check-circle"></i>
+                @Mensaje
+            </div>
+        }
 
         @if (Error is not null)
         {
@@ -24,7 +32,6 @@
                     <input name="email" type="email" class="field-input" placeholder="tucorreo@empresa.com" />
                 </div>
             </div>
-
             <div class="field-group">
                 <label class="field-label">Contraseña</label>
                 <div class="field-input-wrap">
@@ -32,22 +39,32 @@
                     <input name="password" type="password" class="field-input" placeholder="••••••••" />
                 </div>
             </div>
-
             <button type="submit" class="login-btn">
                 Ingresar
                 <i class="bi bi-arrow-right"></i>
             </button>
+            <div class="login-footer">
+                <span>¿Primera vez aquí?</span>
+                <a href="/registro-inicial">Crea tu cuenta</a>
+            </div>
         </form>
     </div>
 </div>
 
 @code {
     [SupplyParameterFromQuery] private string? error { get; set; }
+    [SupplyParameterFromQuery] private string? mensaje { get; set; }
 
     private string? Error => error switch
     {
         "credenciales" => "Correo o contraseña incorrectos.",
         "inactivo" => "Tu cuenta no está activada.",
+        _ => null
+    };
+
+    private string? Mensaje => mensaje switch
+    {
+        "cuenta-creada" => "¡Cuenta creada! Ya puedes iniciar sesión.",
         _ => null
     };
 }
