@@ -4,6 +4,7 @@ using DrakionTech.Crm.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DrakionTech.Crm.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260430150450_SincronizarModelo")]
+    partial class SincronizarModelo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -671,36 +674,6 @@ namespace DrakionTech.Crm.Data.Migrations
 
                             t.HasCheckConstraint("CK_Empresas_Sector", "(\r\n                        (SectorId IS NOT NULL AND SectorOtro IS NULL)\r\n                        OR\r\n                        (SectorId IS NULL AND LTRIM(RTRIM(SectorOtro)) <> '')\r\n                    )");
                         });
-                });
-
-            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Especialidad", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Activo")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Descripcion")
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("RolUsuarioId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RolUsuarioId");
-
-                    b.ToTable("Especialidades");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Estado", b =>
@@ -1701,17 +1674,6 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Navigation("Pais");
 
                     b.Navigation("Sector");
-                });
-
-            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Especialidad", b =>
-                {
-                    b.HasOne("DrakionTech.Crm.Data.Entities.RolUsuario", "RolUsuario")
-                        .WithMany()
-                        .HasForeignKey("RolUsuarioId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("RolUsuario");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.GoogleEventoArchivo", b =>
