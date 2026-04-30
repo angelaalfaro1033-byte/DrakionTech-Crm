@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 using DrakionTech.Crm.Data.Entities;
-//using DrakionTech.Crm.Web.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,7 +26,8 @@ builder.Services.AddCrmBusiness();
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(CrmMappingProfile));
 builder.Services.AddScoped<IAuthService, AuthService>();
-//Whatsapp
+
+// WhatsApp
 builder.Services.Configure<WhatsAppOptions>(
     builder.Configuration.GetSection("WhatsApp"));
 builder.Services.Configure<EmailSettings>(
@@ -45,14 +45,21 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     {
         options.LoginPath = "/login";
         options.AccessDeniedPath = "/login";
+    })
+    .AddGoogle(options =>
+    {
+        options.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
+        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
+        options.CallbackPath = "/signin-google";
     });
 
 builder.Services.AddAuthorization();
-//empleado
+
+// Empleado
 builder.Services.AddScoped<IEmpleadoRepository, EmpleadoRepository>();
 builder.Services.AddScoped<IEmpleadoService, EmpleadoService>();
 
-//azure 
+// Azure
 builder.Services.AddScoped<AzureBlobService>();
 
 builder.Services.AddScoped<GoogleAuthService>();
@@ -72,18 +79,15 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// Middleware de manejo de excepciones
-//app.UseMiddleware<ExceptionHandlingMiddleware>();
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Endpoints
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
 app.MapPost("/account/login", async (HttpContext ctx, IEmpleadoRepository repo) =>
 {
     var form = await ctx.Request.ReadFormAsync();
@@ -163,5 +167,49 @@ app.MapPost("/account/registro-inicial", async (HttpContext ctx, IEmpleadoReposi
 
     return Results.Redirect("/login?mensaje=cuenta-creada");
 }).DisableAntiforgery();
-app.Run();
+
+app.MapGet("/account/google-login", (HttpContext ctx) =>
+{
+    var props = new AuthenticationProperties
+    {
+        RedirectUri = "/account/google-callback"
+    };
+    return Results.Challenge(props, ["Google"]);
+});
+
+app.MapGet("/account/google-callback", async (HttpContext ctx, IEmpleadoRepository repo) =>
+{
+    var result = await ctx.AuthenticateAsync("Google");
+
+    if (!result.Succeeded)
+        return Results.Redirect("/login?error=google");
+
+    var email = result.Principal?.FindFirst(ClaimTypes.Email)?.Value;
+
+    if (string.IsNullOrEmpty(email))
+        return Results.Redirect("/login?error=google");
+
+    var user = (await repo.GetAllAsync())
+        .FirstOrDefault(x => x.Email == email);
+
+    if (user == null)
+        return Results.Redirect("/login?error=no-registrado");
+
+    if (!user.IsActive)
+        return Results.Redirect("/login?error=inactivo");
+
+    var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.Name, user.Email),
+        new Claim("UserId", user.Id.ToString())
+    };
+
+    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+    var principal = new ClaimsPrincipal(identity);
+
+    await ctx.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+    return Results.Redirect("/");
+});
+
 app.Run();
