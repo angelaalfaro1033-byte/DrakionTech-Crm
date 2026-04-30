@@ -1,17 +1,103 @@
 ﻿@page "/activate"
-@using Microsoft.AspNetCore.Components
+@layout EmptyLayout
+@attribute [AllowAnonymous]
+@using DrakionTech.Crm.Business.Interfaces
 @inject IEmpleadoService EmpleadoService
 @inject NavigationManager Nav
 
-<h3>Activar cuenta</h3>
+<div class="login-wrapper">
+    <div class="login-card">
 
-@if (!string.IsNullOrEmpty(Message))
-{
-    <p>@Message</p>
-}
+        <div class="login-header">
+            <img src="images/logo/Logo_Negro.svg" alt="DrakionTech CRM" class="login-logo" />
+            <p class="activate-subtitulo">Activa tu cuenta y crea tu contraseña</p>
+        </div>
 
-<input type="password" @bind="Password" placeholder="Contraseña" />
-<button @onclick="Activar">Activar</button>
+        @if (TokenInvalido)
+        {
+            <div class="login-error">
+                <i class="bi bi-x-circle"></i>
+                El enlace de activación es inválido o ha expirado. Contacta a tu administrador.
+            </div>
+            <div class="login-footer">
+                <a href="/login">Volver al inicio de sesión</a>
+            </div>
+        }
+        else if (Activado)
+        {
+            <div class="activate-success">
+                <div class="activate-success-icon">
+                    <i class="bi bi-check-lg"></i>
+                </div>
+                <p class="activate-success-title">¡Cuenta activada!</p>
+                <p class="activate-success-sub">Redirigiendo al inicio de sesión...</p>
+            </div>
+        }
+        else
+        {
+            @if (Error is not null)
+            {
+                <div class="login-error">
+                    <i class="bi bi-exclamation-circle"></i>
+                    @Error
+                </div>
+            }
+
+            <div class="login-form">
+                <div class="field-group">
+                    <label class="field-label">Nueva contraseña</label>
+                    <div class="field-input-wrap">
+                        <i class="bi bi-lock field-icon"></i>
+                        <input type="password"
+                               class="field-input"
+                               placeholder="Mínimo 8 caracteres"
+                               @bind="Password"
+                               @bind:event="oninput" />
+                    </div>
+                    @if (!string.IsNullOrEmpty(Password))
+                    {
+                        <div class="password-strength">
+                            <div class="strength-bar">
+                                <div class="strength-fill strength-@FuerzaClase" style="width: @FuerzaPorcentaje%"></div>
+                            </div>
+                            <span class="strength-label strength-@FuerzaClase">@FuerzaTexto</span>
+                        </div>
+                    }
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Confirmar contraseña</label>
+                    <div class="field-input-wrap">
+                        <i class="bi bi-lock-fill field-icon"></i>
+                        <input type="password"
+                               class="field-input @(ConfirmacionClase)"
+                               placeholder="Repite tu contraseña"
+                               @bind="Confirmar"
+                               @bind:event="oninput" />
+                        @if (!string.IsNullOrEmpty(Confirmar))
+                        {
+                            <i class="bi @ConfirmacionIcono field-icon-right"></i>
+                        }
+                    </div>
+                </div>
+
+                <button class="login-btn" @onclick="Activar" disabled="@Cargando">
+                    @if (Cargando)
+                    {
+                        <span class="spinner"></span>
+                        <span>Activando...</span>
+                    }
+                    else
+                    {
+                        <span>Activar cuenta</span>
+                        <i class="bi bi-arrow-right"></i>
+                    }
+                </button>
+            </div>
+        }
+
+    </div>
+</div>
 
 @code {
     [Parameter]
@@ -19,28 +105,93 @@
     public string? Token { get; set; }
 
     private string? Password;
-    private string? Message;
+    private string? Confirmar;
+    private string? Error;
+    private bool Cargando;
+    private bool Activado;
+    private bool TokenInvalido;
+
+    private int FuerzaPorcentaje => Password switch
+    {
+        var p when p!.Length < 6 => 25,
+        var p when p.Length < 8 => 50,
+        var p when p.Length >= 8 && !TieneVariedad(p) => 65,
+        var p when p.Length >= 8 && TieneVariedad(p) => 100,
+        _ => 0
+    };
+
+    private string FuerzaClase => FuerzaPorcentaje switch
+    {
+        25 => "debil",
+        50 => "media",
+        65 => "buena",
+        100 => "fuerte",
+        _ => "debil"
+    };
+
+    private string FuerzaTexto => FuerzaClase switch
+    {
+        "debil" => "Débil",
+        "media" => "Regular",
+        "buena" => "Buena",
+        "fuerte" => "Fuerte",
+        _ => ""
+    };
+
+    private static bool TieneVariedad(string p) =>
+        p.Any(char.IsUpper) && p.Any(char.IsDigit);
+
+    private bool Coinciden => !string.IsNullOrEmpty(Password) &&
+                              !string.IsNullOrEmpty(Confirmar) &&
+                              Password == Confirmar;
+
+    private string ConfirmacionClase => string.IsNullOrEmpty(Confirmar) ? "" :
+                                        Coinciden ? "input-ok" : "input-error";
+
+    private string ConfirmacionIcono => Coinciden ? "bi-check-circle-fill icon-ok"
+                                                  : "bi-x-circle-fill icon-error";
 
     private async Task Activar()
     {
-        if (string.IsNullOrWhiteSpace(Token) || string.IsNullOrWhiteSpace(Password))
+        Error = null;
+
+        if (string.IsNullOrWhiteSpace(Token))
         {
-            Message = "Datos inválidos";
+            TokenInvalido = true;
             return;
         }
 
+        if (string.IsNullOrWhiteSpace(Password) || string.IsNullOrWhiteSpace(Confirmar))
+        {
+            Error = "Completa ambos campos.";
+            return;
+        }
+
+        if (Password.Length < 8)
+        {
+            Error = "La contraseña debe tener al menos 8 caracteres.";
+            return;
+        }
+
+        if (Password != Confirmar)
+        {
+            Error = "Las contraseñas no coinciden.";
+            return;
+        }
+
+        Cargando = true;
         var result = await EmpleadoService.ActivarCuentaAsync(Token, Password);
+        Cargando = false;
 
         if (result)
         {
-            Message = "Cuenta activada correctamente";
-
-            await Task.Delay(1500);
-            Nav.NavigateTo("/login");
+            Activado = true;
+            await Task.Delay(2000);
+            Nav.NavigateTo("/login?mensaje=cuenta-creada");
         }
         else
         {
-            Message = "Token inválido o expirado";
+            TokenInvalido = true;
         }
     }
 }

@@ -13,6 +13,7 @@ using DrakionTech.Crm.Business.Configurations;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
+using DrakionTech.Crm.Data.Entities;
 //using DrakionTech.Crm.Web.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -120,5 +121,47 @@ app.MapPost("/account/logout", async (HttpContext ctx) =>
     return Results.Redirect("/login");
 }).DisableAntiforgery();
 
+app.MapPost("/account/registro-inicial", async (HttpContext ctx, IEmpleadoRepository repo) =>
+{
+    var usuarios = await repo.GetAllAsync();
+    if (usuarios.Any())
+        return Results.Redirect("/login");
+
+    var form = await ctx.Request.ReadFormAsync();
+    var nombre = form["nombre"].ToString().Trim();
+    var apellido = form["apellido"].ToString().Trim();
+    var email = form["email"].ToString().Trim();
+    var password = form["password"].ToString();
+    var confirmar = form["confirmar"].ToString();
+
+    if (string.IsNullOrEmpty(nombre) || string.IsNullOrEmpty(apellido) ||
+        string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+        return Results.Redirect("/registro-inicial?error=campos");
+
+    if (password != confirmar)
+        return Results.Redirect("/registro-inicial?error=passwords");
+
+    if (password.Length < 8)
+        return Results.Redirect("/registro-inicial?error=longitud");
+
+    var admin = new Empleado
+    {
+        Nombre = nombre,
+        Apellido = apellido,
+        Email = email,
+        Cargo = "Administrador",
+        Rol = "Administrador",
+        Activo = true,
+        FechaCreacion = DateTime.UtcNow,
+        PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
+        IsActive = true,
+        ActivationToken = null,
+        ActivationTokenExpiration = null
+    };
+
+    await repo.AddAsync(admin);
+
+    return Results.Redirect("/login?mensaje=cuenta-creada");
+}).DisableAntiforgery();
 app.Run();
 app.Run();

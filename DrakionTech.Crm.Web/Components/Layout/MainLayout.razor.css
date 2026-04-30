@@ -54,3 +54,30 @@
     width: auto;
     display: block;
 }
+
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+    .logout-btn:hover {
+        background: #f9fafb;
+        color: #111827;
+        border-color: #d1d5db;
+    }

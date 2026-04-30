@@ -1,0 +1,112 @@
+﻿@page "/registro-inicial"
+@layout EmptyLayout
+@attribute [AllowAnonymous]
+@using DrakionTech.Crm.Data.Repositories.Interfaces
+@inject IEmpleadoRepository Repo
+
+<div class="login-wrapper">
+    <div class="login-card registro-card">
+
+        <div class="login-header">
+            <img src="images/logo/Logo_Negro.svg" alt="DrakionTech CRM" class="login-logo" />
+            <p class="registro-subtitulo">Configura tu cuenta de administrador</p>
+        </div>
+
+        @if (Error is not null)
+        {
+            <div class="login-error">
+                <i class="bi bi-exclamation-circle"></i>
+                @Error
+            </div>
+        }
+
+        @if (SistemaConUsuarios)
+        {
+            <div class="login-error">
+                <i class="bi bi-shield-lock"></i>
+                El sistema ya tiene usuarios registrados. Esta página no está disponible.
+            </div>
+            <div class="login-footer">
+                <a href="/login">Volver al inicio de sesión</a>
+            </div>
+        }
+        else
+        {
+            <form method="post" action="/account/registro-inicial" class="login-form">
+
+                <div class="registro-row">
+                    <div class="field-group">
+                        <label class="field-label">Nombre</label>
+                        <div class="field-input-wrap">
+                            <i class="bi bi-person field-icon"></i>
+                            <input name="nombre" type="text" class="field-input" placeholder="Juan" required />
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Apellido</label>
+                        <div class="field-input-wrap">
+                            <i class="bi bi-person field-icon"></i>
+                            <input name="apellido" type="text" class="field-input" placeholder="Pérez" required />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Correo electrónico</label>
+                    <div class="field-input-wrap">
+                        <i class="bi bi-envelope field-icon"></i>
+                        <input name="email" type="email" class="field-input" placeholder="admin@empresa.com" required />
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Contraseña</label>
+                    <div class="field-input-wrap">
+                        <i class="bi bi-lock field-icon"></i>
+                        <input name="password" type="password" class="field-input" placeholder="Mínimo 8 caracteres" required />
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Confirmar contraseña</label>
+                    <div class="field-input-wrap">
+                        <i class="bi bi-lock-fill field-icon"></i>
+                        <input name="confirmar" type="password" class="field-input" placeholder="Repite tu contraseña" required />
+                    </div>
+                </div>
+
+                <button type="submit" class="login-btn">
+                    Crear cuenta
+                    <i class="bi bi-arrow-right"></i>
+                </button>
+
+            </form>
+
+            <div class="login-footer">
+                <span>¿Ya tienes una cuenta?</span>
+                <a href="/login">Inicia sesión</a>
+            </div>
+        }
+
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery] private string? error { get; set; }
+
+    private bool SistemaConUsuarios { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var usuarios = await Repo.GetAllAsync();
+        SistemaConUsuarios = usuarios.Any();
+    }
+
+    private string? Error => error switch
+    {
+        "campos" => "Todos los campos son obligatorios.",
+        "passwords" => "Las contraseñas no coinciden.",
+        "longitud" => "La contraseña debe tener al menos 8 caracteres.",
+        _ => null
+    };
+}
