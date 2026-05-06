@@ -61,6 +61,10 @@ builder.Services.AddHttpClient<IWhatsAppNotificationService, WhatsAppNotificatio
 builder.Services.AddScoped<IEmpleadoRepository, EmpleadoRepository>();
 builder.Services.AddScoped<IEmpleadoService, EmpleadoService>();
 
+//USUARIOS
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+
 // Azure / Google
 builder.Services.AddScoped<AzureBlobService>();
 builder.Services.AddScoped<GoogleAuthService>();

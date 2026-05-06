@@ -1,0 +1,45 @@
+﻿@page "/usuarios/crear"
+@attribute [Authorize]
+@using DrakionTech.Crm.Business.DTOs.Usuario
+@using DrakionTech.Crm.Business.DTOs.RolUsuario
+@using DrakionTech.Crm.Business.Interfaces
+@inject IUsuarioService UsuarioService
+@inject IRolUsuarioService RolUsuarioService
+@inject NavigationManager Nav
+
+<div class="empleados-container">
+    <div class="empresas-header">
+        <div>
+            <h1 class="empresas-title">Crear usuario</h1>
+            <p class="empresas-subtitle">Registra un nuevo usuario</p>
+        </div>
+    </div>
+    <div class="ui-card">
+        <UsuarioForm Model="usuario"
+                     Roles="roles"
+                     OnValidSubmit="Guardar"
+                     OnCancel="Cancelar"
+                     TextoBoton="Crear" />
+    </div>
+</div>
+
+@code {
+    private CrearUsuarioDto usuario = new();
+    private List<RolUsuarioDto> roles = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        roles = await RolUsuarioService.ObtenerTodosAsync();
+    }
+
+    private async Task Guardar()
+    {
+        await UsuarioService.CrearAsync(usuario);
+        Nav.NavigateTo("/usuarios");
+    }
+
+    private void Cancelar()
+    {
+        Nav.NavigateTo("/usuarios");
+    }
+}

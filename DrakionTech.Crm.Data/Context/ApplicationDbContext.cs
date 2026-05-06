@@ -34,6 +34,7 @@ namespace DrakionTech.Crm.Data.Context
         public DbSet<Empleado> Empleados { get; set; }
         public DbSet<GoogleEventoArchivo> GoogleEventoArchivos { get; set; }
         public DbSet<EmailTemplate> EmailTemplates { get; set; }
+        public DbSet<Usuario> Usuarios => Set<Usuario>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -59,6 +60,7 @@ namespace DrakionTech.Crm.Data.Context
             modelBuilder.ApplyConfiguration(new GoogleEventoConfiguration());
             modelBuilder.ApplyConfiguration(new EmpleadoConfiguration());
             modelBuilder.ApplyConfiguration(new EmailTemplateConfiguration());
+            modelBuilder.ApplyConfiguration(new UsuarioConfiguration());
 
             InitialSeed.Seed(modelBuilder);
 

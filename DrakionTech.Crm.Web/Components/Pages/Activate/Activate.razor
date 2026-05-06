@@ -2,7 +2,7 @@
 @layout EmptyLayout
 @attribute [AllowAnonymous]
 @using DrakionTech.Crm.Business.Interfaces
-@inject IEmpleadoService EmpleadoService
+@inject IUsuarioService UsuarioService
 @inject NavigationManager Nav
 
 <div class="login-wrapper">
@@ -211,7 +211,7 @@
         }
 
         Cargando = true;
-        var result = await EmpleadoService.ActivarCuentaAsync(Token, Password);
+        var result = await UsuarioService.ActivarCuentaAsync(Token, Password);
         Cargando = false;
 
         if (result)

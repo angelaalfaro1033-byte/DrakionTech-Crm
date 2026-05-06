@@ -7,16 +7,16 @@ namespace DrakionTech.Crm.Business.Services;
 
 public class AccountService : IAccountService
 {
-    private readonly IEmpleadoRepository _repo;
+    private readonly IUsuarioRepository _repo;
 
-    public AccountService(IEmpleadoRepository repo)
+    public AccountService(IUsuarioRepository repo)
     {
         _repo = repo;
     }
 
     public async Task<LoginErrorEnum> LoginAsync(string email, string password)
     {
-        var user = (await _repo.GetAllAsync()).FirstOrDefault(x => x.Email == email);
+        var user = await _repo.GetByEmailAsync(email);
 
         if (user == null || string.IsNullOrEmpty(user.PasswordHash))
             return LoginErrorEnum.Credenciales;
@@ -34,7 +34,6 @@ public class AccountService : IAccountService
         string nombre, string apellido, string email, string password, string confirmar)
     {
         var usuarios = await _repo.GetAllAsync();
-
         if (usuarios.Any()) return RegistroResultadoEnum.Bloqueado;
 
         if (string.IsNullOrEmpty(nombre) || string.IsNullOrEmpty(apellido) ||
@@ -44,31 +43,27 @@ public class AccountService : IAccountService
         if (password != confirmar) return RegistroResultadoEnum.PasswordsNoCoinciden;
         if (password.Length < 8) return RegistroResultadoEnum.PasswordCorta;
 
-        var admin = new Empleado
+        var admin = new Usuario
         {
             Nombre = nombre,
             Apellido = apellido,
             Email = email,
-            Cargo = "Administrador",
-            Rol = "Administrador",
-            Activo = true,
+            RolId = 1,
             FechaCreacion = DateTime.UtcNow,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
-            IsActive = true,
-            ActivationToken = null,
-            ActivationTokenExpiration = null
+            IsActive = true
         };
 
         await _repo.AddAsync(admin);
         return RegistroResultadoEnum.Ok;
     }
 
-    public async Task<(GoogleCallbackResultadoEnum resultado, Empleado? user)> GoogleCallbackAsync(string? email)
+    public async Task<(GoogleCallbackResultadoEnum resultado, Usuario? user)> GoogleCallbackAsync(string? email)
     {
         if (string.IsNullOrEmpty(email))
             return (GoogleCallbackResultadoEnum.EmailNulo, null);
 
-        var user = (await _repo.GetAllAsync()).FirstOrDefault(x => x.Email == email);
+        var user = await _repo.GetByEmailAsync(email);
 
         if (user == null) return (GoogleCallbackResultadoEnum.NoRegistrado, null);
         if (!user.IsActive) return (GoogleCallbackResultadoEnum.Inactivo, null);
