@@ -1,0 +1,84 @@
+﻿@page "/usuarios"
+@attribute [Authorize]
+@using DrakionTech.Crm.Business.Interfaces
+@using DrakionTech.Crm.Business.DTOs.Usuario
+@inject IUsuarioService UsuarioService
+
+<div class="empleados-container">
+    <div class="empresas-header">
+        <div class="header-text">
+            <h1 class="empresas-title">Usuarios</h1>
+            <p class="empresas-subtitle">Gestiona los usuarios del CRM</p>
+        </div>
+        <div>
+            <a class="btn btn-primary" href="/usuarios/crear">
+                + Nuevo Usuario
+            </a>
+        </div>
+    </div>
+    <div class="ui-card">
+        <table class="ui-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Teléfono</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in usuarios)
+                {
+                    <tr>
+                        <td>@item.Nombre @item.Apellido</td>
+                        <td class="email-cell" title="@item.Email">
+                            @item.Email
+                        </td>
+                        <td>@(item.Telefono ?? "—")</td>
+                        <td>@item.Rol</td>
+                        <td>
+                            <span class="badge @(item.IsActive ? "badge-success" : "badge-danger")">
+                                @(item.IsActive ? "Activo" : "Inactivo")
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <div class="ui-actions">
+                                <a href="/usuarios/editar/@item.Id" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                @if (item.IsActive)
+                                {
+                                    <a href="#" @onclick="() => Desactivar(item.Id)" @onclick:preventDefault title="Desactivar">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private List<UsuarioListDto> usuarios = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Cargar();
+    }
+
+    private async Task Cargar()
+    {
+        usuarios = await UsuarioService.ObtenerTodosAsync();
+    }
+
+    private async Task Desactivar(int id)
+    {
+        await UsuarioService.DesactivarAsync(id);
+        await Cargar();
+    }
+}

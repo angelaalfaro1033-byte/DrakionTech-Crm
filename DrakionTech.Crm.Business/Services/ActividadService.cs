@@ -108,5 +108,87 @@ namespace DrakionTech.Crm.Business.Services
             var actividades = await _actividadRepository.GetByOportunidadIdAsync(oportunidadId, ct);
             return _mapper.Map<IEnumerable<ActividadDto>>(actividades);
         }
+
+        public async Task<DashboardActividadDto> ObtenerDashboardAsync(
+            int UsuarioId,
+            string? busqueda = null,
+            string? filtroEstado = null,
+            CancellationToken ct = default)
+        {
+            var entidades = await _actividadRepository
+                .GetDashboardByUsuarioAsync(UsuarioId, ct);
+
+            var ahora = DateTime.UtcNow;
+            var limiteProxima = ahora.AddDays(3);
+
+            var actividades = entidades.Select(a =>
+            {
+                var dto = _mapper.Map<ActividadDto>(a);
+                var fechaVenc = a.Fin ?? a.Inicio;
+
+                dto.ClasificacionEstado = fechaVenc < ahora
+                    ? "Vencida"
+                    : fechaVenc <= limiteProxima
+                        ? "ProximaAVencer"
+                        : "Pendiente";
+
+                dto.TiempoRelativo = CalcularTiempoRelativo(fechaVenc, ahora);
+
+                return dto;
+            }).ToList();
+
+            if (!string.IsNullOrWhiteSpace(busqueda))
+            {
+                var texto = busqueda.Trim().ToLower();
+                actividades = actividades.Where(a =>
+                    (a.EmpresaNombre?.ToLower().Contains(texto) ?? false) ||
+                    (a.OportunidadNombre?.ToLower().Contains(texto) ?? false) ||
+                    (a.TipoActividadNombre?.ToLower().Contains(texto) ?? false)
+                ).ToList();
+            }
+
+            if (!string.IsNullOrWhiteSpace(filtroEstado) && filtroEstado != "Todas")
+            {
+                actividades = actividades
+                    .Where(a => a.ClasificacionEstado == filtroEstado)
+                    .ToList();
+            }
+
+            var totalVencidas = actividades.Count(a => a.ClasificacionEstado == "Vencida");
+            var totalProximas = actividades.Count(a => a.ClasificacionEstado == "ProximaAVencer");
+            var totalPendientes = actividades.Count(a => a.ClasificacionEstado == "Pendiente");
+
+            var ordenadas = actividades
+                .OrderBy(a => a.ClasificacionEstado switch
+                {
+                    "Vencida" => 0,
+                    "ProximaAVencer" => 1,
+                    _ => 2
+                })
+                .ThenBy(a => a.FechaVencimiento)
+                .ToList();
+
+            return new DashboardActividadDto
+            {
+                TotalVencidas = totalVencidas,
+                TotalProximasAVencer = totalProximas,
+                TotalPendientes = totalPendientes,
+                Actividades = ordenadas
+            };
+        }
+
+        private static string CalcularTiempoRelativo(DateTime fechaVenc, DateTime ahora)
+        {
+            var diff = fechaVenc.Date - ahora.Date;
+
+            return diff.Days switch
+            {
+                < -1 => $"Hace {Math.Abs(diff.Days)} días",
+                -1 => "Ayer",
+                0 => "Hoy",
+                1 => "Mañana",
+                _ => $"En {diff.Days} días"
+            };
+        }
     }
 }

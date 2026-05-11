@@ -1,0 +1,86 @@
+﻿.dashboard-container {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Resumen */
+.dashboard-resumen {
+    display: flex;
+    gap: 16px;
+}
+
+.resumen-card {
+    flex: 1;
+    border-radius: 14px;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border: 1px solid var(--border-soft);
+    background: var(--bg-card);
+}
+
+.resumen-numero {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.resumen-label {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.resumen-card.vencida .resumen-numero {
+    color: #ef4444;
+}
+
+.resumen-card.proxima .resumen-numero {
+    color: #f59e0b;
+}
+
+.resumen-card.pendiente .resumen-numero {
+    color: #3b82f6;
+}
+
+/* Badges de estado */
+.badge-vencida {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.badge-proximaavencer {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.badge-pendiente {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+/* Tiempo relativo */
+.tiempo-vencida {
+    color: #dc2626;
+    font-size: 13px;
+}
+
+.tiempo-proximaavencer {
+    color: #d97706;
+    font-size: 13px;
+}
+
+.tiempo-pendiente {
+    color: #6b7280;
+    font-size: 13px;
+}
+
+/* Empty state */
+.dashboard-empty {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+    font-size: 14px;
+}

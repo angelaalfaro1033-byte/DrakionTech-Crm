@@ -13,7 +13,7 @@ namespace DrakionTech.Crm.Data.Repositories
             CancellationToken ct = default);
 
         Task<bool> HasOverlapAsync(
-            int usuarioInternoId,
+            int usuarioId,
             DateTime inicio,
             DateTime fin,
             int? actividadIdExcluir = null,
@@ -26,11 +26,14 @@ namespace DrakionTech.Crm.Data.Repositories
         Task<IEnumerable<Actividad>> GetCalendarRangeAsync(
             DateTime inicio,
             DateTime fin,
-            int? usuarioInternoId = null,
+            int? usuarioId = null,
             CancellationToken ct = default);
 
         Task<IEnumerable<Actividad>> GetByUsuarioAsync(
-            int usuarioInternoId,
+            int usuarioId,
             CancellationToken ct = default);
+        Task<IEnumerable<Actividad>> GetDashboardByUsuarioAsync(
+              int usuarioId,
+              CancellationToken ct = default);
     }
 }

@@ -1,13 +1,10 @@
-﻿namespace DrakionTech.Crm.Data.Entities
+﻿using DrakionTech.Crm.Data.Entities;
+
+public class ActividadUsuario
 {
-    public class ActividadUsuario
-    {
-        public int ActividadId { get; set; }
-        public Actividad Actividad { get; set; } = null!;
-
-        public int UsuarioInternoId { get; set; }
-        public UsuarioInterno UsuarioInterno { get; set; } = null!;
-
-        public bool EsResponsable { get; set; }
-    }
+    public int ActividadId { get; set; }
+    public Actividad Actividad { get; set; } = null!;
+    public int UsuarioId { get; set; }
+    public Usuario Usuario { get; set; } = null!;
+    public bool EsResponsable { get; set; }
 }

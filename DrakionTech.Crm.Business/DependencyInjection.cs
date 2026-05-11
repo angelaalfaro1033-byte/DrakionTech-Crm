@@ -30,6 +30,8 @@ namespace DrakionTech.Crm.Business
             services.AddScoped<GoogleEventoSyncService>();
             services.AddScoped<IRolUsuarioService, RolUsuarioService>();
             services.AddScoped<IEspecialidadService, EspecialidadService>();
+            services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<IAuthSessionService, AuthSessionService>();
 
             return services;
         }

@@ -1,10 +1,13 @@
 ﻿@page "/empresas/{EmpresaId:int}/actividades/crear"
 @attribute [Authorize]
+@rendermode InteractiveServer
 @inject IActividadService ActividadService
 @inject IContactoService ContactoService
 @inject IOportunidadService OportunidadService
 @inject NavigationManager Navigation
-
+@inject AuthenticationStateProvider AuthStateProvider
+@using DrakionTech.Crm.Web.Extensions
+@using Microsoft.AspNetCore.Components.Authorization
 <div class="actividad-form-container">
     <div class="actividad-form-card">
         <h3 class="actividad-form-title">
@@ -41,6 +44,17 @@
                 <InputDate TValue="DateTime"
                            class="form-control"
                            @bind-Value="modelo.Fecha" />
+            </div>
+
+            <!-- Fecha de vencimiento -->
+            <div class="mb-3">
+                <label class="form-label">Fecha de vencimiento</label>
+                <InputDate TValue="DateTime?"
+                           class="form-control"
+                           @bind-Value="modelo.FechaFin" />
+                <div class="form-text">
+                    Fecha límite para completar la actividad
+                </div>
             </div>
 
             <!-- Resultado -->
@@ -106,22 +120,38 @@
     private CrearActividadDto modelo = new();
     private IEnumerable<ContactoDto> contactos = [];
     private IEnumerable<OportunidadDto> oportunidades = [];
+    private int usuarioId;
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        usuarioId = authState.User.GetUsuarioId();
+
         modelo.EmpresaId = EmpresaId;
         modelo.Fecha = DateTime.Today;
         modelo.EstadoActividadId = 1;
-        modelo.UsuarioInternoId = 2;
+        modelo.UsuarioId = usuarioId;
+
         contactos = await ContactoService.ObtenerPorEmpresaAsync(EmpresaId);
         oportunidades = await OportunidadService.ObtenerPorEmpresaAsync(EmpresaId);
-
         tiposActividad = await ActividadService.ObtenerTiposActividadAsync();
+
+        Console.WriteLine($"Tipos cargados: {tiposActividad.Count()}");
     }
 
     private async Task Guardar()
     {
-        await ActividadService.CrearAsync(modelo);
-        Navigation.NavigateTo($"/empresas/{EmpresaId}/actividades");
+        try
+        {
+            Console.WriteLine($"Guardando actividad - EmpresaId: {modelo.EmpresaId}, UsuarioId: {modelo.UsuarioId}, TipoId: {modelo.TipoActividadId}, EstadoId: {modelo.EstadoActividadId}, Fecha: {modelo.Fecha}");
+            var id = await ActividadService.CrearAsync(modelo);
+            Console.WriteLine($"Actividad creada con Id: {id}");
+            Navigation.NavigateTo($"/empresas/{EmpresaId}/actividades");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al guardar: {ex.Message}");
+            Console.WriteLine($"Inner: {ex.InnerException?.Message}");
+        }
     }
 }

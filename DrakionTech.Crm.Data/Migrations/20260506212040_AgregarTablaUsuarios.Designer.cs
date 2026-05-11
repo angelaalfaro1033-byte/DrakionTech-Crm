@@ -4,6 +4,7 @@ using DrakionTech.Crm.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DrakionTech.Crm.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260506212040_AgregarTablaUsuarios")]
+    partial class AgregarTablaUsuarios
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +25,7 @@ namespace DrakionTech.Crm.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Actividad", b =>
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Actividad", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -68,10 +71,7 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<int>("TipoActividadId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("UsuarioInternoId")
+                    b.Property<int>("UsuarioInternoId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -88,36 +88,29 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.HasIndex("TipoActividadId");
 
-                    b.HasIndex("UsuarioId");
-
                     b.HasIndex("UsuarioInternoId");
 
-                    b.HasIndex("UsuarioId", "Inicio", "Fin");
+                    b.HasIndex("UsuarioInternoId", "Inicio", "Fin");
 
                     b.ToTable("Actividades", (string)null);
                 });
 
-            modelBuilder.Entity("ActividadUsuario", b =>
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.ActividadUsuario", b =>
                 {
                     b.Property<int>("ActividadId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UsuarioId")
+                    b.Property<int>("UsuarioInternoId")
                         .HasColumnType("int");
 
                     b.Property<bool>("EsResponsable")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("UsuarioInternoId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ActividadId", "UsuarioId");
-
-                    b.HasIndex("UsuarioId");
+                    b.HasKey("ActividadId", "UsuarioInternoId");
 
                     b.HasIndex("UsuarioInternoId");
 
-                    b.ToTable("ActividadUsuarios");
+                    b.ToTable("ActividadUsuarios", (string)null);
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Ciudad", b =>
@@ -1643,7 +1636,7 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.ToTable("GoogleEventos", (string)null);
                 });
 
-            modelBuilder.Entity("Actividad", b =>
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Actividad", b =>
                 {
                     b.HasOne("DrakionTech.Crm.Data.Entities.Contacto", "Contacto")
                         .WithMany()
@@ -1672,15 +1665,11 @@ namespace DrakionTech.Crm.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "Usuario")
-                        .WithMany()
-                        .HasForeignKey("UsuarioId")
+                    b.HasOne("DrakionTech.Crm.Data.Entities.UsuarioInterno", "UsuarioInterno")
+                        .WithMany("ActividadesResponsable")
+                        .HasForeignKey("UsuarioInternoId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("DrakionTech.Crm.Data.Entities.UsuarioInterno", null)
-                        .WithMany("ActividadesResponsable")
-                        .HasForeignKey("UsuarioInternoId");
 
                     b.Navigation("Contacto");
 
@@ -1692,30 +1681,26 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.Navigation("TipoActividad");
 
-                    b.Navigation("Usuario");
+                    b.Navigation("UsuarioInterno");
                 });
 
-            modelBuilder.Entity("ActividadUsuario", b =>
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.ActividadUsuario", b =>
                 {
-                    b.HasOne("Actividad", "Actividad")
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Actividad", "Actividad")
                         .WithMany("UsuariosAsignados")
                         .HasForeignKey("ActividadId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "Usuario")
-                        .WithMany()
-                        .HasForeignKey("UsuarioId")
+                    b.HasOne("DrakionTech.Crm.Data.Entities.UsuarioInterno", "UsuarioInterno")
+                        .WithMany("ActividadesAsignadas")
+                        .HasForeignKey("UsuarioInternoId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("DrakionTech.Crm.Data.Entities.UsuarioInterno", null)
-                        .WithMany("ActividadesAsignadas")
-                        .HasForeignKey("UsuarioInternoId");
-
                     b.Navigation("Actividad");
 
-                    b.Navigation("Usuario");
+                    b.Navigation("UsuarioInterno");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Ciudad", b =>
@@ -1865,7 +1850,7 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Navigation("Rol");
                 });
 
-            modelBuilder.Entity("Actividad", b =>
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Actividad", b =>
                 {
                     b.Navigation("UsuariosAsignados");
                 });
