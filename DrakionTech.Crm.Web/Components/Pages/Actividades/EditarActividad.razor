@@ -4,7 +4,9 @@
 @inject IContactoService ContactoService
 @inject IOportunidadService OportunidadService
 @inject NavigationManager Navigation
-
+@inject AuthenticationStateProvider AuthStateProvider
+@using DrakionTech.Crm.Web.Extensions
+@using Microsoft.AspNetCore.Components.Authorization
 <div class="actividad-form-container">
     <div class="actividad-form-card">
         <h3 class="actividad-form-title">
@@ -112,28 +114,30 @@
     private ActualizarActividadDto? modelo;
     private IEnumerable<ContactoDto> contactos = [];
     private IEnumerable<OportunidadDto> oportunidades = [];
-
+    private int usuarioId;
     protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var usuarioId = authState.User.GetUsuarioId();
+
         var actividad = await ActividadService.ObtenerPorIdAsync(Id);
 
         modelo = new ActualizarActividadDto
-        {
-            TipoActividadId = actividad.TipoActividadId,
-            Fecha = actividad.Fecha,
-            Resultado = actividad.Resultado ?? string.Empty,
-            Notas = actividad.Notas,
-            ContactoId = actividad.ContactoId,
-            OportunidadId = actividad.OportunidadId,
-            UsuarioInternoId = actividad.UsuarioInternoId,
-            EstadoActividadId = actividad.EstadoActividadId
-        };
+            {
+                TipoActividadId = actividad.TipoActividadId,
+                Fecha = actividad.Fecha,
+                Resultado = actividad.Resultado ?? string.Empty,
+                Notas = actividad.Notas,
+                ContactoId = actividad.ContactoId,
+                OportunidadId = actividad.OportunidadId,
+                UsuarioId = usuarioId,
+                EstadoActividadId = actividad.EstadoActividadId
+            };
 
         contactos = await ContactoService.ObtenerPorEmpresaAsync(EmpresaId);
         oportunidades = await OportunidadService.ObtenerPorEmpresaAsync(EmpresaId);
         tiposActividad = await ActividadService.ObtenerTiposActividadAsync();
     }
-
     private async Task Guardar()
     {
         await ActividadService.ActualizarAsync(Id, modelo!);

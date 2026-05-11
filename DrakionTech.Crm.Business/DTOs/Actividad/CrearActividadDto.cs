@@ -11,7 +11,7 @@ namespace DrakionTech.Crm.Business.DTOs.Actividad
         public int? OportunidadId { get; set; }
 
         [Required]
-        public int UsuarioInternoId { get; set; }
+        public int UsuarioId { get; set; }
 
         [Required(ErrorMessage = "El tipo de actividad es obligatorio")]
         public int? TipoActividadId { get; set; }
@@ -21,6 +21,8 @@ namespace DrakionTech.Crm.Business.DTOs.Actividad
 
         [Required(ErrorMessage = "La fecha es obligatoria")]
         public DateTime Fecha { get; set; }
+
+        public DateTime? FechaFin { get; set; }
 
         [MaxLength(1000)]
         public string? Resultado { get; set; }

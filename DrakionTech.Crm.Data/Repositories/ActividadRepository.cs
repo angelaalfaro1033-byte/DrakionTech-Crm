@@ -20,7 +20,7 @@ namespace DrakionTech.Crm.Data.Repositories
             return await _context.Actividades
                 .Include(a => a.TipoActividad)
                 .Include(a => a.EstadoActividad)
-                .Include(a => a.UsuarioInterno)
+                .Include(a => a.Usuario)
                 .Include(a => a.Empresa)
                 .Include(a => a.Contacto)
                 .Include(a => a.Oportunidad)
@@ -34,19 +34,19 @@ namespace DrakionTech.Crm.Data.Repositories
             CancellationToken ct = default)
         {
                 return await _context.Actividades
-        .Include(a => a.TipoActividad)
-        .Include(a => a.EstadoActividad)
-        .Include(a => a.UsuarioInterno)
-        .Include(a => a.Empresa)
-        .Include(a => a.Contacto)
-        .Include(a => a.Oportunidad)
+                .Include(a => a.TipoActividad)
+                .Include(a => a.EstadoActividad)
+                .Include(a => a.Usuario)
+                .Include(a => a.Empresa)
+                .Include(a => a.Contacto)
+                .Include(a => a.Oportunidad)
                 .Where(a => a.OportunidadId == oportunidadId)
                 .AsNoTracking()
                 .ToListAsync(ct);
         }
 
         public async Task<bool> HasOverlapAsync(
-            int usuarioInternoId,
+            int usuarioId,
             DateTime inicio,
             DateTime fin,
             int? actividadIdExcluir = null,
@@ -54,7 +54,7 @@ namespace DrakionTech.Crm.Data.Repositories
         {
             var query = _context.Actividades
                 .Where(a =>
-                    a.UsuarioInternoId == usuarioInternoId &&
+                    a.UsuarioId == usuarioId &&
                     a.EstadoActividad.Nombre != "Cancelada" &&
                     a.Inicio < fin &&
                     a.Fin > inicio);
@@ -83,7 +83,7 @@ namespace DrakionTech.Crm.Data.Repositories
         public async Task<IEnumerable<Actividad>> GetCalendarRangeAsync(
             DateTime inicio,
             DateTime fin,
-            int? usuarioInternoId = null,
+            int? usuarioId = null,
             CancellationToken ct = default)
         {
             var query = _context.Actividades
@@ -92,10 +92,10 @@ namespace DrakionTech.Crm.Data.Repositories
                     a.Fin > inicio &&
                     a.EstadoActividad.Id != SeedIds.EstadoActividadCancelada);
 
-            if (usuarioInternoId.HasValue)
+            if (usuarioId.HasValue)
             {
                 query = query.Where(a =>
-                    a.UsuarioInternoId == usuarioInternoId.Value);
+                    a.UsuarioId == usuarioId.Value);
             }
 
             return await query
@@ -104,13 +104,30 @@ namespace DrakionTech.Crm.Data.Repositories
         }
 
         public async Task<IEnumerable<Actividad>> GetByUsuarioAsync(
-            int usuarioInternoId,
+            int usuarioId,
             CancellationToken ct = default)
         {
             return await _context.Actividades
-                .Where(a => a.UsuarioInternoId == usuarioInternoId)
+                .Where(a => a.UsuarioId == usuarioId)
                 .AsNoTracking()
                 .OrderBy(a => a.Inicio)
+                .ToListAsync(ct);
+        }
+
+        public async Task<IEnumerable<Actividad>> GetDashboardByUsuarioAsync(
+             int usuarioId,
+             CancellationToken ct = default)
+        {
+            return await _context.Actividades
+                .Include(a => a.TipoActividad)
+                .Include(a => a.EstadoActividad)
+                .Include(a => a.Empresa)
+                .Include(a => a.Contacto)
+                .Include(a => a.Oportunidad)
+                .Where(a =>
+                    a.UsuarioId == usuarioId &&
+                    a.EstadoActividad.Id != SeedIds.EstadoActividadCancelada)
+                .AsNoTracking()
                 .ToListAsync(ct);
         }
     }

@@ -8,12 +8,13 @@ namespace DrakionTech.Crm.Business.Services;
 
 public class AuthSessionService : IAuthSessionService
 {
-    public async Task SignInAsync(HttpContext ctx, string email)
+    public async Task SignInAsync(HttpContext ctx, string email, int usuarioId)
     {
         var claims = new List<Claim>
-        {
-            new(ClaimTypes.Name, email)
-        };
+    {
+        new(ClaimTypes.Name, email),
+        new(ClaimTypes.NameIdentifier, usuarioId.ToString())
+    };
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         await ctx.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
     }

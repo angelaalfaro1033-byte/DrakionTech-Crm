@@ -14,20 +14,20 @@ public class AccountService : IAccountService
         _repo = repo;
     }
 
-    public async Task<LoginErrorEnum> LoginAsync(string email, string password)
+    public async Task<(LoginErrorEnum resultado, Usuario? user)> LoginAsync(string email, string password)
     {
         var user = await _repo.GetByEmailAsync(email);
 
         if (user == null || string.IsNullOrEmpty(user.PasswordHash))
-            return LoginErrorEnum.Credenciales;
+            return (LoginErrorEnum.Credenciales, null);
 
         if (!user.IsActive)
-            return LoginErrorEnum.Inactivo;
+            return (LoginErrorEnum.Inactivo, null);
 
         if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
-            return LoginErrorEnum.Credenciales;
+            return (LoginErrorEnum.Credenciales, null);
 
-        return LoginErrorEnum.Ninguno;
+        return (LoginErrorEnum.Ninguno, user);
     }
 
     public async Task<RegistroResultadoEnum> RegistroInicialAsync(

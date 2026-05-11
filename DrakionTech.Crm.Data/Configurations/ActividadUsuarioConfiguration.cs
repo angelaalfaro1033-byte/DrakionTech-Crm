@@ -9,12 +9,10 @@ namespace DrakionTech.Crm.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<ActividadUsuario> builder)
         {
-            builder.ToTable("ActividadUsuarios");
-
             builder.HasKey(x => new
             {
                 x.ActividadId,
-                x.UsuarioInternoId
+                x.UsuarioId
             });
 
             builder.HasOne(x => x.Actividad)
@@ -22,12 +20,12 @@ namespace DrakionTech.Crm.Data.Configurations
                 .HasForeignKey(x => x.ActividadId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(x => x.UsuarioInterno)
-                .WithMany(u => u.ActividadesAsignadas)
-                .HasForeignKey(x => x.UsuarioInternoId)
+            builder.HasOne(x => x.Usuario)
+                .WithMany()
+                .HasForeignKey(x => x.UsuarioId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasIndex(x => x.UsuarioInternoId);
+            builder.HasIndex(x => x.UsuarioId);
 
             builder.Property(x => x.EsResponsable)
                 .IsRequired();

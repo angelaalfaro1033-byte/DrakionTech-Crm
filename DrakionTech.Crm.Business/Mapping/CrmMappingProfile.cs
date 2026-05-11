@@ -7,7 +7,6 @@ using DrakionTech.Crm.Business.DTOs.Oportunidad;
 using DrakionTech.Crm.Business.DTOs.PrefijoTelefonico;
 using DrakionTech.Crm.Business.DTOs.Propuesta;
 using DrakionTech.Crm.Business.DTOs.Ubicacion;
-using DrakionTech.Crm.Business.DTOs.UsuarioInterno;
 using DrakionTech.Crm.Data.Entities;
 using DrakionTech.Crm.Data.Entities.Enums;
 using System.ComponentModel.DataAnnotations;
@@ -66,28 +65,35 @@ namespace DrakionTech.Crm.Business.Mapping
                     GetDisplayName((EtapaOportunidad)s.Etapa)));
 
             // ACTIVIDAD
-            CreateMap<CrearActividadDto, Actividad>()
-    .ForMember(d => d.Inicio,
-        o => o.MapFrom(s => s.Fecha));
-            CreateMap<ActualizarActividadDto, Actividad>()
-    .ForMember(d => d.Inicio,
-        o => o.MapFrom(s => s.Fecha));
-            CreateMap<TipoActividad, TipoActividadDto>();
             CreateMap<Actividad, ActividadDto>()
-             .ForMember(d => d.Fecha,
-                 o => o.MapFrom(s => s.Inicio))
-             .ForMember(d => d.EmpresaNombre,
-                 o => o.MapFrom(s => s.Empresa!.Nombre))
-             .ForMember(d => d.ContactoNombre,
-                 o => o.MapFrom(s =>
-                     s.Contacto != null
-                         ? $"{s.Contacto.Nombre} {s.Contacto.Apellido}"
-                         : null))
-             .ForMember(d => d.OportunidadNombre,
-                 o => o.MapFrom(s =>
-                     s.Oportunidad != null
-                         ? s.Oportunidad.NombreProyecto
-                         : null));
+                .ForMember(d => d.Fecha,
+                    o => o.MapFrom(s => s.Inicio))
+                .ForMember(d => d.FechaVencimiento,
+                    o => o.MapFrom(s => s.Fin))
+                .ForMember(d => d.EmpresaNombre,
+                    o => o.MapFrom(s => s.Empresa!.Nombre))
+                .ForMember(d => d.ContactoNombre,
+                    o => o.MapFrom(s => s.Contacto != null
+                        ? $"{s.Contacto.Nombre} {s.Contacto.Apellido}"
+                        : null))
+                .ForMember(d => d.ContactoTelefono,
+                    o => o.MapFrom(s => s.Contacto != null
+                        ? s.Contacto.Telefono
+                        : null))
+                .ForMember(d => d.OportunidadNombre,
+                    o => o.MapFrom(s => s.Oportunidad != null
+                        ? s.Oportunidad.NombreProyecto
+                        : null));
+
+            CreateMap<TipoActividad, TipoActividadDto>();
+
+            CreateMap<CrearActividadDto, Actividad>()
+                .ForMember(d => d.Inicio, o => o.MapFrom(s => s.Fecha))
+                .ForMember(d => d.Fin, o => o.MapFrom(s => s.FechaFin));
+
+            CreateMap<ActualizarActividadDto, Actividad>()
+                .ForMember(d => d.Inicio, o => o.MapFrom(s => s.Fecha))
+                .ForMember(d => d.Fin, o => o.MapFrom(s => s.FechaFin));
 
             // PROPUESTA
             CreateMap<CrearPropuestaDto, Propuesta>();
@@ -105,10 +111,7 @@ namespace DrakionTech.Crm.Business.Mapping
             // PREFIJO TELEFONICO
             CreateMap<PrefijoTelefonico, PrefijoTelefonicoDto>();
 
-            // USUARIO INTERNO
-            CreateMap<CrearUsuarioInternoDto, UsuarioInterno>();
-            CreateMap<ActualizarUsuarioInternoDto, UsuarioInterno>();
-            CreateMap<UsuarioInterno, UsuarioInternoDto>();
+        
         }
 
         private static string GetDisplayName(Enum value)

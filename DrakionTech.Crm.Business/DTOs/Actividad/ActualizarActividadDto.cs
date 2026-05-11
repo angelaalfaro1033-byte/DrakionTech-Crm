@@ -8,7 +8,7 @@ namespace DrakionTech.Crm.Business.DTOs.Actividad
         public int? OportunidadId { get; set; }
 
         [Required]
-        public int UsuarioInternoId { get; set; }
+        public int UsuarioId { get; set; }
 
         [Required]
         public int TipoActividadId { get; set; }
@@ -20,6 +20,9 @@ namespace DrakionTech.Crm.Business.DTOs.Actividad
         public DateTime Fecha { get; set; }
 
         [MaxLength(1000)]
+
+        public DateTime? FechaFin { get; set; }
+
         public string? Resultado { get; set; }
 
         [MaxLength(2000)]

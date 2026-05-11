@@ -1,0 +1,167 @@
+﻿@page "/dashboardActividades"
+@attribute [Authorize]
+@inject IActividadService ActividadService
+@inject AuthenticationStateProvider AuthStateProvider
+@using Microsoft.AspNetCore.Components.Authorization
+@using DrakionTech.Crm.Web.Extensions
+
+<div class="dashboard-container">
+
+    <!-- Resumen -->
+    <div class="dashboard-resumen">
+        <div class="resumen-card vencida">
+            <span class="resumen-numero">@dashboard?.TotalVencidas</span>
+            <span class="resumen-label">Vencidas</span>
+        </div>
+        <div class="resumen-card proxima">
+            <span class="resumen-numero">@dashboard?.TotalProximasAVencer</span>
+            <span class="resumen-label">Próximas a vencer</span>
+        </div>
+        <div class="resumen-card pendiente">
+            <span class="resumen-numero">@dashboard?.TotalPendientes</span>
+            <span class="resumen-label">Pendientes</span>
+        </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="ui-toolbar">
+        <div class="ui-search">
+            <i class="bi bi-search"></i>
+            <input class="form-control"
+                   placeholder="Buscar por actividad, cliente u oportunidad..."
+                   value="@textoBusqueda"
+                   @oninput="OnBusquedaChanged" />
+        </div>
+
+        <select class="form-select" @bind="filtroEstado" @bind:after="OnFiltroChanged">
+            <option value="Todas">Todas</option>
+            <option value="Vencida">Vencidas</option>
+            <option value="ProximaAVencer">Próximas a vencer</option>
+            <option value="Pendiente">Pendientes</option>
+        </select>
+    </div>
+
+    <!-- Tabla -->
+    <div class="ui-card">
+        @if (cargando)
+        {
+            <p class="dashboard-empty">Cargando actividades...</p>
+        }
+        else if (dashboard is null || !dashboard.Actividades.Any())
+        {
+            <p class="dashboard-empty">No hay actividades disponibles.</p>
+        }
+        else
+        {
+            <table class="ui-table">
+                <thead>
+                    <tr>
+                        <th>Estado</th>
+                        <th>Actividad</th>
+                        <th>Cliente</th>
+                        <th>Contacto principal</th>
+                        <th>Oportunidad</th>
+                        <th>Tipo</th>
+                        <th>Vencimiento</th>
+                        <th>Tiempo</th>
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in dashboard.Actividades)
+                    {
+                        <tr>
+                            <td>
+                                <span class="badge badge-@a.ClasificacionEstado?.ToLower()">
+                                    @a.EstadoActividadNombre
+                                </span>
+                            </td>
+                            <td>@a.TipoActividadNombre</td>
+                            <td>
+                                @if (a.EmpresaId > 0)
+                                {
+                                    <a class="link-empresa"
+                                       href="/empresas/@a.EmpresaId">
+                                        @a.EmpresaNombre
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span>—</span>
+                                }
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(a.ContactoTelefono))
+                                {
+                                    <span>@a.ContactoNombre</span>
+                                    <br />
+                                    <small class="text-muted">@a.ContactoTelefono</small>
+                                }
+                                else if (!string.IsNullOrEmpty(a.ContactoNombre))
+                                {
+                                    <span>@a.ContactoNombre</span>
+                                }
+                                else
+                                {
+                                    <span>—</span>
+                                }
+                            </td>
+                            <td>@(a.OportunidadNombre ?? "—")</td>
+                            <td>@a.TipoActividadNombre</td>
+                            <td>@(a.FechaVencimiento?.ToString("dd/MM/yyyy") ?? "—")</td>
+                            <td>
+                                <span class="tiempo-@a.ClasificacionEstado?.ToLower()">
+                                    @a.TiempoRelativo
+                                </span>
+                            </td>
+                            <td>
+                                <div class="ui-actions">
+                                    <a href="/empresas/@a.EmpresaId/actividades/editar/@a.Id"
+                                       title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@code {
+    private DashboardActividadDto? dashboard;
+    private bool cargando = true;
+    private int usuarioId;
+    private string? textoBusqueda;
+    private string filtroEstado = "Todas";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        usuarioId = authState.User.GetUsuarioId();
+        await CargarDashboard();
+    }
+
+    private async Task CargarDashboard()
+    {
+        cargando = true;
+        dashboard = await ActividadService.ObtenerDashboardAsync(
+            usuarioId,
+            textoBusqueda,
+            filtroEstado);
+        cargando = false;
+    }
+
+    private async Task OnBusquedaChanged(ChangeEventArgs e)
+    {
+        textoBusqueda = e.Value?.ToString();
+        await CargarDashboard();
+    }
+
+    private async Task OnFiltroChanged()
+    {
+        await CargarDashboard();
+    }
+}

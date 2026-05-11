@@ -106,12 +106,12 @@ app.MapPost("/account/login", async (
     var email = form["email"].ToString();
     var password = form["password"].ToString();
 
-    var resultado = await accountService.LoginAsync(email, password);
+    var (resultado, user) = await accountService.LoginAsync(email, password);
 
     if (resultado != LoginErrorEnum.Ninguno)
         return Results.Redirect($"/login?error={resultado}");
 
-    await sessionService.SignInAsync(ctx, email);
+    await sessionService.SignInAsync(ctx, user!.Email, user!.Id);
     return Results.Redirect("/");
 }).DisableAntiforgery();
 
@@ -166,7 +166,7 @@ app.MapGet("/account/google-callback", async (
     if (resultado != GoogleCallbackResultadoEnum.Ok)
         return Results.Redirect($"/login?error={resultado}");
 
-    await sessionService.SignInAsync(ctx, user!.Email);
+    await sessionService.SignInAsync(ctx, user!.Email, user!.Id);
     return Results.Redirect("/");
 });
 

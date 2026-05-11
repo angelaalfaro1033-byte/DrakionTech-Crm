@@ -1,7 +1,6 @@
 ﻿using DrakionTech.Crm.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
 namespace DrakionTech.Crm.Data.Configurations
 {
     public class ActividadConfiguration : IEntityTypeConfiguration<Actividad>
@@ -39,13 +38,12 @@ namespace DrakionTech.Crm.Data.Configurations
                 .IsRequired(false);
 
             // RESPONSABLE
-
-            builder.Property(a => a.UsuarioInternoId)
+            builder.Property(a => a.UsuarioId)
                 .IsRequired();
 
-            builder.HasOne(a => a.UsuarioInterno)
-                .WithMany(t => t.ActividadesResponsable)
-                .HasForeignKey(a => a.UsuarioInternoId)
+            builder.HasOne(a => a.Usuario)
+                .WithMany()
+                .HasForeignKey(a => a.UsuarioId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // CAMPOS DE TEXTO
@@ -94,12 +92,12 @@ namespace DrakionTech.Crm.Data.Configurations
             builder.HasIndex(a => a.OportunidadId);
 
             // Agenda
-            builder.HasIndex(a => a.UsuarioInternoId);
+            builder.HasIndex(a => a.UsuarioId);
             builder.HasIndex(a => a.Inicio);
 
             builder.HasIndex(a => new
             {
-                a.UsuarioInternoId,
+                a.UsuarioId,
                 a.Inicio,
                 a.Fin
             });
