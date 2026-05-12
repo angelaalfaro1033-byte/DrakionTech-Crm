@@ -1,0 +1,6 @@
+@DrakionTech.Crm.Api_HostAddress = http://localhost:5104
+
+GET {{DrakionTech.Crm.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
