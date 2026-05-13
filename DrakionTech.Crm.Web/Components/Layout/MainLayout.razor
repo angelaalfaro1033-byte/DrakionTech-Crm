@@ -1,31 +1,28 @@
 ﻿@inherits LayoutComponentBase
-@inject NavigationManager Nav
 
-<header class="app-header">
-    <div class="header-left">
-        <a href="/" class="logo-link">
-            <img src="images/logo/Logo_Negro.svg"
-                 alt="CRM"
-                 class="logo-img" />
-        </a>
-        <NavigationTabs />
+<div class="app-layout">
+    <Sidebar />
+    <div class="app-body">
+        <header class="app-header">
+            <div class="header-left">
+                <img src="images/logo/Logo_Negro.svg" alt="CRM" class="logo-img" style="height:32px;" />
+            </div>
+            <div class="header-right">
+                <form method="post" action="/account/logout">
+                    <button type="submit" class="logout-btn">
+                        <i class="bi bi-box-arrow-right"></i>
+                        Cerrar sesión
+                    </button>
+                </form>
+            </div>
+        </header>
+        <main class="app-main">
+            <article class="content">
+                @Body
+            </article>
+        </main>
     </div>
-
-    <div class="header-right">
-        <form method="post" action="/account/logout">
-            <button type="submit" class="logout-btn">
-                <i class="bi bi-box-arrow-right"></i>
-                Cerrar sesión
-            </button>
-        </form>
-    </div>
-</header>
-
-<main class="app-main">
-    <article class="content">
-        @Body
-    </article>
-</main>
+</div>
 
 <div id="blazor-error-ui">
     An unhandled error has occurred.
