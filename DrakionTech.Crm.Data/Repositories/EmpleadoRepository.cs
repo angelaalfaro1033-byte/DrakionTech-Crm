@@ -15,23 +15,23 @@ namespace DrakionTech.Crm.Data.Repositories
             _context = context;
         }
 
-        public async Task<List<Empleado>> GetAllAsync()
+        public async Task<List<Empleado>> ObtenerTodosAsync()
         {
             return await _context.Empleados.ToListAsync();
         }
 
-        public async Task<Empleado?> GetByIdAsync(int id)
+        public async Task<Empleado?> ObtenerPorIdAsync(int id)
         {
             return await _context.Empleados.FindAsync(id);
         }
 
-        public async Task AddAsync(Empleado empleado)
+        public async Task AgregarAsync(Empleado empleado)
         {
             _context.Empleados.Add(empleado);
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(Empleado empleado)
+        public async Task ActualizarAsync(Empleado empleado)
         {
             var existing = await _context.Empleados.FindAsync(empleado.Id);
 

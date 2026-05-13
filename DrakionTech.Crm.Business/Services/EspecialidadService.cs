@@ -16,13 +16,13 @@ namespace DrakionTech.Crm.Business.Services
 
         public async Task<List<EspecialidadDto>> ObtenerTodosAsync()
         {
-            var lista = await _repository.GetAllWithRolAsync();
+            var lista = await _repository.ObtenerTodosConRolAsync();
             return lista.Select(MapToDto).ToList();
         }
 
         public async Task<EspecialidadDto> ObtenerPorIdAsync(int id)
         {
-            var lista = await _repository.GetAllWithRolAsync();
+            var lista = await _repository.ObtenerTodosConRolAsync();
             var e = lista.FirstOrDefault(x => x.Id == id)
                 ?? throw new Exception("Especialidad no encontrada");
             return MapToDto(e);
@@ -37,12 +37,12 @@ namespace DrakionTech.Crm.Business.Services
                 RolUsuarioId = dto.RolUsuarioId,
                 Activo = true
             };
-            await _repository.AddAsync(entidad);
+            await _repository.AgregarAsync(entidad);
         }
 
         public async Task EditarAsync(EspecialidadDto dto)
         {
-            var entidad = await _repository.GetByIdAsync(dto.Id)
+            var entidad = await _repository.ObtenerPorIdAsync(dto.Id)
                 ?? throw new Exception("Especialidad no encontrada");
 
             entidad.Nombre = dto.Nombre;
@@ -50,23 +50,23 @@ namespace DrakionTech.Crm.Business.Services
             entidad.RolUsuarioId = dto.RolUsuarioId;
             entidad.Activo = dto.Activo;
 
-            await _repository.UpdateAsync(entidad);
+            await _repository.ActualizarAsync(entidad);
         }
 
         public async Task ActivarAsync(int id)
         {
-            var entidad = await _repository.GetByIdAsync(id)
+            var entidad = await _repository.ObtenerPorIdAsync(id)
                 ?? throw new Exception("Especialidad no encontrada");
             entidad.Activo = true;
-            await _repository.UpdateAsync(entidad);
+            await _repository.ActualizarAsync(entidad);
         }
 
         public async Task DesactivarAsync(int id)
         {
-            var entidad = await _repository.GetByIdAsync(id)
+            var entidad = await _repository.ObtenerPorIdAsync(id)
                 ?? throw new Exception("Especialidad no encontrada");
             entidad.Activo = false;
-            await _repository.UpdateAsync(entidad);
+            await _repository.ActualizarAsync(entidad);
         }
 
         private static EspecialidadDto MapToDto(Especialidad e) => new()

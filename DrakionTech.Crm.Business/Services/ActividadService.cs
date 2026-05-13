@@ -42,7 +42,7 @@ namespace DrakionTech.Crm.Business.Services
         public async Task<IEnumerable<TipoActividadDto>> ObtenerTiposActividadAsync(
     CancellationToken ct = default)
         {
-            var tipos = await _tipoActividadRepository.GetAllAsync(ct);
+            var tipos = await _tipoActividadRepository.ObtenerTodosAsync(ct);
 
             return _mapper.Map<IEnumerable<TipoActividadDto>>(tipos);
         }
@@ -53,7 +53,7 @@ namespace DrakionTech.Crm.Business.Services
         {
             var actividad = _mapper.Map<Actividad>(dto);
 
-            await _actividadRepository.AddAsync(actividad, ct);
+            await _actividadRepository.AgregarAsync(actividad, ct);
 
             try
             {
@@ -75,19 +75,19 @@ namespace DrakionTech.Crm.Business.Services
             ActualizarActividadDto dto,
             CancellationToken ct = default)
         {
-            var actividad = await _actividadRepository.GetByIdAsync(actividadId, ct)
+            var actividad = await _actividadRepository.ObtenerPorIdAsync(actividadId, ct)
                 ?? throw new EntidadNoEncontradaException("Actividad", actividadId);
 
             _mapper.Map(dto, actividad);
 
-            await _actividadRepository.UpdateAsync(actividad, ct);
+            await _actividadRepository.ActualizarAsync(actividad, ct);
         }
 
         public async Task<ActividadDto> ObtenerPorIdAsync(
             int actividadId,
             CancellationToken ct = default)
         {
-            var actividad = await _actividadRepository.GetByIdAsync(actividadId, ct)
+            var actividad = await _actividadRepository.ObtenerPorIdAsync(actividadId, ct)
                 ?? throw new EntidadNoEncontradaException("Actividad", actividadId);
 
             return _mapper.Map<ActividadDto>(actividad);
@@ -97,7 +97,7 @@ namespace DrakionTech.Crm.Business.Services
             int empresaId,
             CancellationToken ct = default)
         {
-            var actividades = await _actividadRepository.GetByEmpresaIdAsync(empresaId, ct);
+            var actividades = await _actividadRepository.ObtenerPorEmpresaIdAsync(empresaId, ct);
             return _mapper.Map<IEnumerable<ActividadDto>>(actividades);
         }
 
@@ -105,7 +105,7 @@ namespace DrakionTech.Crm.Business.Services
             int oportunidadId,
             CancellationToken ct = default)
         {
-            var actividades = await _actividadRepository.GetByOportunidadIdAsync(oportunidadId, ct);
+            var actividades = await _actividadRepository.ObtenerPorOportunidadIdAsync(oportunidadId, ct);
             return _mapper.Map<IEnumerable<ActividadDto>>(actividades);
         }
 
@@ -116,7 +116,7 @@ namespace DrakionTech.Crm.Business.Services
             CancellationToken ct = default)
         {
             var entidades = await _actividadRepository
-                .GetDashboardByUsuarioAsync(UsuarioId, ct);
+                .ObtenerDashboardPorUsuarioAsync(UsuarioId, ct);
 
             var ahora = DateTime.UtcNow;
             var limiteProxima = ahora.AddDays(3);

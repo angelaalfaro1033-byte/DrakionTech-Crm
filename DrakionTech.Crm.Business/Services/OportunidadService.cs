@@ -29,7 +29,7 @@ namespace DrakionTech.Crm.Business.Services
             CrearOportunidadDto dto,
             CancellationToken ct = default)
         {
-            var existeEmpresa = await _empresaRepository.ExistsAsync(dto.EmpresaId, ct);
+            var existeEmpresa = await _empresaRepository.ExisteAsync(dto.EmpresaId, ct);
             if (!existeEmpresa)
                 throw new ReglaNegocioException("La empresa asociada no existe");
 
@@ -40,7 +40,7 @@ namespace DrakionTech.Crm.Business.Services
 
             oportunidad.Etapa = EtapaOportunidad.Lead;
 
-            await _oportunidadRepository.AddAsync(oportunidad, ct);
+            await _oportunidadRepository.AgregarAsync(oportunidad, ct);
 
             return oportunidad.Id;
         }
@@ -50,19 +50,19 @@ namespace DrakionTech.Crm.Business.Services
             ActualizarOportunidadDto dto,
             CancellationToken ct = default)
         {
-            var oportunidad = await _oportunidadRepository.GetByIdAsync(oportunidadId, ct)
+            var oportunidad = await _oportunidadRepository.ObtenerPorIdAsync(oportunidadId, ct)
                 ?? throw new EntidadNoEncontradaException("Oportunidad", oportunidadId);
 
             _mapper.Map(dto, oportunidad);
 
-            await _oportunidadRepository.UpdateAsync(oportunidad, ct);
+            await _oportunidadRepository.ActualizarAsync(oportunidad, ct);
         }
 
         public async Task<OportunidadDto> ObtenerPorIdAsync(
             int oportunidadId,
             CancellationToken ct = default)
         {
-            var oportunidad = await _oportunidadRepository.GetByIdAsync(oportunidadId, ct)
+            var oportunidad = await _oportunidadRepository.ObtenerPorIdAsync(oportunidadId, ct)
                 ?? throw new EntidadNoEncontradaException("Oportunidad", oportunidadId);
 
             return _mapper.Map<OportunidadDto>(oportunidad);
@@ -72,7 +72,7 @@ namespace DrakionTech.Crm.Business.Services
             int empresaId,
             CancellationToken ct = default)
         {
-            var oportunidades = await _oportunidadRepository.GetByEmpresaIdAsync(empresaId, ct);
+            var oportunidades = await _oportunidadRepository.ObtenerPorEmpresaIdAsync(empresaId, ct);
             return _mapper.Map<IEnumerable<OportunidadDto>>(oportunidades);
         }
 
@@ -81,12 +81,12 @@ namespace DrakionTech.Crm.Business.Services
             EtapaOportunidad nuevaEtapa,
             CancellationToken ct = default)
         {
-            var oportunidad = await _oportunidadRepository.GetByIdAsync(oportunidadId, ct)
+            var oportunidad = await _oportunidadRepository.ObtenerPorIdAsync(oportunidadId, ct)
                 ?? throw new EntidadNoEncontradaException("Oportunidad", oportunidadId);
 
             oportunidad.Etapa = nuevaEtapa;
 
-            await _oportunidadRepository.UpdateAsync(oportunidad, ct);
+            await _oportunidadRepository.ActualizarAsync(oportunidad, ct);
         }
 
         public IEnumerable<OpcionEnumDto> ObtenerEtapas()

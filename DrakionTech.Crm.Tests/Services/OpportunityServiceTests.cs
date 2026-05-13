@@ -28,7 +28,7 @@
 //                Stage = OpportunityStage.New
 //            };
 
-//            _mockRepo.Setup(r => r.GetByIdAsync(opportunityId, It.IsAny<CancellationToken>()))
+//            _mockRepo.Setup(r => r.ObtenerPorIdAsync(opportunityId, It.IsAny<CancellationToken>()))
 //                     .ReturnsAsync(entity);
 
 //            var result = await _service.ChangeStageAsync(opportunityId, OpportunityStage.Qualified);
@@ -36,7 +36,7 @@
 //            Assert.True(result.Success);
 //            Assert.Equal(OpportunityStage.Qualified, entity.Stage);
 
-//            _mockRepo.Verify(r => r.UpdateAsync(entity, It.IsAny<CancellationToken>()), Times.Once);
+//            _mockRepo.Verify(r => r.ActualizarAsync(entity, It.IsAny<CancellationToken>()), Times.Once);
 //        }
 
 //        // Invalid retrograde transition
@@ -51,7 +51,7 @@
 //            };
 
 //            _mockRepo
-//                .Setup(r => r.GetByIdAsync(
+//                .Setup(r => r.ObtenerPorIdAsync(
 //                    It.Is<int>(g => g == opportunityId),
 //                    It.IsAny<CancellationToken>()))
 //                .ReturnsAsync((Opportunity?)entity);
@@ -61,7 +61,7 @@
 //            Assert.False(result.Success);
 //            Assert.Contains("cannot move backwards", result.ErrorMessage);
 
-//            _mockRepo.Verify(r => r.UpdateAsync(It.IsAny<Opportunity>(), It.IsAny<CancellationToken>()), Times.Never);
+//            _mockRepo.Verify(r => r.ActualizarAsync(It.IsAny<Opportunity>(), It.IsAny<CancellationToken>()), Times.Never);
 //        }
 
 //        // Cannot change stage of a closed opportunity
@@ -77,7 +77,7 @@
 //                Stage = closedStage
 //            };
 
-//            _mockRepo.Setup(r => r.GetByIdAsync(opportunityId, It.IsAny<CancellationToken>()))
+//            _mockRepo.Setup(r => r.ObtenerPorIdAsync(opportunityId, It.IsAny<CancellationToken>()))
 //                     .ReturnsAsync(entity);
 
 //            var result = await _service.ChangeStageAsync(opportunityId, OpportunityStage.Proposal);
@@ -85,7 +85,7 @@
 //            Assert.False(result.Success);
 //            Assert.Equal("Cannot change stage of a closed opportunity.", result.ErrorMessage);
 
-//            _mockRepo.Verify(r => r.UpdateAsync(It.IsAny<Opportunity>(), It.IsAny<CancellationToken>()), Times.Never);
+//            _mockRepo.Verify(r => r.ActualizarAsync(It.IsAny<Opportunity>(), It.IsAny<CancellationToken>()), Times.Never);
 //        }
 
 //        // Opportunity does not exist
@@ -94,7 +94,7 @@
 //        {
 //            var opportunityId = int.Newint();
 
-//            _mockRepo.Setup(r => r.GetByIdAsync(opportunityId, It.IsAny<CancellationToken>()))
+//            _mockRepo.Setup(r => r.ObtenerPorIdAsync(opportunityId, It.IsAny<CancellationToken>()))
 //                     .ReturnsAsync((Opportunity?)null);
 
 //            var result = await _service.ChangeStageAsync(opportunityId, OpportunityStage.Qualified);
@@ -102,7 +102,7 @@
 //            Assert.False(result.Success);
 //            Assert.Equal("Opportunity not found", result.ErrorMessage);
 
-//            _mockRepo.Verify(r => r.UpdateAsync(It.IsAny<Opportunity>(), It.IsAny<CancellationToken>()), Times.Never);
+//            _mockRepo.Verify(r => r.ActualizarAsync(It.IsAny<Opportunity>(), It.IsAny<CancellationToken>()), Times.Never);
 //        }
 //    }
 //}

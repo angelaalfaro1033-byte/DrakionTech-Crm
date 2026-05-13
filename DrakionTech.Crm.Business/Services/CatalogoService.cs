@@ -29,7 +29,7 @@ namespace DrakionTech.Crm.Business.Services
 
         public async Task<IEnumerable<CatalogoDto>> ObtenerPaisesAsync(CancellationToken ct = default)
         {
-            var paises = await _paisRepository.GetAllAsync(ct);
+            var paises = await _paisRepository.ObtenerTodosAsync(ct);
             return _mapper.Map<IEnumerable<CatalogoDto>>(paises);
         }
 
@@ -41,13 +41,13 @@ namespace DrakionTech.Crm.Business.Services
 
         public async Task<IEnumerable<CatalogoDto>> ObtenerSectoresAsync(CancellationToken ct = default)
         {
-            var sectores = await _sectorRepository.GetAllAsync(ct);
+            var sectores = await _sectorRepository.ObtenerTodosAsync(ct);
             return _mapper.Map<IEnumerable<CatalogoDto>>(sectores);
         }
 
         public async Task<IEnumerable<CatalogoDto>> ObtenerEstadosAsync(CancellationToken ct = default)
         {
-            var estados = await _estadoRepository.GetAllAsync(ct);
+            var estados = await _estadoRepository.ObtenerTodosAsync(ct);
             return _mapper.Map<IEnumerable<CatalogoDto>>(estados);
         }
     }

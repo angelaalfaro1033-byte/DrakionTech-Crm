@@ -4,35 +4,35 @@ namespace DrakionTech.Crm.Data.Repositories
 {
     public interface IActividadRepository : IGenericRepository<Actividad>
     {
-        Task<IEnumerable<Actividad>> GetByEmpresaIdAsync(
+        Task<IEnumerable<Actividad>> ObtenerPorEmpresaIdAsync(
             int empresaId,
             CancellationToken ct = default);
 
-        Task<IEnumerable<Actividad>> GetByOportunidadIdAsync(
+        Task<IEnumerable<Actividad>> ObtenerPorOportunidadIdAsync(
             int oportunidadId,
             CancellationToken ct = default);
 
-        Task<bool> HasOverlapAsync(
+        Task<bool> TieneSolapamientoAsync(
             int usuarioId,
             DateTime inicio,
             DateTime fin,
             int? actividadIdExcluir = null,
             CancellationToken ct = default);
 
-        Task<IEnumerable<Actividad>> GetUpcomingAsync(
+        Task<IEnumerable<Actividad>> ObtenerProximasAsync(
             DateTime desde,
             CancellationToken ct = default);
 
-        Task<IEnumerable<Actividad>> GetCalendarRangeAsync(
+        Task<IEnumerable<Actividad>> ObtenerPorRangoCalendarioAsync(
             DateTime inicio,
             DateTime fin,
             int? usuarioId = null,
             CancellationToken ct = default);
 
-        Task<IEnumerable<Actividad>> GetByUsuarioAsync(
+        Task<IEnumerable<Actividad>> ObtenerPorUsuarioAsync(
             int usuarioId,
             CancellationToken ct = default);
-        Task<IEnumerable<Actividad>> GetDashboardByUsuarioAsync(
+        Task<IEnumerable<Actividad>> ObtenerDashboardPorUsuarioAsync(
               int usuarioId,
               CancellationToken ct = default);
     }

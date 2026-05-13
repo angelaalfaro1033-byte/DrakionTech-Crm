@@ -36,7 +36,7 @@ namespace DrakionTech.Crm.Business.Services
 
             var empresa = _mapper.Map<Empresa>(dto);
 
-            await _empresaRepository.AddAsync(empresa, ct);
+            await _empresaRepository.AgregarAsync(empresa, ct);
 
             return empresa.Id;
         }
@@ -46,12 +46,12 @@ namespace DrakionTech.Crm.Business.Services
         {
             await ValidarCatalogosAsync(dto, ct);
 
-            var empresa = await _empresaRepository.GetByIdAsync(empresaId, ct)
+            var empresa = await _empresaRepository.ObtenerPorIdAsync(empresaId, ct)
                 ?? throw new EntidadNoEncontradaException("Empresa", empresaId);
 
             _mapper.Map(dto, empresa);
 
-            await _empresaRepository.UpdateAsync(empresa, ct);
+            await _empresaRepository.ActualizarAsync(empresa, ct);
         }
 
         // OBTENER POR ID
@@ -79,14 +79,14 @@ namespace DrakionTech.Crm.Business.Services
                 dto.SectorId,
                 dto.SectorOtro,
                 "sector",
-                _sectorRepository.ExistsAsync,
+                _sectorRepository.ExisteAsync,
                 ct);
 
             await ValidarCatalogoAsync(
                 dto.EstadoId,
                 dto.EstadoOtro,
                 "estado",
-                _estadoRepository.ExistsAsync,
+                _estadoRepository.ExisteAsync,
                 ct);
         }
 

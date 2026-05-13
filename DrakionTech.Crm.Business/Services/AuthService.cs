@@ -17,7 +17,7 @@ public class AuthService : IAuthService
 
     public async Task<bool> LoginAsync(string email, string password)
     {
-        var user = (await _repo.GetAllAsync())
+        var user = (await _repo.ObtenerTodosAsync())
             .FirstOrDefault(x => x.Email == email);
 
         if (user == null)

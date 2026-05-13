@@ -24,13 +24,13 @@ namespace DrakionTech.Crm.Business.Services
 
         public async Task<List<EmpleadoListDto>> ObtenerTodosAsync()
         {
-            var empleados = await _repository.GetAllAsync();
+            var empleados = await _repository.ObtenerTodosAsync();
             return empleados.Select(MapToDto).ToList();
         }
 
         public async Task<EmpleadoListDto> ObtenerPorIdAsync(int id)
         {
-            var e = await _repository.GetByIdAsync(id)
+            var e = await _repository.ObtenerPorIdAsync(id)
                 ?? throw new Exception("Empleado no encontrado");
 
             return MapToDto(e);
@@ -60,7 +60,7 @@ namespace DrakionTech.Crm.Business.Services
             };
 
 
-            await _repository.AddAsync(empleado);
+            await _repository.AgregarAsync(empleado);
 
             var baseUrl = _config["App:BaseUrl"];
 
@@ -82,7 +82,7 @@ namespace DrakionTech.Crm.Business.Services
 
         public async Task<bool> ActivarCuentaAsync(string token, string password)
         {
-            var empleado = (await _repository.GetAllAsync())
+            var empleado = (await _repository.ObtenerTodosAsync())
                 .FirstOrDefault(x => x.ActivationToken == token);
 
             if (empleado == null)
@@ -95,13 +95,13 @@ namespace DrakionTech.Crm.Business.Services
             empleado.IsActive = true;
             empleado.ActivationToken = null;
 
-            await _repository.UpdateAsync(empleado);
+            await _repository.ActualizarAsync(empleado);
 
             return true;
         } 
         public async Task EditarAsync(ActualizarEmpleadoDto dto)
         {
-            var empleado = await _repository.GetByIdAsync(dto.Id)
+            var empleado = await _repository.ObtenerPorIdAsync(dto.Id)
                 ?? throw new Exception("Empleado no encontrado");
 
             empleado.Nombre = dto.Nombre;
@@ -111,18 +111,18 @@ namespace DrakionTech.Crm.Business.Services
             empleado.Rol = dto.Rol;
             empleado.FechaModificacion = DateTime.UtcNow;
 
-            await _repository.UpdateAsync(empleado);
+            await _repository.ActualizarAsync(empleado);
         }
 
         public async Task DesactivarAsync(int id)
         {
-            var empleado = await _repository.GetByIdAsync(id)
+            var empleado = await _repository.ObtenerPorIdAsync(id)
                 ?? throw new Exception("Empleado no encontrado");
 
             empleado.Activo = false;
             empleado.FechaModificacion = DateTime.UtcNow;
 
-            await _repository.UpdateAsync(empleado);
+            await _repository.ActualizarAsync(empleado);
         }
         private static EmpleadoListDto MapToDto(Empleado e) => new()
         {

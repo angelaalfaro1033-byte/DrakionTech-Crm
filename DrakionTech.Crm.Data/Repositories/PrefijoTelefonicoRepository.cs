@@ -12,14 +12,14 @@ namespace DrakionTech.Crm.Data.Repositories
         {
         }
 
-        public async Task<IEnumerable<PrefijoTelefonico>> GetByPaisIdAsync(int paisId, CancellationToken ct = default)
+        public async Task<IEnumerable<PrefijoTelefonico>> ObtenerPorPaisIdAsync(int paisId, CancellationToken ct = default)
         {
             return await _context.PrefijosTelefonicos
                 .Where(x => x.PaisId == paisId)
                 .ToListAsync(ct);
         }
 
-        public async Task<PrefijoTelefonico?> GetByPaisAsync(int paisId, CancellationToken ct = default)
+        public async Task<PrefijoTelefonico?> ObtenerPorPaisAsync(int paisId, CancellationToken ct = default)
         {
             return await _context.PrefijosTelefonicos
                 .FirstOrDefaultAsync(x => x.PaisId == paisId, ct);

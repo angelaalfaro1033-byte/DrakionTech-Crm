@@ -26,7 +26,7 @@ namespace DrakionTech.Crm.Business.Services
         {
             if (!string.IsNullOrWhiteSpace(dto.Email))
             {
-                var existente = await _repository.GetByEmailAsync(dto.Email, ct);
+                var existente = await _repository.ObtenerPorEmailAsync(dto.Email, ct);
 
                 if (existente != null)
                     throw new ReglaNegocioException(
@@ -35,7 +35,7 @@ namespace DrakionTech.Crm.Business.Services
 
             var usuario = _mapper.Map<UsuarioInterno>(dto);
 
-            await _repository.AddAsync(usuario, ct);
+            await _repository.AgregarAsync(usuario, ct);
 
             return usuario.Id;
         }
@@ -45,12 +45,12 @@ namespace DrakionTech.Crm.Business.Services
             ActualizarUsuarioInternoDto dto,
             CancellationToken ct = default)
         {
-            var usuario = await _repository.GetByIdAsync(usuarioId, ct)
+            var usuario = await _repository.ObtenerPorIdAsync(usuarioId, ct)
                 ?? throw new EntidadNoEncontradaException("UsuarioInterno", usuarioId);
 
             if (!string.IsNullOrWhiteSpace(dto.Email))
             {
-                var existente = await _repository.GetByEmailAsync(dto.Email, ct);
+                var existente = await _repository.ObtenerPorEmailAsync(dto.Email, ct);
 
                 if (existente != null && existente.Id != usuarioId)
                     throw new ReglaNegocioException(
@@ -59,14 +59,14 @@ namespace DrakionTech.Crm.Business.Services
 
             _mapper.Map(dto, usuario);
 
-            await _repository.UpdateAsync(usuario, ct);
+            await _repository.ActualizarAsync(usuario, ct);
         }
 
         public async Task<UsuarioInternoDto> ObtenerPorIdAsync(
             int usuarioId,
             CancellationToken ct = default)
         {
-            var usuario = await _repository.GetByIdAsync(usuarioId, ct)
+            var usuario = await _repository.ObtenerPorIdAsync(usuarioId, ct)
                 ?? throw new EntidadNoEncontradaException("UsuarioInterno", usuarioId);
 
             return _mapper.Map<UsuarioInternoDto>(usuario);
@@ -75,14 +75,14 @@ namespace DrakionTech.Crm.Business.Services
         public async Task<IEnumerable<UsuarioInternoDto>> ObtenerActivosAsync(
             CancellationToken ct = default)
         {
-            var usuarios = await _repository.GetActivosAsync(ct);
+            var usuarios = await _repository.ObtenerActivosAsync(ct);
             return _mapper.Map<IEnumerable<UsuarioInternoDto>>(usuarios);
         }
 
         public async Task<IEnumerable<UsuarioInternoDto>> ObtenerTodosAsync(
             CancellationToken ct = default)
         {
-            var usuarios = await _repository.GetAllAsync(ct);
+            var usuarios = await _repository.ObtenerTodosAsync(ct);
             return _mapper.Map<IEnumerable<UsuarioInternoDto>>(usuarios);
         }
     }
