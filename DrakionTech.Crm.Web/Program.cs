@@ -39,7 +39,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
         options.CallbackPath = "/signin-google";
     });
-
+builder.Services.AddAuthorizationCore();
+builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 
@@ -111,7 +112,7 @@ app.MapPost("/account/login", async (
     if (resultado != LoginErrorEnum.Ninguno)
         return Results.Redirect($"/login?error={resultado}");
 
-    await sessionService.SignInAsync(ctx, user!.Email, user!.Id);
+    await sessionService.SignInAsync(ctx, user!.Email, user!.Id, $"{user!.Nombre} {user!.Apellido}");
     return Results.Redirect("/");
 }).DisableAntiforgery();
 
@@ -166,7 +167,7 @@ app.MapGet("/account/google-callback", async (
     if (resultado != GoogleCallbackResultadoEnum.Ok)
         return Results.Redirect($"/login?error={resultado}");
 
-    await sessionService.SignInAsync(ctx, user!.Email, user!.Id);
+    await sessionService.SignInAsync(ctx, user!.Email, user!.Id, $"{user!.Nombre} {user!.Apellido}");
     return Results.Redirect("/");
 });
 

@@ -1,0 +1,175 @@
+﻿@implements IDisposable
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthState
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+<div class="crm-sidebar @(collapsed ? "collapsed" : "")">
+
+    @* Botón toggle *@
+    <button class="sidebar-toggle" @onclick="ToggleSidebar" title="@(collapsed ? "Expandir" : "Contraer")">
+        <i class="bi @(collapsed ? "bi-chevron-right" : "bi-chevron-left")"></i>
+    </button>
+
+    @* Perfil de usuario *@
+    <div class="sidebar-profile">
+        <div class="profile-avatar" title="@nombreUsuario">@inicialesUsuario</div>
+        @if (!collapsed)
+        {
+            <div class="profile-info">
+                <span class="profile-name">@nombreUsuario</span>
+            </div>
+        }
+    </div>
+
+    <nav class="sidebar-nav">
+
+        @* Inicio *@
+        <ul>
+            <li class="@GetNavClass("/")">
+                <a href="/" title="Inicio">
+                    <i class="bi bi-house"></i>
+                    @if (!collapsed)
+                    {
+                        <span>Inicio</span>
+                    }
+                </a>
+            </li>
+        </ul>
+
+        @* Organización *@
+        @if (!collapsed)
+        {
+            <div class="nav-section-label">Organización</div>
+        }
+        <ul>
+            <li class="@GetNavClass("/empresas")">
+                <a href="/empresas" title="Empresas">
+                    <i class="bi bi-building"></i>
+                    @if (!collapsed)
+                    {
+                        <span>Empresas</span>
+                    }
+                </a>
+            </li>
+            <li class="nav-group-header @(personasOpen ? "open" : "")">
+                <button class="group-toggle" @onclick="TogglePersonas" title="Personas">
+                    <i class="bi bi-people"></i>
+                    @if (!collapsed)
+                    {
+                        <span>Personas</span>
+                        <i class="bi bi-chevron-down group-arrow"></i>
+                    }
+                </button>
+                @if (personasOpen && !collapsed)
+                {
+                    <ul class="nav-sub-list">
+                        <li class="nav-sub @GetNavClass("/usuarios-internos")">
+                            <a href="/usuarios-internos">
+                                <i class="bi bi-person"></i>
+                                <span>Usuarios internos</span>
+                            </a>
+                        </li>
+                        <li class="nav-sub @GetNavClass("/empleados")">
+                            <a href="/empleados">
+                                <i class="bi bi-person-badge"></i>
+                                <span>Empleados</span>
+                            </a>
+                        </li>
+                    </ul>
+                }
+            </li>
+        </ul>
+
+        @* Configuración *@
+        @if (!collapsed)
+        {
+            <div class="nav-section-label">Configuración</div>
+        }
+        <ul>
+            <li class="@GetNavClass("/roles")">
+                <a href="/roles" title="Roles">
+                    <i class="bi bi-shield-lock"></i>
+                    @if (!collapsed)
+                    {
+                        <span>Roles</span>
+                    }
+                </a>
+            </li>
+            <li class="@GetNavClass("/especialidades")">
+                <a href="/especialidades" title="Especialidades">
+                    <i class="bi bi-patch-check-fill"></i>
+                    @if (!collapsed)
+                    {
+                        <span>Especialidades</span>
+                    }
+                </a>
+            </li>
+        </ul>
+
+        @* Integraciones *@
+        @if (!collapsed)
+        {
+            <div class="nav-section-label">Integraciones</div>
+        }
+        <ul>
+            <li class="@GetNavClass("/google-eventos")">
+                <a href="/google-eventos" title="Google Eventos">
+                    <i class="bi bi-calendar-event"></i>
+                    @if (!collapsed)
+                    {
+                        <span>Google Eventos</span>
+                    }
+                </a>
+            </li>
+        </ul>
+
+    </nav>
+</div>
+
+@code {
+    private bool collapsed = false;
+    private bool personasOpen = false;
+
+    private void ToggleSidebar() => collapsed = !collapsed;
+    private void TogglePersonas() => personasOpen = !personasOpen;
+
+    protected override void OnInitialized()
+    {
+        Nav.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Nav.LocationChanged -= OnLocationChanged;
+    }
+
+    private string GetNavClass(string url)
+    {
+        var current = "/" + Nav.ToBaseRelativePath(Nav.Uri);
+        if (url == "/")
+            return current == "/" ? "nav-item active" : "nav-item";
+        return current.StartsWith(url) ? "nav-item active" : "nav-item";
+    }
+    private string nombreUsuario = "";
+    private string inicialesUsuario = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        Nav.LocationChanged += OnLocationChanged;
+
+        var authState = await AuthState.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        nombreUsuario = user.FindFirst(ClaimTypes.Name)?.Value ?? "Usuario";
+
+        var partes = nombreUsuario.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        inicialesUsuario = partes.Length >= 2
+            ? $"{partes[0][0]}{partes[1][0]}".ToUpper()
+            : nombreUsuario.Substring(0, Math.Min(2, nombreUsuario.Length)).ToUpper();
+    }
+}
