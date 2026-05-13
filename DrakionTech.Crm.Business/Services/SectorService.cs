@@ -20,7 +20,7 @@ namespace DrakionTech.Crm.Business.Services
 
         public async Task<IEnumerable<CatalogoDto>> ObtenerTodosAsync(CancellationToken ct = default)
         {
-            var sectores = await _sectorRepository.GetAllAsync(ct);
+            var sectores = await _sectorRepository.ObtenerTodosAsync(ct);
             return _mapper.Map<IEnumerable<CatalogoDto>>(sectores);
         }
     }

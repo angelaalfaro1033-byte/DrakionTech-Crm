@@ -15,7 +15,7 @@ namespace DrakionTech.Crm.Data.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<UsuarioInterno>> GetActivosAsync(
+        public async Task<IEnumerable<UsuarioInterno>> ObtenerActivosAsync(
             CancellationToken ct = default)
         {
             return await _context.UsuariosInternos
@@ -24,7 +24,7 @@ namespace DrakionTech.Crm.Data.Repositories
                 .ToListAsync(ct);
         }
 
-        public async Task<UsuarioInterno?> GetByEmailAsync(
+        public async Task<UsuarioInterno?> ObtenerPorEmailAsync(
             string email,
             CancellationToken ct = default)
         {

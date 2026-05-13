@@ -13,7 +13,7 @@ namespace DrakionTech.Crm.Data.Repositories
             _context = context;
         }
 
-        public async Task<List<Especialidad>> GetAllWithRolAsync()
+        public async Task<List<Especialidad>> ObtenerTodosConRolAsync()
         {
             return await _context.Especialidades
                 .Include(e => e.RolUsuario)

@@ -154,7 +154,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var usuarios = await Repo.GetAllAsync();
+        var usuarios = await Repo.ObtenerTodosAsync();
         SistemaConUsuarios = usuarios.Any();
     }
 
@@ -222,7 +222,7 @@
             return;
         }
 
-        var usuarios = await Repo.GetAllAsync();
+        var usuarios = await Repo.ObtenerTodosAsync();
         if (usuarios.Any())
         {
             SistemaConUsuarios = true;

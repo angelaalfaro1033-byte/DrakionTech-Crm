@@ -19,7 +19,7 @@ namespace DrakionTech.Crm.Business.Services
         // =========================
         public async Task<List<RolUsuarioDto>> ObtenerTodosAsync()
         {
-            var roles = await _repository.GetAllAsync();
+            var roles = await _repository.ObtenerTodosAsync();
             return roles.Select(MapToDto).ToList();
         }
 
@@ -28,7 +28,7 @@ namespace DrakionTech.Crm.Business.Services
         // =========================
         public async Task<RolUsuarioDto> ObtenerPorIdAsync(int id)
         {
-            var rol = await _repository.GetByIdAsync(id)
+            var rol = await _repository.ObtenerPorIdAsync(id)
                 ?? throw new Exception("Rol no encontrado");
 
             return MapToDto(rol);
@@ -44,7 +44,7 @@ namespace DrakionTech.Crm.Business.Services
                 Nombre = dto.Nombre
             };
 
-            await _repository.AddAsync(rol);
+            await _repository.AgregarAsync(rol);
         }
 
         // =========================
@@ -52,13 +52,13 @@ namespace DrakionTech.Crm.Business.Services
         // =========================
         public async Task EditarAsync(RolUsuarioDto dto)
         {
-            var rol = await _repository.GetByIdAsync(dto.Id)
+            var rol = await _repository.ObtenerPorIdAsync(dto.Id)
                 ?? throw new Exception("Rol no encontrado");
 
             rol.Nombre = dto.Nombre;
             rol.Activo = dto.Activo;
 
-            await _repository.UpdateAsync(rol);
+            await _repository.ActualizarAsync(rol);
         }
 
         // =========================
@@ -66,10 +66,10 @@ namespace DrakionTech.Crm.Business.Services
         // =========================
         public async Task DesactivarAsync(int id)
         {
-            var rol = await _repository.GetByIdAsync(id)
+            var rol = await _repository.ObtenerPorIdAsync(id)
                 ?? throw new Exception("Rol no encontrado");
             rol.Activo = false;
-            await _repository.UpdateAsync(rol);
+            await _repository.ActualizarAsync(rol);
         }
 
         // =========================
@@ -77,10 +77,10 @@ namespace DrakionTech.Crm.Business.Services
         // =========================
         public async Task ActivarAsync(int id)
         {
-            var rol = await _repository.GetByIdAsync(id)
+            var rol = await _repository.ObtenerPorIdAsync(id)
                 ?? throw new Exception("Rol no encontrado");
             rol.Activo = true;
-            await _repository.UpdateAsync(rol);
+            await _repository.ActualizarAsync(rol);
         }
         // =========================
         // MAPPER

@@ -12,7 +12,7 @@ namespace DrakionTech.Crm.Data.Repositories
         {
         }
 
-        public async Task<IEnumerable<Propuesta>> GetByOportunidadIdAsync(
+        public async Task<IEnumerable<Propuesta>> ObtenerPorOportunidadIdAsync(
             int oportunidadId,
             CancellationToken ct = default)
         {

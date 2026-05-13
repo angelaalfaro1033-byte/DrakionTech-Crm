@@ -13,7 +13,7 @@ namespace DrakionTech.Crm.Data.Repositories
         {
         }
 
-        public async Task<IEnumerable<Actividad>> GetByEmpresaIdAsync(
+        public async Task<IEnumerable<Actividad>> ObtenerPorEmpresaIdAsync(
       int empresaId,
       CancellationToken ct = default)
         {
@@ -29,7 +29,7 @@ namespace DrakionTech.Crm.Data.Repositories
                 .ToListAsync(ct);
         }
 
-        public async Task<IEnumerable<Actividad>> GetByOportunidadIdAsync(
+        public async Task<IEnumerable<Actividad>> ObtenerPorOportunidadIdAsync(
             int oportunidadId,
             CancellationToken ct = default)
         {
@@ -45,7 +45,7 @@ namespace DrakionTech.Crm.Data.Repositories
                 .ToListAsync(ct);
         }
 
-        public async Task<bool> HasOverlapAsync(
+        public async Task<bool> TieneSolapamientoAsync(
             int usuarioId,
             DateTime inicio,
             DateTime fin,
@@ -67,7 +67,7 @@ namespace DrakionTech.Crm.Data.Repositories
             return await query.AnyAsync(ct);
         }
 
-        public async Task<IEnumerable<Actividad>> GetUpcomingAsync(
+        public async Task<IEnumerable<Actividad>> ObtenerProximasAsync(
             DateTime desde,
             CancellationToken ct = default)
         {
@@ -80,7 +80,7 @@ namespace DrakionTech.Crm.Data.Repositories
                 .ToListAsync(ct);
         }
 
-        public async Task<IEnumerable<Actividad>> GetCalendarRangeAsync(
+        public async Task<IEnumerable<Actividad>> ObtenerPorRangoCalendarioAsync(
             DateTime inicio,
             DateTime fin,
             int? usuarioId = null,
@@ -103,7 +103,7 @@ namespace DrakionTech.Crm.Data.Repositories
                 .ToListAsync(ct);
         }
 
-        public async Task<IEnumerable<Actividad>> GetByUsuarioAsync(
+        public async Task<IEnumerable<Actividad>> ObtenerPorUsuarioAsync(
             int usuarioId,
             CancellationToken ct = default)
         {
@@ -114,7 +114,7 @@ namespace DrakionTech.Crm.Data.Repositories
                 .ToListAsync(ct);
         }
 
-        public async Task<IEnumerable<Actividad>> GetDashboardByUsuarioAsync(
+        public async Task<IEnumerable<Actividad>> ObtenerDashboardPorUsuarioAsync(
              int usuarioId,
              CancellationToken ct = default)
         {

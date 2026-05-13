@@ -4,6 +4,6 @@ namespace DrakionTech.Crm.Data.Repositories
 {
     public interface IEspecialidadRepository : IGenericRepository<Especialidad>
     {
-        Task<List<Especialidad>> GetAllWithRolAsync();
+        Task<List<Especialidad>> ObtenerTodosConRolAsync();
     }
 }

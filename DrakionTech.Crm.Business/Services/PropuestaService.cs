@@ -25,7 +25,7 @@ namespace DrakionTech.Crm.Business.Services
         {
             var propuesta = _mapper.Map<Propuesta>(dto);
 
-            await _propuestaRepository.AddAsync(propuesta, ct);
+            await _propuestaRepository.AgregarAsync(propuesta, ct);
 
             return propuesta.Id;
         }
@@ -34,7 +34,7 @@ namespace DrakionTech.Crm.Business.Services
             int oportunidadId,
             CancellationToken ct = default)
         {
-            var propuestas = await _propuestaRepository.GetByOportunidadIdAsync(oportunidadId, ct);
+            var propuestas = await _propuestaRepository.ObtenerPorOportunidadIdAsync(oportunidadId, ct);
             return _mapper.Map<IEnumerable<PropuestaDto>>(propuestas);
         }
     }

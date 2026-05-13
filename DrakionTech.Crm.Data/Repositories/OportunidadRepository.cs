@@ -12,7 +12,7 @@ namespace DrakionTech.Crm.Data.Repositories
         {
         }
 
-        public override async Task<Oportunidad?> GetByIdAsync(
+        public override async Task<Oportunidad?> ObtenerPorIdAsync(
             int id,
             CancellationToken ct = default)
         {
@@ -23,7 +23,7 @@ namespace DrakionTech.Crm.Data.Repositories
                 .FirstOrDefaultAsync(o => o.Id == id, ct);
         }
 
-        public async Task<IEnumerable<Oportunidad>> GetByEmpresaIdAsync(
+        public async Task<IEnumerable<Oportunidad>> ObtenerPorEmpresaIdAsync(
             int empresaId,
             CancellationToken ct = default)
         {
@@ -35,7 +35,7 @@ namespace DrakionTech.Crm.Data.Repositories
                 .ToListAsync(ct);
         }
 
-        public async Task<IEnumerable<Oportunidad>> GetAllAsync(
+        public async Task<IEnumerable<Oportunidad>> ObtenerTodosAsync(
             CancellationToken ct = default)
         {
             return await _context.Oportunidades

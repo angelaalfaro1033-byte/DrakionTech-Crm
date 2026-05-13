@@ -15,14 +15,14 @@ namespace DrakionTech.Crm.Data.Repositories
             _dbSet = context.Set<TEntity>();
         }
 
-        public virtual async Task<TEntity?> GetByIdAsync(
+        public virtual async Task<TEntity?> ObtenerPorIdAsync(
             int id,
             CancellationToken ct = default)
         {
             return await _dbSet.FindAsync(new object[] { id }, ct);
         }
 
-        public async Task<IEnumerable<TEntity>> GetAllAsync(
+        public async Task<IEnumerable<TEntity>> ObtenerTodosAsync(
             CancellationToken ct = default)
         {
             return await _dbSet
@@ -30,19 +30,19 @@ namespace DrakionTech.Crm.Data.Repositories
                 .ToListAsync(ct);
         }
 
-        public async Task AddAsync(TEntity entity, CancellationToken ct = default)
+        public async Task AgregarAsync(TEntity entity, CancellationToken ct = default)
         {
             await _dbSet.AddAsync(entity, ct);
             await _context.SaveChangesAsync(ct);
         }
 
-        public async Task UpdateAsync(TEntity entity, CancellationToken ct = default)
+        public async Task ActualizarAsync(TEntity entity, CancellationToken ct = default)
         {
             _dbSet.Update(entity);
             await _context.SaveChangesAsync(ct);
         }
 
-        public async Task DeleteAsync(int id, CancellationToken ct = default)
+        public async Task EliminarAsync(int id, CancellationToken ct = default)
         {
             var entity = await _dbSet.FindAsync(new object[] { id }, ct);
             if (entity is null)
@@ -52,7 +52,7 @@ namespace DrakionTech.Crm.Data.Repositories
             await _context.SaveChangesAsync(ct);
         }
 
-        public async Task<bool> ExistsAsync(int id, CancellationToken ct = default)
+        public async Task<bool> ExisteAsync(int id, CancellationToken ct = default)
         {
             return await _dbSet.AnyAsync(
                 e => EF.Property<int>(e, "Id") == id,

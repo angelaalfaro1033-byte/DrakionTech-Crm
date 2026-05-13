@@ -20,25 +20,25 @@ namespace DrakionTech.Crm.Business.Services
 
         public async Task<IEnumerable<PrefijoTelefonicoDto>> ObtenerTodosAsync(CancellationToken ct = default)
         {
-            var prefijos = await _repository.GetAllAsync(ct);
+            var prefijos = await _repository.ObtenerTodosAsync(ct);
             return _mapper.Map<IEnumerable<PrefijoTelefonicoDto>>(prefijos);
         }
 
         public async Task<IEnumerable<PrefijoTelefonicoDto>> ObtenerPorPaisAsync(int paisId, CancellationToken ct = default)
         {
-            var prefijos = await _repository.GetByPaisIdAsync(paisId, ct);
+            var prefijos = await _repository.ObtenerPorPaisIdAsync(paisId, ct);
             return _mapper.Map<IEnumerable<PrefijoTelefonicoDto>>(prefijos);
         }
 
         public async Task<PrefijoTelefonicoDto?> ObtenerPorPaisUnicoAsync(int paisId, CancellationToken ct = default)
         {
-            var prefijo = await _repository.GetByPaisAsync(paisId, ct);
+            var prefijo = await _repository.ObtenerPorPaisAsync(paisId, ct);
             return _mapper.Map<PrefijoTelefonicoDto?>(prefijo);
         }
 
         public async Task<string?> ObtenerCodigoPorPaisAsync(int paisId, CancellationToken ct = default)
         {
-            var prefijo = await _repository.GetByPaisAsync(paisId, ct);
+            var prefijo = await _repository.ObtenerPorPaisAsync(paisId, ct);
 
             if (prefijo == null)
                 return null;

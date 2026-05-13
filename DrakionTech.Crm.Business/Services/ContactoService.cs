@@ -33,17 +33,17 @@ namespace DrakionTech.Crm.Business.Services
             CrearContactoDto dto,
             CancellationToken ct = default)
         {
-            var existeEmpresa = await _empresaRepository.ExistsAsync(dto.EmpresaId, ct);
+            var existeEmpresa = await _empresaRepository.ExisteAsync(dto.EmpresaId, ct);
             if (!existeEmpresa)
                 throw new ReglaNegocioException("La empresa asociada no existe");
 
-            var existeRol = await _rolContactoRepository.ExistsAsync(dto.RolContactoId, ct);
+            var existeRol = await _rolContactoRepository.ExisteAsync(dto.RolContactoId, ct);
             if (!existeRol)
                 throw new ReglaNegocioException("El rol de contacto no existe");
 
             var contacto = _mapper.Map<Contacto>(dto);
 
-            await _contactoRepository.AddAsync(contacto, ct);
+            await _contactoRepository.AgregarAsync(contacto, ct);
 
             return contacto.Id;
         }
@@ -53,23 +53,23 @@ namespace DrakionTech.Crm.Business.Services
             ActualizarContactoDto dto,
             CancellationToken ct = default)
         {
-            var contacto = await _contactoRepository.GetByIdAsync(contactoId, ct)
+            var contacto = await _contactoRepository.ObtenerPorIdAsync(contactoId, ct)
                 ?? throw new EntidadNoEncontradaException("Contacto", contactoId);
 
-            var existeRol = await _rolContactoRepository.ExistsAsync(dto.RolContactoId, ct);
+            var existeRol = await _rolContactoRepository.ExisteAsync(dto.RolContactoId, ct);
             if (!existeRol)
                 throw new ReglaNegocioException("El rol de contacto no existe");
 
             _mapper.Map(dto, contacto);
 
-            await _contactoRepository.UpdateAsync(contacto, ct);
+            await _contactoRepository.ActualizarAsync(contacto, ct);
         }
 
         public async Task<ContactoDto> ObtenerPorIdAsync(
             int contactoId,
             CancellationToken ct = default)
         {
-            var contacto = await _contactoRepository.GetByIdAsync(contactoId, ct)
+            var contacto = await _contactoRepository.ObtenerPorIdAsync(contactoId, ct)
                 ?? throw new EntidadNoEncontradaException("Contacto", contactoId);
 
             return _mapper.Map<ContactoDto>(contacto);
@@ -85,7 +85,7 @@ namespace DrakionTech.Crm.Business.Services
 
         public async Task<IEnumerable<CatalogoDto>> ObtenerRolesContactoAsync(CancellationToken ct = default)
         {
-            var roles = await _rolContactoRepository.GetAllAsync(ct);
+            var roles = await _rolContactoRepository.ObtenerTodosAsync(ct);
             return roles.Select(r => new CatalogoDto
             {
                 Id = r.Id,
