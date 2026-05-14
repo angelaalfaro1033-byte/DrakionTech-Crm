@@ -12,5 +12,8 @@ namespace DrakionTech.Crm.Business.Interfaces
         Task<IEnumerable<ActividadDto>> ObtenerPorOportunidadAsync(int oportunidadId, CancellationToken ct = default);
         Task<DashboardActividadDto> ObtenerDashboardAsync(int usuarioId, string? busqueda = null, string? filtroEstado = null, CancellationToken ct = default);
         Task CompletarAsync(int actividadId, CancellationToken ct = default);
+        Task<IEnumerable<ActividadDto>> ObtenerCadenaAsync(
+    int actividadId,
+    CancellationToken ct = default);
     }
 }

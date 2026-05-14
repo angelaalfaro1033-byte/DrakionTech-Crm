@@ -29,5 +29,7 @@ namespace DrakionTech.Crm.Business.DTOs.Actividad
 
         [MaxLength(2000)]
         public string? Notas { get; set; }
+        public int? ActividadPreviaId { get; set; }
+
     }
 }

@@ -1,7 +1,9 @@
 ﻿@page "/dashboardActividades"
 @attribute [Authorize]
+@rendermode InteractiveServer
 @inject IActividadService ActividadService
 @inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
 @using Microsoft.AspNetCore.Components.Authorization
 @using DrakionTech.Crm.Web.Extensions
 
@@ -9,7 +11,7 @@
 
     <!-- Resumen -->
     <div class="dashboard-resumen">
-        <div class="resumen-card pendiente">
+        <div class="resumen-card programada">
             <span class="resumen-numero">@dashboard?.TotalPendientes</span>
             <span class="resumen-label">Programadas</span>
         </div>
@@ -70,7 +72,17 @@
                                     @a.ClasificacionEstado
                                 </span>
                             </td>
-                            <td>@a.TipoActividadNombre</td>
+                            <td>
+                                @a.TipoActividadNombre
+                                @if (a.ActividadPreviaId.HasValue)
+                                {
+                                    <br />
+                                    <small class="text-muted">
+                                        <i class="bi bi-arrow-return-right"></i>
+                                        Seguimiento
+                                    </small>
+                                }
+                            </td>
                             <td>
                                 @if (a.EmpresaId > 0)
                                 {
@@ -90,7 +102,6 @@
                                     @if (!string.IsNullOrEmpty(a.ContactoTelefono))
                                     {
                                         <br />
-
                                         <small class="text-muted">@a.ContactoTelefono</small>
                                     }
                                 }
@@ -112,7 +123,7 @@
                                     {
                                         <button class="btn-completar"
                                                 title="Marcar como completada"
-                                                @onclick="() => CompletarActividad(a.Id)"
+                                                @onclick="() => IniciarCompletar(a.Id, a.EmpresaId)"
                                                 disabled="@completando.Contains(a.Id)">
                                             <i class="bi bi-check-circle"></i>
                                         </button>
@@ -131,6 +142,26 @@
     </div>
 </div>
 
+<!-- Modal actividad relacionada -->
+@if (mostrarModal)
+{
+    <div class="modal-overlay">
+        <div class="modal-box">
+            <h5>Actividad completada</h5>
+            <p>¿Deseas crear una actividad de seguimiento relacionada?</p>
+            <div class="modal-actions">
+                <button class="btn btn-primary" @onclick="IrACrearRelacionada">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    Sí, crear seguimiento
+                </button>
+                <button class="btn btn-secondary" @onclick="CerrarModal">
+                    No, por ahora no
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private DashboardActividadDto? dashboard;
     private bool cargando = true;
@@ -138,6 +169,10 @@
     private string? textoBusqueda;
     private string filtroEstado = "Todas";
     private HashSet<int> completando = [];
+
+    private bool mostrarModal = false;
+    private int actividadCompletadaId;
+    private int empresaIdCompletada;
 
     protected override async Task OnInitializedAsync()
     {
@@ -154,13 +189,29 @@
         cargando = false;
     }
 
-    private async Task CompletarActividad(int id)
+    private async Task IniciarCompletar(int id, int empresaId)
     {
         completando.Add(id);
+        StateHasChanged();
+
         await ActividadService.CompletarAsync(id);
+
         completando.Remove(id);
         await CargarDashboard();
+
+        actividadCompletadaId = id;
+        empresaIdCompletada = empresaId;
+        mostrarModal = true;
     }
+
+    private void IrACrearRelacionada()
+    {
+        mostrarModal = false;
+        Navigation.NavigateTo(
+            $"/empresas/{empresaIdCompletada}/actividades/crear?previaId={actividadCompletadaId}");
+    }
+
+    private void CerrarModal() => mostrarModal = false;
 
     private async Task OnBusquedaChanged(ChangeEventArgs e)
     {

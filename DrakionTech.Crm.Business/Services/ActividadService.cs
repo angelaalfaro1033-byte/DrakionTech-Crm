@@ -48,6 +48,13 @@ namespace DrakionTech.Crm.Business.Services
             return _mapper.Map<IEnumerable<TipoActividadDto>>(tipos);
         }
 
+        public async Task<IEnumerable<ActividadDto>> ObtenerCadenaAsync(
+    int actividadId,
+    CancellationToken ct = default)
+        {
+            var cadena = await _actividadRepository.ObtenerCadenaAsync(actividadId, ct);
+            return _mapper.Map<IEnumerable<ActividadDto>>(cadena);
+        }
         public async Task<int> CrearAsync(
     CrearActividadDto dto,
     CancellationToken ct = default)

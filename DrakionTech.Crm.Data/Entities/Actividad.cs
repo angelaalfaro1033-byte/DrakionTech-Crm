@@ -6,7 +6,7 @@ public class Actividad
     public TipoActividad TipoActividad { get; set; } = null!;
     public int EstadoActividadId { get; set; }
     public EstadoActividad EstadoActividad { get; set; } = null!;
-    public int UsuarioId { get; set; } 
+    public int UsuarioId { get; set; }
     public Usuario Usuario { get; set; } = null!;
     public DateTime Inicio { get; set; }
     public DateTime? Fin { get; set; }
@@ -22,4 +22,8 @@ public class Actividad
     public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
     public ICollection<ActividadUsuario> UsuariosAsignados { get; set; }
         = new List<ActividadUsuario>();
+    public int? ActividadPreviaId { get; set; }
+    public Actividad? ActividadPrevia { get; set; }
+    public ICollection<Actividad> ActividadesRelacionadas { get; set; }
+        = new List<Actividad>();
 }

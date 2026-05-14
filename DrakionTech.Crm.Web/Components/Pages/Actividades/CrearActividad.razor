@@ -8,10 +8,21 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @using DrakionTech.Crm.Web.Extensions
 @using Microsoft.AspNetCore.Components.Authorization
+
 <div class="actividad-form-container">
     <div class="actividad-form-card">
+
+        @* Indicador visual si es actividad de seguimiento *@
+        @if (modelo.ActividadPreviaId.HasValue)
+        {
+            <div class="seguimiento-banner">
+                <i class="bi bi-arrow-return-right"></i>
+                Actividad de seguimiento — vinculada a actividad #@modelo.ActividadPreviaId
+            </div>
+        }
+
         <h3 class="actividad-form-title">
-            Nueva actividad
+            @(modelo.ActividadPreviaId.HasValue ? "Nueva actividad de seguimiento" : "Nueva actividad")
         </h3>
 
         <p class="actividad-form-subtitle">
@@ -28,7 +39,6 @@
             <!-- Tipo -->
             <div class="mb-3">
                 <label class="form-label">Tipo de actividad</label>
-
                 <InputSelect class="form-control" @bind-Value="modelo.TipoActividadId">
                     <option value="">-- Seleccione --</option>
                     @foreach (var tipo in tiposActividad)
@@ -52,26 +62,20 @@
                 <InputDate TValue="DateTime?"
                            class="form-control"
                            @bind-Value="modelo.FechaFin" />
-                <div class="form-text">
-                    Fecha límite para completar la actividad
-                </div>
+                <div class="form-text">Fecha límite para completar la actividad</div>
             </div>
 
             <!-- Resultado -->
             <div class="mb-3">
                 <label class="form-label">Resultado</label>
-                <InputText class="form-control"
-                           @bind-Value="modelo.Resultado" />
-                <div class="form-text">
-                    Ejemplo: Reunión realizada, Cliente interesado, No contestó
-                </div>
+                <InputText class="form-control" @bind-Value="modelo.Resultado" />
+                <div class="form-text">Ejemplo: Reunión realizada, Cliente interesado, No contestó</div>
             </div>
 
-            <!-- Contacto (opcional) -->
+            <!-- Contacto -->
             <div class="mb-3">
                 <label class="form-label">Contacto (opcional)</label>
-                <InputSelect class="form-control"
-                             @bind-Value="modelo.ContactoId">
+                <InputSelect class="form-control" @bind-Value="modelo.ContactoId">
                     <option value="">-- Sin contacto --</option>
                     @foreach (var c in contactos)
                     {
@@ -80,11 +84,10 @@
                 </InputSelect>
             </div>
 
-            <!-- Oportunidad (opcional) -->
+            <!-- Oportunidad -->
             <div class="mb-3">
                 <label class="form-label">Oportunidad (opcional)</label>
-                <InputSelect class="form-control"
-                             @bind-Value="modelo.OportunidadId">
+                <InputSelect class="form-control" @bind-Value="modelo.OportunidadId">
                     <option value="">-- Sin oportunidad --</option>
                     @foreach (var o in oportunidades)
                     {
@@ -96,25 +99,22 @@
             <!-- Notas -->
             <div class="mb-3">
                 <label class="form-label">Notas</label>
-                <InputTextArea class="form-control"
-                               rows="4"
-                               @bind-Value="modelo.Notas" />
+                <InputTextArea class="form-control" rows="4" @bind-Value="modelo.Notas" />
             </div>
 
-            <button type="submit" class="btn btn-primary">
-                Guardar
-            </button>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a class="btn btn-secondary ms-2" href="/empresas/@EmpresaId/actividades">Cancelar</a>
 
-            <a class="btn btn-secondary ms-2"
-               href="/empresas/@EmpresaId/actividades">
-                Cancelar
-            </a>
         </EditForm>
     </div>
 </div>
 
 @code {
     [Parameter] public int EmpresaId { get; set; }
+
+    // ← Lee el query string ?previaId=X
+    [SupplyParameterFromQuery(Name = "previaId")]
+    public int? PreviaId { get; set; }
 
     private IEnumerable<TipoActividadDto> tiposActividad = [];
     private CrearActividadDto modelo = new();
@@ -132,20 +132,20 @@
         modelo.EstadoActividadId = 1;
         modelo.UsuarioId = usuarioId;
 
+        // ← Aquí se vincula la actividad previa
+        if (PreviaId.HasValue)
+            modelo.ActividadPreviaId = PreviaId.Value;
+
         contactos = await ContactoService.ObtenerPorEmpresaAsync(EmpresaId);
         oportunidades = await OportunidadService.ObtenerPorEmpresaAsync(EmpresaId);
         tiposActividad = await ActividadService.ObtenerTiposActividadAsync();
-
-        Console.WriteLine($"Tipos cargados: {tiposActividad.Count()}");
     }
 
     private async Task Guardar()
     {
         try
         {
-            Console.WriteLine($"Guardando actividad - EmpresaId: {modelo.EmpresaId}, UsuarioId: {modelo.UsuarioId}, TipoId: {modelo.TipoActividadId}, EstadoId: {modelo.EstadoActividadId}, Fecha: {modelo.Fecha}");
             var id = await ActividadService.CrearAsync(modelo);
-            Console.WriteLine($"Actividad creada con Id: {id}");
             Navigation.NavigateTo($"/empresas/{EmpresaId}/actividades");
         }
         catch (Exception ex)

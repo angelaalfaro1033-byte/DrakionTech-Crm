@@ -83,6 +83,12 @@ namespace DrakionTech.Crm.Business.Mapping
                 .ForMember(d => d.OportunidadNombre,
                     o => o.MapFrom(s => s.Oportunidad != null
                         ? s.Oportunidad.NombreProyecto
+                        : null))
+                .ForMember(d => d.ActividadPreviaId,
+                    o => o.MapFrom(s => s.ActividadPreviaId))
+                .ForMember(d => d.ActividadPreviaNombre,
+                    o => o.MapFrom(s => s.ActividadPrevia != null
+                        ? s.ActividadPrevia.TipoActividad.Nombre
                         : null));
 
             CreateMap<TipoActividad, TipoActividadDto>();
