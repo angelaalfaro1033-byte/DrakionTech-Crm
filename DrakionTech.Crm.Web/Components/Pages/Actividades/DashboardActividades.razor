@@ -9,17 +9,13 @@
 
     <!-- Resumen -->
     <div class="dashboard-resumen">
-        <div class="resumen-card vencida">
-            <span class="resumen-numero">@dashboard?.TotalVencidas</span>
-            <span class="resumen-label">Vencidas</span>
-        </div>
-        <div class="resumen-card proxima">
-            <span class="resumen-numero">@dashboard?.TotalProximasAVencer</span>
-            <span class="resumen-label">Próximas a vencer</span>
-        </div>
         <div class="resumen-card pendiente">
             <span class="resumen-numero">@dashboard?.TotalPendientes</span>
-            <span class="resumen-label">Pendientes</span>
+            <span class="resumen-label">Programadas</span>
+        </div>
+        <div class="resumen-card completada">
+            <span class="resumen-numero">@dashboard?.TotalCompletadas</span>
+            <span class="resumen-label">Completadas</span>
         </div>
     </div>
 
@@ -35,9 +31,8 @@
 
         <select class="form-select" @bind="filtroEstado" @bind:after="OnFiltroChanged">
             <option value="Todas">Todas</option>
-            <option value="Vencida">Vencidas</option>
-            <option value="ProximaAVencer">Próximas a vencer</option>
-            <option value="Pendiente">Pendientes</option>
+            <option value="Programada">Programadas</option>
+            <option value="Completada">Completadas</option>
         </select>
     </div>
 
@@ -61,7 +56,6 @@
                         <th>Cliente</th>
                         <th>Contacto principal</th>
                         <th>Oportunidad</th>
-                        <th>Tipo</th>
                         <th>Vencimiento</th>
                         <th>Tiempo</th>
                         <th class="text-end">Acciones</th>
@@ -72,16 +66,15 @@
                     {
                         <tr>
                             <td>
-                                <span class="badge badge-@a.ClasificacionEstado?.ToLower()">
-                                    @a.EstadoActividadNombre
+                                <span class="badge badge-estado badge-@a.ClasificacionEstado?.ToLower()">
+                                    @a.ClasificacionEstado
                                 </span>
                             </td>
                             <td>@a.TipoActividadNombre</td>
                             <td>
                                 @if (a.EmpresaId > 0)
                                 {
-                                    <a class="link-empresa"
-                                       href="/empresas/@a.EmpresaId">
+                                    <a class="link-empresa" href="/empresas/@a.EmpresaId">
                                         @a.EmpresaNombre
                                     </a>
                                 }
@@ -91,15 +84,15 @@
                                 }
                             </td>
                             <td>
-                                @if (!string.IsNullOrEmpty(a.ContactoTelefono))
+                                @if (!string.IsNullOrEmpty(a.ContactoNombre))
                                 {
                                     <span>@a.ContactoNombre</span>
-                                    <br />
-                                    <small class="text-muted">@a.ContactoTelefono</small>
-                                }
-                                else if (!string.IsNullOrEmpty(a.ContactoNombre))
-                                {
-                                    <span>@a.ContactoNombre</span>
+                                    @if (!string.IsNullOrEmpty(a.ContactoTelefono))
+                                    {
+                                        <br />
+
+                                        <small class="text-muted">@a.ContactoTelefono</small>
+                                    }
                                 }
                                 else
                                 {
@@ -107,7 +100,6 @@
                                 }
                             </td>
                             <td>@(a.OportunidadNombre ?? "—")</td>
-                            <td>@a.TipoActividadNombre</td>
                             <td>@(a.FechaVencimiento?.ToString("dd/MM/yyyy") ?? "—")</td>
                             <td>
                                 <span class="tiempo-@a.ClasificacionEstado?.ToLower()">
@@ -116,6 +108,15 @@
                             </td>
                             <td>
                                 <div class="ui-actions">
+                                    @if (a.ClasificacionEstado == "Programada")
+                                    {
+                                        <button class="btn-completar"
+                                                title="Marcar como completada"
+                                                @onclick="() => CompletarActividad(a.Id)"
+                                                disabled="@completando.Contains(a.Id)">
+                                            <i class="bi bi-check-circle"></i>
+                                        </button>
+                                    }
                                     <a href="/empresas/@a.EmpresaId/actividades/editar/@a.Id"
                                        title="Editar">
                                         <i class="bi bi-pencil"></i>
@@ -136,6 +137,7 @@
     private int usuarioId;
     private string? textoBusqueda;
     private string filtroEstado = "Todas";
+    private HashSet<int> completando = [];
 
     protected override async Task OnInitializedAsync()
     {
@@ -148,10 +150,16 @@
     {
         cargando = true;
         dashboard = await ActividadService.ObtenerDashboardAsync(
-            usuarioId,
-            textoBusqueda,
-            filtroEstado);
+            usuarioId, textoBusqueda, filtroEstado);
         cargando = false;
+    }
+
+    private async Task CompletarActividad(int id)
+    {
+        completando.Add(id);
+        await ActividadService.CompletarAsync(id);
+        completando.Remove(id);
+        await CargarDashboard();
     }
 
     private async Task OnBusquedaChanged(ChangeEventArgs e)
@@ -160,8 +168,5 @@
         await CargarDashboard();
     }
 
-    private async Task OnFiltroChanged()
-    {
-        await CargarDashboard();
-    }
+    private async Task OnFiltroChanged() => await CargarDashboard();
 }
