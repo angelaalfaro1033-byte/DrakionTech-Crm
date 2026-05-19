@@ -103,7 +103,7 @@
             </div>
 
             <button type="submit" class="btn btn-primary">Guardar</button>
-            <a class="btn btn-secondary ms-2" href="/empresas/@EmpresaId/actividades">Cancelar</a>
+            <a class="btn btn-secondary ms-2" href="/dashboardActividades">Cancelar</a>
 
         </EditForm>
     </div>
@@ -112,7 +112,6 @@
 @code {
     [Parameter] public int EmpresaId { get; set; }
 
-    // ← Lee el query string ?previaId=X
     [SupplyParameterFromQuery(Name = "previaId")]
     public int? PreviaId { get; set; }
 
@@ -132,7 +131,6 @@
         modelo.EstadoActividadId = 1;
         modelo.UsuarioId = usuarioId;
 
-        // ← Aquí se vincula la actividad previa
         if (PreviaId.HasValue)
             modelo.ActividadPreviaId = PreviaId.Value;
 
