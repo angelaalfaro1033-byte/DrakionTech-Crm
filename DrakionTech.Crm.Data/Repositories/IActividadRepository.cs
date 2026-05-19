@@ -35,5 +35,8 @@ namespace DrakionTech.Crm.Data.Repositories
         Task<IEnumerable<Actividad>> ObtenerDashboardPorUsuarioAsync(
               int usuarioId,
               CancellationToken ct = default);
+        Task<IEnumerable<Actividad>> ObtenerCadenaAsync(
+            int actividadId,
+            CancellationToken ct = default);
     }
 }

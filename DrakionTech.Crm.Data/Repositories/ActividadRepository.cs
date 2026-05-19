@@ -14,8 +14,8 @@ namespace DrakionTech.Crm.Data.Repositories
         }
 
         public async Task<IEnumerable<Actividad>> ObtenerPorEmpresaIdAsync(
-      int empresaId,
-      CancellationToken ct = default)
+    int empresaId,
+    CancellationToken ct = default)
         {
             return await _context.Actividades
                 .Include(a => a.TipoActividad)
@@ -24,6 +24,8 @@ namespace DrakionTech.Crm.Data.Repositories
                 .Include(a => a.Empresa)
                 .Include(a => a.Contacto)
                 .Include(a => a.Oportunidad)
+                .Include(a => a.ActividadPrevia)          // ← agregar
+                    .ThenInclude(p => p.TipoActividad)    // ← agregar
                 .Where(a => a.EmpresaId == empresaId)
                 .AsNoTracking()
                 .ToListAsync(ct);
@@ -115,8 +117,8 @@ namespace DrakionTech.Crm.Data.Repositories
         }
 
         public async Task<IEnumerable<Actividad>> ObtenerDashboardPorUsuarioAsync(
-             int usuarioId,
-             CancellationToken ct = default)
+     int usuarioId,
+     CancellationToken ct = default)
         {
             return await _context.Actividades
                 .Include(a => a.TipoActividad)
@@ -124,11 +126,43 @@ namespace DrakionTech.Crm.Data.Repositories
                 .Include(a => a.Empresa)
                 .Include(a => a.Contacto)
                 .Include(a => a.Oportunidad)
+                .Include(a => a.ActividadPrevia)          // ← agregar
+                    .ThenInclude(p => p.TipoActividad)    // ← agregar
                 .Where(a =>
                     a.UsuarioId == usuarioId &&
                     a.EstadoActividad.Id != SeedIds.EstadoActividadCancelada)
                 .AsNoTracking()
                 .ToListAsync(ct);
+        }
+
+        public async Task<IEnumerable<Actividad>> ObtenerCadenaAsync(
+            int actividadId,
+            CancellationToken ct = default)
+        {
+            // Sube hasta la raíz de la cadena
+            var todas = await _context.Actividades
+                .Include(a => a.TipoActividad)
+                .Include(a => a.EstadoActividad)
+                .AsNoTracking()
+                .ToListAsync(ct);
+
+            // Encuentra la raíz
+            var actual = todas.FirstOrDefault(a => a.Id == actividadId);
+            while (actual?.ActividadPreviaId != null)
+                actual = todas.FirstOrDefault(a => a.Id == actual.ActividadPreviaId);
+
+            if (actual == null) return [];
+
+            // Construye la cadena hacia adelante
+            var cadena = new List<Actividad>();
+            var nodo = actual;
+            while (nodo != null)
+            {
+                cadena.Add(nodo);
+                nodo = todas.FirstOrDefault(a => a.ActividadPreviaId == nodo.Id);
+            }
+
+            return cadena;
         }
     }
 }

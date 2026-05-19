@@ -1,5 +1,9 @@
 ﻿@page "/"
 @attribute [Authorize]
+@inject IActividadService ActividadService
+@inject AuthenticationStateProvider AuthStateProvider
+@using Microsoft.AspNetCore.Components.Authorization
+@using DrakionTech.Crm.Web.Extensions
 
 <div class="home-container">
     <div class="home-header">
@@ -7,8 +11,33 @@
         <p>¿Qué quieres hacer hoy?</p>
     </div>
 
-    <p class="section-title">Acciones rápidas</p>
+    @* Resumen de actividades *@
+    <p class="section-title">Mis actividades</p>
+    @if (cargando)
+    {
+        <div class="resumen-grid">
+            <div class="resumen-card programada skeleton"></div>
+            <div class="resumen-card completada skeleton"></div>
+        </div>
+    }
+    else
+    {
+        <div class="resumen-grid">
+            <div class="resumen-card programada" @onclick="GoActividades">
+                <span class="resumen-numero">@dashboard?.TotalPendientes</span>
+                <span class="resumen-label">Programadas</span>
+                <i class="bi bi-arrow-right resumen-arrow"></i>
+            </div>
+            <div class="resumen-card completada" @onclick="GoActividades">
+                <span class="resumen-numero">@dashboard?.TotalCompletadas</span>
+                <span class="resumen-label">Completadas</span>
+                <i class="bi bi-arrow-right resumen-arrow"></i>
+            </div>
+        </div>
+    }
 
+    @* Acciones rápidas *@
+    <p class="section-title" style="margin-top:2rem;">Acciones rápidas</p>
     <div class="actions-grid">
         <div class="action-card @(loadingCard == "empresa" ? "loading" : "")" @onclick="GoEmpresa">
             @if (loadingCard == "empresa")
@@ -24,7 +53,6 @@
             </div>
             <i class="bi bi-arrow-right card-arrow"></i>
         </div>
-
         <div class="action-card @(loadingCard == "usuario" ? "loading" : "")" @onclick="GoUsuario">
             @if (loadingCard == "usuario")
             {
@@ -39,7 +67,6 @@
             </div>
             <i class="bi bi-arrow-right card-arrow"></i>
         </div>
-
         <div class="action-card @(loadingCard == "empleado" ? "loading" : "")" @onclick="GoEmpleado">
             @if (loadingCard == "empleado")
             {
@@ -54,7 +81,6 @@
             </div>
             <i class="bi bi-arrow-right card-arrow"></i>
         </div>
-
         <div class="action-card @(loadingCard == "eventos" ? "loading" : "")" @onclick="GoEventos">
             @if (loadingCard == "eventos")
             {
@@ -74,7 +100,24 @@
 
 @code {
     [Inject] private NavigationManager Nav { get; set; } = default!;
+
+    private DashboardActividadDto? dashboard;
+    private bool cargando = true;
     private string? loadingCard;
+    private int usuarioId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        usuarioId = authState.User.GetUsuarioId();
+        dashboard = await ActividadService.ObtenerDashboardAsync(usuarioId, null, "Todas");
+        cargando = false;
+    }
+
+    private void GoActividades()
+    {
+        Nav.NavigateTo("/dashboardActividades");
+    }
 
     private async Task NavigateWithLoading(string key, string url)
     {

@@ -18,7 +18,8 @@ namespace DrakionTech.Crm.Business.Services
         private readonly IEstadoActividadRepository _estadoActividadRepository;
         private readonly ITipoActividadRepository _tipoActividadRepository;
         private readonly IWhatsAppNotificationService _whatsapp;
-
+        private const int EstadoProgramadaId = 1;
+        private const int EstadoCompletadaId = 2;
 
         public ActividadService(
              IActividadRepository actividadRepository,
@@ -47,6 +48,13 @@ namespace DrakionTech.Crm.Business.Services
             return _mapper.Map<IEnumerable<TipoActividadDto>>(tipos);
         }
 
+        public async Task<IEnumerable<ActividadDto>> ObtenerCadenaAsync(
+    int actividadId,
+    CancellationToken ct = default)
+        {
+            var cadena = await _actividadRepository.ObtenerCadenaAsync(actividadId, ct);
+            return _mapper.Map<IEnumerable<ActividadDto>>(cadena);
+        }
         public async Task<int> CrearAsync(
     CrearActividadDto dto,
     CancellationToken ct = default)
@@ -110,29 +118,25 @@ namespace DrakionTech.Crm.Business.Services
         }
 
         public async Task<DashboardActividadDto> ObtenerDashboardAsync(
-            int UsuarioId,
-            string? busqueda = null,
-            string? filtroEstado = null,
-            CancellationToken ct = default)
+     int UsuarioId,
+     string? busqueda = null,
+     string? filtroEstado = null,
+     CancellationToken ct = default)
         {
             var entidades = await _actividadRepository
                 .ObtenerDashboardPorUsuarioAsync(UsuarioId, ct);
 
-            var ahora = DateTime.UtcNow;
-            var limiteProxima = ahora.AddDays(3);
-
             var actividades = entidades.Select(a =>
             {
                 var dto = _mapper.Map<ActividadDto>(a);
-                var fechaVenc = a.Fin ?? a.Inicio;
 
-                dto.ClasificacionEstado = fechaVenc < ahora
-                    ? "Vencida"
-                    : fechaVenc <= limiteProxima
-                        ? "ProximaAVencer"
-                        : "Pendiente";
+                // La clasificación ahora viene del estado real en BD
+                dto.ClasificacionEstado = a.EstadoActividadId == EstadoCompletadaId
+                    ? "Completada"
+                    : "Programada";
 
-                dto.TiempoRelativo = CalcularTiempoRelativo(fechaVenc, ahora);
+                var fechaRef = a.Fin ?? a.Inicio;
+                dto.TiempoRelativo = CalcularTiempoRelativo(fechaRef, DateTime.UtcNow);
 
                 return dto;
             }).ToList();
@@ -154,27 +158,29 @@ namespace DrakionTech.Crm.Business.Services
                     .ToList();
             }
 
-            var totalVencidas = actividades.Count(a => a.ClasificacionEstado == "Vencida");
-            var totalProximas = actividades.Count(a => a.ClasificacionEstado == "ProximaAVencer");
-            var totalPendientes = actividades.Count(a => a.ClasificacionEstado == "Pendiente");
-
             var ordenadas = actividades
-                .OrderBy(a => a.ClasificacionEstado switch
-                {
-                    "Vencida" => 0,
-                    "ProximaAVencer" => 1,
-                    _ => 2
-                })
+                .OrderBy(a => a.ClasificacionEstado == "Programada" ? 0 : 1)
                 .ThenBy(a => a.FechaVencimiento)
                 .ToList();
 
             return new DashboardActividadDto
             {
-                TotalVencidas = totalVencidas,
-                TotalProximasAVencer = totalProximas,
-                TotalPendientes = totalPendientes,
+                TotalPendientes = actividades.Count(a => a.ClasificacionEstado == "Programada"),
+                TotalCompletadas = actividades.Count(a => a.ClasificacionEstado == "Completada"),
                 Actividades = ordenadas
             };
+        }
+
+        // Nuevo método
+        public async Task CompletarAsync(int actividadId, CancellationToken ct = default)
+        {
+            var actividad = await _actividadRepository.ObtenerPorIdAsync(actividadId, ct)
+                ?? throw new EntidadNoEncontradaException("Actividad", actividadId);
+
+            actividad.EstadoActividadId = EstadoCompletadaId;
+            actividad.Fin = DateTime.UtcNow;
+
+            await _actividadRepository.ActualizarAsync(actividad, ct);
         }
 
         private static string CalcularTiempoRelativo(DateTime fechaVenc, DateTime ahora)
