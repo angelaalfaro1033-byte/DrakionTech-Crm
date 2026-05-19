@@ -2,9 +2,9 @@
 @layout EmptyLayout
 @attribute [AllowAnonymous]
 @using DrakionTech.Crm.Data.Repositories.Interfaces
-@inject IEmpleadoRepository Repo
 @inject NavigationManager Nav
-
+@using DrakionTech.Crm.Business.Interfaces
+@inject IUsuarioService UsuarioService
 <div class="login-wrapper">
     <div class="login-card registro-card">
 
@@ -154,8 +154,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var usuarios = await Repo.ObtenerTodosAsync();
-        SistemaConUsuarios = usuarios.Any();
+        SistemaConUsuarios = await UsuarioService.ExisteAlgunUsuarioAsync();
     }
 
     private bool TieneLongitud  => Password?.Length >= 8;
@@ -222,12 +221,8 @@
             return;
         }
 
-        var usuarios = await Repo.ObtenerTodosAsync();
-        if (usuarios.Any())
-        {
-            SistemaConUsuarios = true;
-            return;
-        }
+        SistemaConUsuarios = await UsuarioService.ExisteAlgunUsuarioAsync();
+        if (SistemaConUsuarios) return;
         Cargando = true;
 
         // Llamar al endpoint directamente

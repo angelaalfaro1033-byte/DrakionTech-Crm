@@ -126,4 +126,10 @@ public class UsuarioService : IUsuarioService
 
         await _repository.UpdateAsync(usuario);
     }
+
+    public async Task<bool> ExisteAlgunUsuarioAsync()
+    {
+        var usuarios = await _repository.GetAllAsync();
+        return usuarios.Count > 0;
+    }
 }
