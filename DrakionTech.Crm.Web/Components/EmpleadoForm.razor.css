@@ -1,56 +1,17 @@
-﻿.form-container {
-    width: 100%;
-}
-
-.form-card {
+﻿/* Separación superior de los botones */
+.empleado-form-actions {
     display: flex;
-    flex-direction: column;
-    gap: 18px;
+    gap: 10px;
+    margin-top: 1.5rem;
 }
 
-.form-title {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 8px;
+/* Ajuste de altura del select para igualar form-control */
+.form-select {
+    height: 40px;
 }
 
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 16px;
-    row-gap: 14px;
-}
-
-.form-field {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-    .form-field label {
-        font-size: 13px;
-        font-weight: 500;
-        color: #374151;
-    }
-
-.input-control {
-    width: 100%;
-    min-height: 36px;
-    box-sizing: border-box;
-}
-
-    .input-control:focus {
-        outline: none;
-        border-color: #2563eb;
-    }
-
-.full-width {
-    grid-column: 1 / -1;
-}
-
-.form-actions {
-    display: flex;
-    justify-content: flex-start;
-    gap: 12px;
-    margin-top: 10px;
+/* Mensajes de validación */
+.text-danger.small {
+    font-size: 0.78rem;
+    margin-top: 3px;
 }

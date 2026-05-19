@@ -134,6 +134,12 @@
         listaFiltrada = query.ToList();
     }
 
-    private async Task Desactivar(int id) { await EspecialidadService.DesactivarAsync(id); await Cargar(); }
-    private async Task Activar(int id) { await EspecialidadService.ActivarAsync(id); await Cargar(); }
+    private async Task Desactivar(int id) => await CambiarEstado(id, EspecialidadService.DesactivarAsync);
+    private async Task Activar(int id) => await CambiarEstado(id, EspecialidadService.ActivarAsync);
+
+    private async Task CambiarEstado(int id, Func<int, Task> accion)
+    {
+        await accion(id);
+        await Cargar();
+    }
 }

@@ -12,5 +12,6 @@ namespace DrakionTech.Crm.Business.Interfaces
         Task<EmpleadoListDto> ObtenerPorIdAsync(int id);
 
         Task<bool> ActivarCuentaAsync(string token, string password);
+        Task<EmpleadoListDto?> ObtenerPorEmailAsync(string email);
     }
 }

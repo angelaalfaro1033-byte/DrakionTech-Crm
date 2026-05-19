@@ -32,6 +32,9 @@ namespace DrakionTech.Crm.Business
             services.AddScoped<IEspecialidadService, EspecialidadService>();
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IAuthSessionService, AuthSessionService>();
+            services.AddScoped<IExcelEmpleadoParser, ExcelEmpleadoParser>();
+            services.AddScoped<IImportarEmpleadosService, ImportarEmpleadosService>();
+            services.AddScoped<IPlantillaEmpleadoService, PlantillaEmpleadoService>();
 
             return services;
         }

@@ -20,6 +20,25 @@
     <script src="bootstrap/bootstrap.bundle.min.js"></script>
     <script src="site.js"></script>
     <script src="_framework/blazor.web.js"></script>
+    <script>
+        window.descargarArchivo = function (base64, nombreArchivo, tipoMime) {
+            const byteChars = atob(base64);
+            const byteNumbers = new Array(byteChars.length);
+            for (let i = 0; i < byteChars.length; i++) {
+                byteNumbers[i] = byteChars.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: tipoMime });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = nombreArchivo;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        };
+    </script>
 </body>
 
 </html>

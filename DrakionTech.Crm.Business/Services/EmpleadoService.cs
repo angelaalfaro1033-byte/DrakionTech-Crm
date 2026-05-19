@@ -56,7 +56,13 @@ namespace DrakionTech.Crm.Business.Services
 
                 IsActive = false,
                 ActivationToken = token,
-                ActivationTokenExpiration = DateTime.UtcNow.AddHours(24)
+                ActivationTokenExpiration = DateTime.UtcNow.AddHours(24),
+
+                TipoDocumento = dto.TipoDocumento,
+                NumeroDocumento = dto.NumeroDocumento,
+                Salario = dto.Salario.HasValue
+                    ? new EmpleadoSalario { Salario = dto.Salario.Value }
+                    : null,
             };
 
 
@@ -110,6 +116,19 @@ namespace DrakionTech.Crm.Business.Services
             empleado.Cargo = dto.Cargo;
             empleado.Rol = dto.Rol;
             empleado.FechaModificacion = DateTime.UtcNow;
+            empleado.TipoDocumento = dto.TipoDocumento;
+            empleado.NumeroDocumento = dto.NumeroDocumento;
+
+            if (dto.Salario.HasValue)
+            {
+                if (empleado.Salario is null)
+                    empleado.Salario = new EmpleadoSalario { Salario = dto.Salario.Value };
+                else
+                {
+                    empleado.Salario.Salario = dto.Salario.Value;
+                    empleado.Salario.FechaModificacion = DateTime.UtcNow;
+                }
+            }
 
             await _repository.ActualizarAsync(empleado);
         }
@@ -124,6 +143,7 @@ namespace DrakionTech.Crm.Business.Services
 
             await _repository.ActualizarAsync(empleado);
         }
+
         private static EmpleadoListDto MapToDto(Empleado e) => new()
         {
             Id = e.Id,
@@ -132,7 +152,15 @@ namespace DrakionTech.Crm.Business.Services
             Email = e.Email,
             Cargo = e.Cargo,
             Rol = e.Rol,
-            Activo = e.Activo
+            Activo = e.Activo,
+            TipoDocumento = e.TipoDocumento,
+            NumeroDocumento = e.NumeroDocumento,
+            Salario = e.Salario?.Salario
         };
+        public async Task<EmpleadoListDto?> ObtenerPorEmailAsync(string email)
+        {
+            var e = await _repository.ObtenerPorEmailAsync(email);
+            return e is null ? null : MapToDto(e);
+        }
     }
 }

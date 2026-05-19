@@ -8,5 +8,6 @@ namespace DrakionTech.Crm.Data.Repositories.Interfaces
         Task<Empleado?> ObtenerPorIdAsync(int id);
         Task AgregarAsync(Empleado empleado);
         Task ActualizarAsync(Empleado empleado);
+        Task<Empleado?> ObtenerPorEmailAsync(string email);
     }
 }

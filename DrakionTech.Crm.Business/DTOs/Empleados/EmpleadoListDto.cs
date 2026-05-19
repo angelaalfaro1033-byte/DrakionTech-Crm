@@ -1,4 +1,6 @@
-﻿namespace DrakionTech.Crm.Business.DTOs.Empleado
+﻿using DrakionTech.Crm.Data.Entities.Enums;
+
+namespace DrakionTech.Crm.Business.DTOs.Empleado
 {
     public class EmpleadoListDto
     {
@@ -6,9 +8,11 @@
         public string Nombre { get; set; } = null!;
         public string Apellido { get; set; } = null!;
         public string Email { get; set; } = null!;
-        public string Cargo { get; set; } = null!;   
-
+        public string Cargo { get; set; } = null!;
         public string Rol { get; set; } = null!;
         public bool Activo { get; set; }
+        public TipoDocumento TipoDocumento { get; set; }
+        public string? NumeroDocumento { get; set; }
+        public decimal? Salario { get; set; }
     }
 }

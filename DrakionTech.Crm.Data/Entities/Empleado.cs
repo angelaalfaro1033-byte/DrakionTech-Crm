@@ -1,4 +1,6 @@
-﻿namespace DrakionTech.Crm.Data.Entities
+﻿using DrakionTech.Crm.Data.Entities.Enums;
+
+namespace DrakionTech.Crm.Data.Entities
 {
     public class Empleado
     {
@@ -22,5 +24,9 @@
         public string? ActivationToken { get; set; }
 
         public DateTime? ActivationTokenExpiration { get; set; }
+        public TipoDocumento TipoDocumento { get; set; }
+        public string? NumeroDocumento { get; set; }
+
+        public EmpleadoSalario? Salario { get; set; }
     }
 }

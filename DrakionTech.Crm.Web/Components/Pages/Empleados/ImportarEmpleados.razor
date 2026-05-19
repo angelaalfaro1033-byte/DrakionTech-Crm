@@ -1,0 +1,135 @@
+﻿@page "/empleados/importar"
+@attribute [Authorize]
+@using DrakionTech.Crm.Business.Interfaces
+@using DrakionTech.Crm.Business.DTOs.Empleado
+@inject IImportarEmpleadosService ImportarService
+@inject IPlantillaEmpleadoService PlantillaService
+@inject IJSRuntime JS
+@inject NavigationManager Nav
+
+<div class="roles-container">
+
+    <div class="empresas-header">
+        <div>
+            <h1 class="empresas-title">Importar empleados</h1>
+            <p class="empresas-subtitle">Carga un archivo Excel (.xlsx) para crear o actualizar empleados</p>
+        </div>
+        <a class="btn btn-secondary" href="/empleados">Volver</a>
+    </div>
+
+    <div class="ui-card">
+
+        <div class="mb-4 d-flex align-items-center gap-3">
+            <div>
+                <p class="mb-1 fw-semibold" style="font-size:0.9rem;">¿Primera vez?</p>
+                <small class="text-muted">Descarga la plantilla con los encabezados y un ejemplo de fila.</small>
+            </div>
+            <button class="btn btn-outline-primary btn-sm" @onclick="DescargarPlantilla">
+                ⬇ Descargar plantilla
+            </button>
+        </div>
+
+        <hr class="mb-4" />
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Archivo Excel</label>
+            <InputFile OnChange="SeleccionarArchivo"
+                       accept=".xlsx,.xls"
+                       class="form-control" />
+            <small class="text-muted d-block mt-1">
+                Columnas requeridas en orden: TipoDocumento | NumeroDocumento | Nombre | Apellido | Email | Cargo | Rol | Salario
+            </small>
+        </div>
+
+        <div class="form-actions">
+            <button class="btn btn-primary" @onclick="Procesar" disabled="@(archivo is null || procesando)">
+                @(procesando ? "Procesando..." : "Importar")
+            </button>
+        </div>
+
+        @if (resultado is not null)
+        {
+            <div class="mt-4">
+                <div class="alert alert-success">
+                    ✅ Creados: <strong>@resultado.Creados</strong> &nbsp;|&nbsp;
+                    🔄 Actualizados: <strong>@resultado.Actualizados</strong>
+                </div>
+
+                @if (resultado.Errores.Any())
+                {
+                    <div class="alert alert-warning">
+                        <strong>Errores (@resultado.Errores.Count):</strong>
+                        <ul class="mb-0 mt-2">
+                            @foreach (var err in resultado.Errores)
+                            {
+                                <li>@err</li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <div class="alert alert-danger mt-3">@error</div>
+        }
+
+    </div>
+</div>
+
+@code {
+    private IBrowserFile? archivo;
+    private ImportarEmpleadosResultDto? resultado;
+    private bool procesando = false;
+    private string? error;
+
+    private void SeleccionarArchivo(InputFileChangeEventArgs e)
+    {
+        archivo = e.File;
+        resultado = null;
+        error = null;
+    }
+
+    private async Task Procesar()
+    {
+        if (archivo is null) return;
+
+        procesando = true;
+        error = null;
+        resultado = null;
+
+        try
+        {
+            using var stream = archivo.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            ms.Position = 0;
+
+            resultado = await ImportarService.ImportarAsync(ms);
+        }
+        catch (Exception ex)
+        {
+            error = $"Error al procesar el archivo: {ex.Message}";
+        }
+        finally
+        {
+            procesando = false;
+        }
+    }
+
+    private async Task DescargarPlantilla()
+    {
+        try
+        {
+            var bytes = PlantillaService.GenerarPlantillaExcel();
+            var base64 = Convert.ToBase64String(bytes);
+            await JS.InvokeVoidAsync("descargarArchivo", base64, "plantilla_empleados.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        }
+        catch (Exception ex)
+        {
+            error = $"Error al generar la plantilla: {ex.Message}";
+        }
+    }
+}

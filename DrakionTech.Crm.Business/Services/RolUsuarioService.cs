@@ -14,18 +14,12 @@ namespace DrakionTech.Crm.Business.Services
             _repository = repository;
         }
 
-        // =========================
-        // GET ALL
-        // =========================
         public async Task<List<RolUsuarioDto>> ObtenerTodosAsync()
         {
             var roles = await _repository.ObtenerTodosAsync();
             return roles.Select(MapToDto).ToList();
         }
 
-        // =========================
-        // GET BY ID
-        // =========================
         public async Task<RolUsuarioDto> ObtenerPorIdAsync(int id)
         {
             var rol = await _repository.ObtenerPorIdAsync(id)
@@ -34,9 +28,6 @@ namespace DrakionTech.Crm.Business.Services
             return MapToDto(rol);
         }
 
-        // =========================
-        // CREATE
-        // =========================
         public async Task CrearAsync(RolUsuarioDto dto)
         {
             var rol = new RolUsuario
@@ -47,9 +38,6 @@ namespace DrakionTech.Crm.Business.Services
             await _repository.AgregarAsync(rol);
         }
 
-        // =========================
-        // UPDATE
-        // =========================
         public async Task EditarAsync(RolUsuarioDto dto)
         {
             var rol = await _repository.ObtenerPorIdAsync(dto.Id)
@@ -61,9 +49,6 @@ namespace DrakionTech.Crm.Business.Services
             await _repository.ActualizarAsync(rol);
         }
 
-        // =========================
-        // ACTIVATE ROLE
-        // =========================
         public async Task DesactivarAsync(int id)
         {
             var rol = await _repository.ObtenerPorIdAsync(id)
@@ -72,9 +57,6 @@ namespace DrakionTech.Crm.Business.Services
             await _repository.ActualizarAsync(rol);
         }
 
-        // =========================
-        // DEACTIVATE ROLE
-        // =========================
         public async Task ActivarAsync(int id)
         {
             var rol = await _repository.ObtenerPorIdAsync(id)
@@ -82,9 +64,7 @@ namespace DrakionTech.Crm.Business.Services
             rol.Activo = true;
             await _repository.ActualizarAsync(rol);
         }
-        // =========================
-        // MAPPER
-        // =========================
+
         private static RolUsuarioDto MapToDto(RolUsuario r) => new()
         {
             Id = r.Id,

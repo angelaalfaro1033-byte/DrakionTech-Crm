@@ -52,13 +52,16 @@
             var e = await EmpleadoService.ObtenerPorIdAsync(id);
 
             empleado = new CrearEmpleadoDto
-                {
-                    Nombre = e.Nombre,
-                    Apellido = e.Apellido,
-                    Email = e.Email,
-                    Cargo = e.Cargo,
-                    Rol = e.Rol
-                };
+            {
+                Nombre = e.Nombre,
+                Apellido = e.Apellido,
+                Email = e.Email,
+                Cargo = e.Cargo,
+                Rol = e.Rol,
+                TipoDocumento = e.TipoDocumento,
+                NumeroDocumento = e.NumeroDocumento,
+                Salario = e.Salario
+            };
         }
         catch (Exception ex)
         {
@@ -75,17 +78,19 @@
         try
         {
             var dto = new ActualizarEmpleadoDto
-                {
-                    Id = id,
-                    Nombre = empleado.Nombre,
-                    Apellido = empleado.Apellido,
-                    Email = empleado.Email,
-                    Cargo = empleado.Cargo,
-                    Rol = empleado.Rol
-                };
+            {
+                Id = id,
+                Nombre = empleado.Nombre,
+                Apellido = empleado.Apellido,
+                Email = empleado.Email,
+                Cargo = empleado.Cargo,
+                Rol = empleado.Rol,
+                TipoDocumento = empleado.TipoDocumento,
+                NumeroDocumento = empleado.NumeroDocumento,
+                Salario = empleado.Salario
+            };
 
             await EmpleadoService.EditarAsync(dto);
-
             Nav.NavigateTo("/empleados");
         }
         catch (Exception ex)

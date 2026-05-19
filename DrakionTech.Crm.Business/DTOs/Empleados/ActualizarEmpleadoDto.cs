@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using DrakionTech.Crm.Data.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace DrakionTech.Crm.Business.DTOs.Empleado
 {
@@ -24,5 +25,14 @@ namespace DrakionTech.Crm.Business.DTOs.Empleado
 
         [Required]
         public string Rol { get; set; } = null!;
+        [Required(ErrorMessage = "El tipo de documento es obligatorio")]
+        public TipoDocumento TipoDocumento { get; set; }
+
+        [Required(ErrorMessage = "El número de documento es obligatorio")]
+        [RegularExpression(@"^\d+$", ErrorMessage = "El número de documento solo puede contener números")]
+        [StringLength(20, MinimumLength = 5, ErrorMessage = "El número de documento debe tener entre 5 y 20 dígitos")]
+        public string NumeroDocumento { get; set; } = null!;
+
+        public decimal? Salario { get; set; }
     }
 }

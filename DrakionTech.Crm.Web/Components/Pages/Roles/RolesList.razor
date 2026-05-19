@@ -144,15 +144,12 @@
         rolesFiltrados = query.ToList();
     }
 
-    private async Task Desactivar(int id)
-    {
-        await RolUsuarioService.DesactivarAsync(id);
-        await Cargar();
-    }
+    private async Task Desactivar(int id) => await CambiarEstado(id, RolUsuarioService.DesactivarAsync);
+    private async Task Activar(int id) => await CambiarEstado(id, RolUsuarioService.ActivarAsync);
 
-    private async Task Activar(int id)
+    private async Task CambiarEstado(int id, Func<int, Task> accion)
     {
-        await RolUsuarioService.ActivarAsync(id);
+        await accion(id);
         await Cargar();
     }
 }

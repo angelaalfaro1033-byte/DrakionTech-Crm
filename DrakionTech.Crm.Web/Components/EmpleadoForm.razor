@@ -1,52 +1,101 @@
 ﻿@using DrakionTech.Crm.Business.DTOs.Empleado
+@using DrakionTech.Crm.Business.DTOs.RolUsuario
+@using DrakionTech.Crm.Business.DTOs.Especialidad
+@using DrakionTech.Crm.Business.Interfaces
+@using DrakionTech.Crm.Data.Entities.Enums
+@inject IRolUsuarioService RolService
+@inject IEspecialidadService EspecialidadService
 
-<EditForm Model="@Model" OnValidSubmit="OnValidSubmit" class="form-container">
+<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
     <DataAnnotationsValidator />
-    <ValidationSummary class="validation-summary" />
+    <ValidationSummary class="validation-summary-errors mb-3" />
 
-    <div class="form-card">
-        <h3 class="form-title">Información del Empleado</h3>
+    <div class="row g-3">
 
-        <div class="form-grid">
-            <div class="form-field">
-                <label>Nombre</label>
-                <InputText @bind-Value="Model.Nombre" class="input-control" />
-            </div>
-
-            <div class="form-field">
-                <label>Apellido</label>
-                <InputText @bind-Value="Model.Apellido" class="input-control" />
-            </div>
-
-            <div class="form-field">
-                <label>Correo</label>
-                <InputText @bind-Value="Model.Email" class="input-control" />
-            </div>
-
-            <div class="form-field">
-                <label>Cargo</label>
-                <InputText @bind-Value="Model.Cargo" class="input-control" />
-            </div>
-
-            <div class="form-field full-width">
-                <label>Rol</label>
-                <InputText @bind-Value="Model.Rol" class="input-control" />
-            </div>
+        <div class="col-md-6">
+            <label class="form-label">Tipo de documento</label>
+            <InputSelect @bind-Value="Model.TipoDocumento" class="form-select">
+                <option value="">-- Selecciona --</option>
+                <option value="@TipoDocumento.CC">Cédula de ciudadanía</option>
+                <option value="@TipoDocumento.NIT">NIT</option>
+                <option value="@TipoDocumento.CE">Cédula de extranjería</option>
+                <option value="@TipoDocumento.PA">Pasaporte</option>
+                <option value="@TipoDocumento.RC">Registro civil</option>
+                <option value="@TipoDocumento.TI">Tarjeta de identidad</option>
+            </InputSelect>
+            <ValidationMessage For="@(() => Model.TipoDocumento)" class="text-danger small" />
         </div>
 
-        <div class="form-actions">
-            <button type="submit" class="btn primary">
-                @TextoBoton
-            </button>
-
-            @if (OnCancel.HasDelegate)
-            {
-                <button type="button" class="btn secondary" @onclick="OnCancel">
-                    Cancelar
-                </button>
-            }
+        <div class="col-md-6">
+            <label class="form-label">Número de documento</label>
+            <InputText @bind-Value="Model.NumeroDocumento"
+                       class="form-control"
+                       placeholder="Solo números"
+                       inputmode="numeric" />
+            <ValidationMessage For="@(() => Model.NumeroDocumento)" class="text-danger small" />
         </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Nombre</label>
+            <InputText @bind-Value="Model.Nombre" class="form-control" />
+            <ValidationMessage For="@(() => Model.Nombre)" class="text-danger small" />
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Apellido</label>
+            <InputText @bind-Value="Model.Apellido" class="form-control" />
+            <ValidationMessage For="@(() => Model.Apellido)" class="text-danger small" />
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Correo electrónico</label>
+            <InputText @bind-Value="Model.Email" class="form-control" />
+            <ValidationMessage For="@(() => Model.Email)" class="text-danger small" />
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Rol</label>
+            <select class="form-select" value="@Model.RolUsuarioId"
+                    @onchange="OnRolChanged">
+                <option value="">-- Selecciona un rol --</option>
+                @foreach (var rol in roles)
+                {
+                    <option value="@rol.Id">@rol.Nombre</option>
+                }
+            </select>
+            <ValidationMessage For="@(() => Model.Rol)" class="text-danger small" />
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Cargo</label>
+            <select class="form-select" value="@Model.EspecialidadId"
+                    @onchange="OnCargoChanged"
+                    disabled="@(Model.RolUsuarioId is null)">
+                <option value="">-- Selecciona un cargo --</option>
+                @foreach (var esp in especialidadesFiltradas)
+                {
+                    <option value="@esp.Id">@esp.Nombre</option>
+                }
+            </select>
+            <ValidationMessage For="@(() => Model.Cargo)" class="text-danger small" />
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Salario</label>
+            <InputNumber @bind-Value="Model.Salario" class="form-control" placeholder="0.00" />
+            <ValidationMessage For="@(() => Model.Salario)" class="text-danger small" />
+        </div>
+
     </div>
+
+    <div class="empleado-form-actions">
+        <button type="submit" class="btn btn-primary">@TextoBoton</button>
+        @if (OnCancel.HasDelegate)
+        {
+            <button type="button" class="btn btn-secondary" @onclick="OnCancel">Cancelar</button>
+        }
+    </div>
+
 </EditForm>
 
 @code {
@@ -54,4 +103,74 @@
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
     [Parameter] public string TextoBoton { get; set; } = "Guardar";
+
+    private List<RolUsuarioDto> roles = [];
+    private List<EspecialidadDto> todasEspecialidades = [];
+    private List<EspecialidadDto> especialidadesFiltradas = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        roles = await RolService.ObtenerTodosAsync();
+        todasEspecialidades = await EspecialidadService.ObtenerTodosAsync();
+
+        if (!string.IsNullOrEmpty(Model.Rol) && Model.RolUsuarioId is null)
+        {
+            var rol = roles.FirstOrDefault(r => r.Nombre == Model.Rol);
+            if (rol is not null)
+            {
+                Model.RolUsuarioId = rol.Id;
+                FiltrarEspecialidades(rol.Id);
+
+                if (!string.IsNullOrEmpty(Model.Cargo) && Model.EspecialidadId is null)
+                {
+                    var esp = especialidadesFiltradas.FirstOrDefault(e => e.Nombre == Model.Cargo);
+                    if (esp is not null) Model.EspecialidadId = esp.Id;
+                }
+            }
+        }
+        else if (Model.RolUsuarioId is not null)
+        {
+            FiltrarEspecialidades(Model.RolUsuarioId.Value);
+        }
+    }
+
+    private void OnRolChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var id))
+        {
+            Model.RolUsuarioId = id;
+            Model.Rol = roles.FirstOrDefault(r => r.Id == id)?.Nombre ?? string.Empty;
+            FiltrarEspecialidades(id);
+        }
+        else
+        {
+            Model.RolUsuarioId = null;
+            Model.Rol = string.Empty;
+            especialidadesFiltradas = [];
+        }
+
+        Model.EspecialidadId = null;
+        Model.Cargo = string.Empty;
+    }
+
+    private void OnCargoChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var id))
+        {
+            Model.EspecialidadId = id;
+            Model.Cargo = todasEspecialidades.FirstOrDefault(x => x.Id == id)?.Nombre ?? string.Empty;
+        }
+        else
+        {
+            Model.EspecialidadId = null;
+            Model.Cargo = string.Empty;
+        }
+    }
+
+    private void FiltrarEspecialidades(int rolId)
+    {
+        especialidadesFiltradas = todasEspecialidades
+            .Where(e => e.RolUsuarioId == rolId && e.Activo)
+            .ToList();
+    }
 }

@@ -35,6 +35,13 @@ namespace DrakionTech.Crm.Data.Configurations
 
             entity.Property(e => e.Activo)
                 .HasDefaultValue(true);
+            entity.Property(e => e.TipoDocumento)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasMaxLength(50);
+
+            entity.Property(e => e.NumeroDocumento)
+                .HasMaxLength(20);
         }
     }
 }
