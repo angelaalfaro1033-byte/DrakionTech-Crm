@@ -1,25 +1,30 @@
 ﻿@page "/dashboardActividades"
 @attribute [Authorize]
+@rendermode InteractiveServer
 @inject IActividadService ActividadService
+@inject IEmpresaService EmpresaService
+@inject IContactoService ContactoService
+@inject IOportunidadService OportunidadService
 @inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
 @using Microsoft.AspNetCore.Components.Authorization
 @using DrakionTech.Crm.Web.Extensions
+@using DrakionTech.Crm.Business.DTOs.Actividad
+@using DrakionTech.Crm.Business.DTOs.Empresa
+@using DrakionTech.Crm.Business.DTOs.Contacto
+@using DrakionTech.Crm.Business.DTOs.Oportunidad
 
 <div class="dashboard-container">
 
     <!-- Resumen -->
     <div class="dashboard-resumen">
-        <div class="resumen-card vencida">
-            <span class="resumen-numero">@dashboard?.TotalVencidas</span>
-            <span class="resumen-label">Vencidas</span>
-        </div>
-        <div class="resumen-card proxima">
-            <span class="resumen-numero">@dashboard?.TotalProximasAVencer</span>
-            <span class="resumen-label">Próximas a vencer</span>
-        </div>
-        <div class="resumen-card pendiente">
+        <div class="resumen-card programada">
             <span class="resumen-numero">@dashboard?.TotalPendientes</span>
-            <span class="resumen-label">Pendientes</span>
+            <span class="resumen-label">Programadas</span>
+        </div>
+        <div class="resumen-card completada">
+            <span class="resumen-numero">@dashboard?.TotalCompletadas</span>
+            <span class="resumen-label">Completadas</span>
         </div>
     </div>
 
@@ -35,10 +40,15 @@
 
         <select class="form-select" @bind="filtroEstado" @bind:after="OnFiltroChanged">
             <option value="Todas">Todas</option>
-            <option value="Vencida">Vencidas</option>
-            <option value="ProximaAVencer">Próximas a vencer</option>
-            <option value="Pendiente">Pendientes</option>
+            <option value="Programada">Programadas</option>
+            <option value="Completada">Completadas</option>
         </select>
+
+        <!-- Botón nueva actividad -->
+        <a class="btn btn-primary" href="/actividades/crear">
+            <i class="bi bi-plus-circle me-1"></i>
+            Nueva actividad
+        </a>
     </div>
 
     <!-- Tabla -->
@@ -61,7 +71,6 @@
                         <th>Cliente</th>
                         <th>Contacto principal</th>
                         <th>Oportunidad</th>
-                        <th>Tipo</th>
                         <th>Vencimiento</th>
                         <th>Tiempo</th>
                         <th class="text-end">Acciones</th>
@@ -72,16 +81,25 @@
                     {
                         <tr>
                             <td>
-                                <span class="badge badge-@a.ClasificacionEstado?.ToLower()">
-                                    @a.EstadoActividadNombre
+                                <span class="badge badge-estado badge-@a.ClasificacionEstado?.ToLower()">
+                                    @a.ClasificacionEstado
                                 </span>
                             </td>
-                            <td>@a.TipoActividadNombre</td>
+                            <td>
+                                @a.TipoActividadNombre
+                                @if (a.ActividadPreviaId.HasValue)
+                                {
+                                    <br />
+                                    <small class="text-muted">
+                                        <i class="bi bi-arrow-return-right"></i>
+                                        Seguimiento de: @(a.ActividadPreviaNombre ?? "actividad anterior")
+                                    </small>
+                                }
+                            </td>
                             <td>
                                 @if (a.EmpresaId > 0)
                                 {
-                                    <a class="link-empresa"
-                                       href="/empresas/@a.EmpresaId">
+                                    <a class="link-empresa" href="/empresas/@a.EmpresaId">
                                         @a.EmpresaNombre
                                     </a>
                                 }
@@ -91,15 +109,14 @@
                                 }
                             </td>
                             <td>
-                                @if (!string.IsNullOrEmpty(a.ContactoTelefono))
+                                @if (!string.IsNullOrEmpty(a.ContactoNombre))
                                 {
                                     <span>@a.ContactoNombre</span>
-                                    <br />
-                                    <small class="text-muted">@a.ContactoTelefono</small>
-                                }
-                                else if (!string.IsNullOrEmpty(a.ContactoNombre))
-                                {
-                                    <span>@a.ContactoNombre</span>
+                                    @if (!string.IsNullOrEmpty(a.ContactoTelefono))
+                                    {
+                                        <br />
+                                        <small class="text-muted">@a.ContactoTelefono</small>
+                                    }
                                 }
                                 else
                                 {
@@ -107,7 +124,6 @@
                                 }
                             </td>
                             <td>@(a.OportunidadNombre ?? "—")</td>
-                            <td>@a.TipoActividadNombre</td>
                             <td>@(a.FechaVencimiento?.ToString("dd/MM/yyyy") ?? "—")</td>
                             <td>
                                 <span class="tiempo-@a.ClasificacionEstado?.ToLower()">
@@ -116,6 +132,15 @@
                             </td>
                             <td>
                                 <div class="ui-actions">
+                                    @if (a.ClasificacionEstado == "Programada")
+                                    {
+                                        <button class="btn-completar"
+                                                title="Marcar como completada"
+                                                @onclick="() => IniciarCompletar(a.Id, a.EmpresaId)"
+                                                disabled="@completando.Contains(a.Id)">
+                                            <i class="bi bi-check-circle"></i>
+                                        </button>
+                                    }
                                     <a href="/empresas/@a.EmpresaId/actividades/editar/@a.Id"
                                        title="Editar">
                                         <i class="bi bi-pencil"></i>
@@ -130,29 +155,287 @@
     </div>
 </div>
 
+<!-- Modal: actividad completada → seguimiento -->
+@if (mostrarModal)
+{
+    <div class="modal-overlay">
+        <div class="modal-box">
+            <h5>Actividad completada</h5>
+            <p>¿Deseas crear una actividad de seguimiento relacionada?</p>
+            <div class="modal-actions">
+                <button class="btn btn-primary" @onclick="IrACrearRelacionada">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    Sí, crear seguimiento
+                </button>
+                <button class="btn btn-secondary" @onclick="CerrarModal">
+                    No, por ahora no
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal: nueva actividad -->
+@if (mostrarModalNuevaActividad)
+{
+    <div class="modal-overlay">
+        <div class="modal-box" style="min-width: 480px;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Nueva actividad</h5>
+                <button class="btn-close" @onclick="CerrarModalNuevaActividad" />
+            </div>
+
+            @if (errorGuardar is not null)
+            {
+                <div class="alert alert-danger py-2">@errorGuardar</div>
+            }
+
+            <!-- Empresa -->
+            <div class="mb-3">
+                <label class="form-label">Empresa <span class="text-danger">*</span></label>
+                <select class="form-control" value="@empresaSeleccionadaId"
+                        @onchange="OnEmpresaChanged">
+                    <option value="">-- Seleccione empresa --</option>
+                    @foreach (var e in empresas)
+                    {
+                        <option value="@e.Id">@e.Nombre</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Tipo -->
+            <div class="mb-3">
+                <label class="form-label">Tipo de actividad <span class="text-danger">*</span></label>
+                <select class="form-control" @bind="nuevaActividad.TipoActividadId">
+                    <option value="">-- Seleccione --</option>
+                    @foreach (var t in tiposActividad)
+                    {
+                        <option value="@t.Id">@t.Nombre</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Fecha -->
+            <div class="mb-3">
+                <label class="form-label">Fecha <span class="text-danger">*</span></label>
+                <InputDate TValue="DateTime" class="form-control"
+                           @bind-Value="nuevaActividad.Fecha" />
+            </div>
+
+            <!-- Fecha de vencimiento -->
+            <div class="mb-3">
+                <label class="form-label">Fecha de vencimiento</label>
+                <InputDate TValue="DateTime?" class="form-control"
+                           @bind-Value="nuevaActividad.FechaFin" />
+            </div>
+
+            <!-- Contacto -->
+            <div class="mb-3">
+                <label class="form-label">Contacto (opcional)</label>
+                <select class="form-control" @bind="nuevaActividad.ContactoId"
+                        disabled="@(empresaSeleccionadaId is null)">
+                    <option value="">-- Sin contacto --</option>
+                    @foreach (var c in contactosModal)
+                    {
+                        <option value="@c.Id">@c.NombreCompleto</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Oportunidad -->
+            <div class="mb-3">
+                <label class="form-label">Oportunidad (opcional)</label>
+                <select class="form-control" @bind="nuevaActividad.OportunidadId"
+                        disabled="@(empresaSeleccionadaId is null)">
+                    <option value="">-- Sin oportunidad --</option>
+                    @foreach (var o in oportunidadesModal)
+                    {
+                        <option value="@o.Id">@o.NombreProyecto</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Resultado -->
+            <div class="mb-3">
+                <label class="form-label">Resultado</label>
+                <input class="form-control" @bind="nuevaActividad.Resultado"
+                       placeholder="Ej: Reunión realizada, Cliente interesado..." />
+            </div>
+
+            <!-- Notas -->
+            <div class="mb-3">
+                <label class="form-label">Notas</label>
+                <textarea class="form-control" rows="3"
+                          @bind="nuevaActividad.Notas"></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-primary"
+                        @onclick="GuardarNuevaActividad"
+                        disabled="@guardando">
+                    @if (guardando)
+                    {
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                    }
+                    Guardar
+                </button>
+                <button class="btn btn-secondary"
+                        @onclick="CerrarModalNuevaActividad"
+                        disabled="@guardando">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private DashboardActividadDto? dashboard;
     private bool cargando = true;
     private int usuarioId;
     private string? textoBusqueda;
     private string filtroEstado = "Todas";
+    private HashSet<int> completando = [];
+
+    private bool mostrarModal = false;
+    private int actividadCompletadaId;
+    private int empresaIdCompletada;
+
+    private bool mostrarModalNuevaActividad = false;
+    private bool guardando = false;
+    private string? errorGuardar;
+
+    private CrearActividadDto nuevaActividad = new();
+    private IEnumerable<EmpresaDto> empresas = [];
+    private IEnumerable<TipoActividadDto> tiposActividad = [];
+    private IEnumerable<ContactoDto> contactosModal = [];
+    private IEnumerable<OportunidadDto> oportunidadesModal = [];
+    private int? empresaSeleccionadaId;
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         usuarioId = authState.User.GetUsuarioId();
-        await CargarDashboard();
+
+        await Task.WhenAll(
+            CargarDashboard(),
+            CargarCatalogos()
+        );
+    }
+
+    private async Task CargarCatalogos()
+    {
+        empresas = await EmpresaService.ObtenerTodasAsync();
+        tiposActividad = await ActividadService.ObtenerTiposActividadAsync();
     }
 
     private async Task CargarDashboard()
     {
         cargando = true;
         dashboard = await ActividadService.ObtenerDashboardAsync(
-            usuarioId,
-            textoBusqueda,
-            filtroEstado);
+            usuarioId, textoBusqueda, filtroEstado);
         cargando = false;
     }
+
+    private void AbrirModalNuevaActividad()
+    {
+        nuevaActividad = new CrearActividadDto
+        {
+            Fecha = DateTime.Today,
+            EstadoActividadId = 1,
+            UsuarioId = usuarioId
+        };
+        empresaSeleccionadaId = null;
+        contactosModal = [];
+        oportunidadesModal = [];
+        errorGuardar = null;
+        mostrarModalNuevaActividad = true;
+    }
+
+    private void CerrarModalNuevaActividad()
+    {
+        mostrarModalNuevaActividad = false;
+        errorGuardar = null;
+    }
+    private async Task OnEmpresaChanged(ChangeEventArgs e)
+    {
+        contactosModal = [];
+        oportunidadesModal = [];
+        nuevaActividad.ContactoId = null;
+        nuevaActividad.OportunidadId = null;
+
+        if (int.TryParse(e.Value?.ToString(), out var id))
+        {
+            empresaSeleccionadaId = id;
+            nuevaActividad.EmpresaId = id;
+
+            contactosModal = await ContactoService.ObtenerPorEmpresaAsync(id);
+            oportunidadesModal = await OportunidadService.ObtenerPorEmpresaAsync(id);
+        }
+        else
+        {
+            empresaSeleccionadaId = null;
+            nuevaActividad.EmpresaId = 0;
+        }
+    }
+
+    private async Task GuardarNuevaActividad()
+    {
+        errorGuardar = null;
+
+        if (nuevaActividad.EmpresaId == 0)
+        {
+            errorGuardar = "Debes seleccionar una empresa.";
+            return;
+        }
+
+        if (nuevaActividad.TipoActividadId is null)
+        {
+            errorGuardar = "Debes seleccionar el tipo de actividad.";
+            return;
+        }
+
+        guardando = true;
+
+        try
+        {
+            await ActividadService.CrearAsync(nuevaActividad);
+            mostrarModalNuevaActividad = false;
+            await CargarDashboard();
+        }
+        catch (Exception ex)
+        {
+            errorGuardar = $"Error al guardar: {ex.Message}";
+        }
+        finally
+        {
+            guardando = false;
+        }
+    }
+
+    private async Task IniciarCompletar(int id, int empresaId)
+    {
+        completando.Add(id);
+        StateHasChanged();
+
+        await ActividadService.CompletarAsync(id);
+
+        completando.Remove(id);
+        await CargarDashboard();
+
+        actividadCompletadaId = id;
+        empresaIdCompletada = empresaId;
+        mostrarModal = true;
+    }
+
+    private void IrACrearRelacionada()
+    {
+        mostrarModal = false;
+        Navigation.NavigateTo(
+            $"/empresas/{empresaIdCompletada}/actividades/crear?previaId={actividadCompletadaId}");
+    }
+
+    private void CerrarModal() => mostrarModal = false;
 
     private async Task OnBusquedaChanged(ChangeEventArgs e)
     {
@@ -160,8 +443,5 @@
         await CargarDashboard();
     }
 
-    private async Task OnFiltroChanged()
-    {
-        await CargarDashboard();
-    }
+    private async Task OnFiltroChanged() => await CargarDashboard();
 }

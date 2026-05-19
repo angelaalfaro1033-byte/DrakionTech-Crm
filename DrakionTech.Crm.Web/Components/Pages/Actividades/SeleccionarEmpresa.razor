@@ -1,0 +1,42 @@
+﻿@page "/actividades/crear"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@inject IEmpresaService EmpresaService
+@inject NavigationManager Navigation
+@using Microsoft.AspNetCore.Components.Authorization
+
+<div class="actividad-form-container">
+    <div class="actividad-form-card">
+
+        <h3 class="actividad-form-title">Nueva actividad</h3>
+        <p class="actividad-form-subtitle">Selecciona la empresa para continuar</p>
+
+        <div class="mb-3">
+            <label class="form-label">Empresa <span class="text-danger">*</span></label>
+            <select class="form-control" @onchange="OnEmpresaChanged">
+                <option value="">-- Seleccione empresa --</option>
+                @foreach (var e in empresas)
+                {
+                    <option value="@e.Id">@e.Nombre</option>
+                }
+            </select>
+        </div>
+
+        <a class="btn btn-secondary" href="/dashboardActividades">Cancelar</a>
+    </div>
+</div>
+
+@code {
+    private IEnumerable<EmpresaDto> empresas = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        empresas = await EmpresaService.ObtenerTodasAsync();
+    }
+
+    private void OnEmpresaChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var id))
+            Navigation.NavigateTo($"/empresas/{id}/actividades/crear");
+    }
+}

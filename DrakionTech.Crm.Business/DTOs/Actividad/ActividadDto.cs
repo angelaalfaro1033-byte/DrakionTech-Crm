@@ -21,4 +21,7 @@
     public DateTime FechaCreacion { get; set; }
     public string? ClasificacionEstado { get; set; }
     public string? TiempoRelativo { get; set; }
+
+    public int? ActividadPreviaId { get; set; }
+    public string? ActividadPreviaNombre { get; set; }
 }

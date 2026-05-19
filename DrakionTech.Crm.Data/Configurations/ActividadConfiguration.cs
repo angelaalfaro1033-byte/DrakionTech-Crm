@@ -74,6 +74,17 @@ namespace DrakionTech.Crm.Data.Configurations
                 .HasForeignKey(a => a.OportunidadId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // RELACIÓN CADENA DE ACTIVIDADES
+            builder.Property(a => a.ActividadPreviaId)
+                .IsRequired(false);
+
+            builder.HasOne(a => a.ActividadPrevia)
+                .WithMany(a => a.ActividadesRelacionadas)
+                .HasForeignKey(a => a.ActividadPreviaId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
+            builder.HasIndex(a => a.ActividadPreviaId);
             // FECHA CREACIÓN 
 
             builder.Property(a => a.FechaCreacion)

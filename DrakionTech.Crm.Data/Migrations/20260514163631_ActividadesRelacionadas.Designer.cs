@@ -4,6 +4,7 @@ using DrakionTech.Crm.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DrakionTech.Crm.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260514163631_ActividadesRelacionadas")]
+    partial class ActividadesRelacionadas
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -585,10 +588,6 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("NumeroDocumento")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
 
@@ -597,45 +596,12 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("TipoDocumento")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Email")
                         .IsUnique();
 
                     b.ToTable("Empleados", (string)null);
-                });
-
-            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.EmpleadoSalario", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("EmpleadoId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("FechaModificacion")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("FechaRegistro")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("Salario")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmpleadoId")
-                        .IsUnique();
-
-                    b.ToTable("EmpleadoSalarios", (string)null);
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Empresa", b =>
@@ -1791,17 +1757,6 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Navigation("RolContacto");
                 });
 
-            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.EmpleadoSalario", b =>
-                {
-                    b.HasOne("DrakionTech.Crm.Data.Entities.Empleado", "Empleado")
-                        .WithOne("Salario")
-                        .HasForeignKey("DrakionTech.Crm.Data.Entities.EmpleadoSalario", "EmpleadoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Empleado");
-                });
-
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Empresa", b =>
                 {
                     b.HasOne("DrakionTech.Crm.Data.Entities.Ciudad", "Ciudad")
@@ -1924,11 +1879,6 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Navigation("ActividadesRelacionadas");
 
                     b.Navigation("UsuariosAsignados");
-                });
-
-            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Empleado", b =>
-                {
-                    b.Navigation("Salario");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Empresa", b =>

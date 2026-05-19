@@ -325,12 +325,6 @@ namespace DrakionTech.Crm.Data.Seed
                     Id = SeedIds.EstadoActividadCompletada,
                     Nombre = "Completada",
                     Activo = true
-                },
-                new EstadoActividad
-                {
-                    Id = SeedIds.EstadoActividadCancelada,
-                    Nombre = "Cancelada",
-                    Activo = true
                 }
             );
         }

@@ -30,6 +30,88 @@
     margin-bottom: 14px;
 }
 
+.resumen-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 1rem;
+}
+
+.resumen-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 1.4rem 1.6rem;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    border: 1px solid transparent;
+}
+
+    .resumen-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .resumen-card.programada {
+        background: #fff1f2;
+        border-color: #fecdd3;
+    }
+
+    .resumen-card.completada {
+        background: #f0fdf4;
+        border-color: #bbf7d0;
+    }
+
+.resumen-numero {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.resumen-card.programada .resumen-numero {
+    color: #dc2626;
+}
+
+.resumen-card.completada .resumen-numero {
+    color: #16a34a;
+}
+
+.resumen-label {
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 6px;
+    color: var(--text-muted);
+}
+
+.resumen-arrow {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    font-size: 14px;
+    color: var(--text-muted);
+    opacity: 0.5;
+}
+
+.resumen-card.skeleton {
+    height: 90px;
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s infinite;
+    border-color: transparent;
+    cursor: default;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
 .actions-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -54,7 +136,7 @@
     .action-card:hover {
         border-color: #d1d5db;
         transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.07);
     }
 
     .action-card.loading {
@@ -107,7 +189,7 @@
 .card-loading {
     position: absolute;
     inset: 0;
-    background: rgba(255, 255, 255, 0.65);
+    background: rgba(255,255,255,0.65);
     backdrop-filter: blur(2px);
     display: flex;
     align-items: center;
