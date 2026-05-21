@@ -2,5 +2,5 @@
 
 public interface IEmailService
 {
-    Task SendTemplateAsync(string to, string templateName, Dictionary<string, string> values);
+    Task EnviarPlantillaAsync(string to, string templateName, Dictionary<string, string> values);
 }

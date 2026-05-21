@@ -41,7 +41,13 @@
                         <option value="@rol.Id">@rol.Nombre</option>
                     }
                 </InputSelect>
+                <ValidationMessage For="@(() => especialidad.RolUsuarioId)" class="text-danger small" />
             </div>
+
+            @if (!string.IsNullOrEmpty(error))
+            {
+                <div class="alert alert-danger mt-3">@error</div>
+            }
 
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">Crear</button>
@@ -55,6 +61,7 @@
 @code {
     private EspecialidadDto especialidad = new();
     private List<RolUsuarioDto> roles = new();
+    private string? error;
 
     protected override async Task OnInitializedAsync()
     {
@@ -63,8 +70,16 @@
 
     private async Task Guardar()
     {
-        await EspecialidadService.CrearAsync(especialidad);
-        Nav.NavigateTo("/especialidades");
+        try
+        {
+            error = null;
+            await EspecialidadService.CrearAsync(especialidad);
+            Nav.NavigateTo("/especialidades");
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
     }
 
     private void Cancelar() => Nav.NavigateTo("/especialidades");

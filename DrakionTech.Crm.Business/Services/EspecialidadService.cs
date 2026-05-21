@@ -1,4 +1,5 @@
-﻿using DrakionTech.Crm.Business.DTOs.Especialidad;
+﻿using DrakionTech.Crm.Business.Common;
+using DrakionTech.Crm.Business.DTOs.Especialidad;
 using DrakionTech.Crm.Business.Interfaces;
 using DrakionTech.Crm.Data.Entities;
 using DrakionTech.Crm.Data.Repositories;
@@ -24,12 +25,21 @@ namespace DrakionTech.Crm.Business.Services
         {
             var lista = await _repository.ObtenerTodosConRolAsync();
             var e = lista.FirstOrDefault(x => x.Id == id)
-                ?? throw new Exception("Especialidad no encontrada");
+                ?? throw new Exception(MensajesError.EspecialidadNoEncontrada);
             return MapToDto(e);
         }
 
         public async Task CrearAsync(EspecialidadDto dto)
         {
+            var lista = await _repository.ObtenerTodosConRolAsync();
+
+            var duplicado = lista.Any(e =>
+                e.Nombre.Trim().ToLower() == dto.Nombre.Trim().ToLower() &&
+                e.RolUsuarioId == dto.RolUsuarioId);
+
+            if (duplicado)
+                throw new Exception(string.Format(MensajesError.EspecialidadDuplicada, dto.Nombre));
+
             var entidad = new Especialidad
             {
                 Nombre = dto.Nombre,
@@ -37,13 +47,24 @@ namespace DrakionTech.Crm.Business.Services
                 RolUsuarioId = dto.RolUsuarioId,
                 Activo = true
             };
+
             await _repository.AgregarAsync(entidad);
         }
 
         public async Task EditarAsync(EspecialidadDto dto)
         {
+            var lista = await _repository.ObtenerTodosConRolAsync();
+
+            var duplicado = lista.Any(e =>
+                e.Id != dto.Id &&
+                e.Nombre.Trim().ToLower() == dto.Nombre.Trim().ToLower() &&
+                e.RolUsuarioId == dto.RolUsuarioId);
+
+            if (duplicado)
+                throw new Exception(string.Format(MensajesError.EspecialidadDuplicada, dto.Nombre));
+
             var entidad = await _repository.ObtenerPorIdAsync(dto.Id)
-                ?? throw new Exception("Especialidad no encontrada");
+                ?? throw new Exception(MensajesError.EspecialidadNoEncontrada);
 
             entidad.Nombre = dto.Nombre;
             entidad.Descripcion = dto.Descripcion;
@@ -56,7 +77,7 @@ namespace DrakionTech.Crm.Business.Services
         public async Task ActivarAsync(int id)
         {
             var entidad = await _repository.ObtenerPorIdAsync(id)
-                ?? throw new Exception("Especialidad no encontrada");
+                ?? throw new Exception(MensajesError.EspecialidadNoEncontrada);
             entidad.Activo = true;
             await _repository.ActualizarAsync(entidad);
         }
@@ -64,7 +85,7 @@ namespace DrakionTech.Crm.Business.Services
         public async Task DesactivarAsync(int id)
         {
             var entidad = await _repository.ObtenerPorIdAsync(id)
-                ?? throw new Exception("Especialidad no encontrada");
+                ?? throw new Exception(MensajesError.EspecialidadNoEncontrada);
             entidad.Activo = false;
             await _repository.ActualizarAsync(entidad);
         }

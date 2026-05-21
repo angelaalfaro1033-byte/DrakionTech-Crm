@@ -1,25 +1,26 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using DrakionTech.Crm.Business.Common;
+using System.ComponentModel.DataAnnotations;
 
 namespace DrakionTech.Crm.Business.DTOs.Usuario;
 
 public class CrearUsuarioDto
 {
-    [Required(ErrorMessage = "El nombre es obligatorio")]
-    [RegularExpression("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$", ErrorMessage = "El nombre solo puede contener letras")]
+    [Required(ErrorMessage = MensajesError.NombreObligatorio)]
+    [RegularExpression("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$", ErrorMessage = MensajesError.NombreSoloLetras)]
     public string Nombre { get; set; } = null!;
 
-    [Required(ErrorMessage = "El apellido es obligatorio")]
-    [RegularExpression("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$", ErrorMessage = "El apellido solo puede contener letras")]
+    [Required(ErrorMessage = MensajesError.ApellidoObligatorio)]
+    [RegularExpression("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$", ErrorMessage = MensajesError.ApellidoSoloLetras)]
     public string Apellido { get; set; } = null!;
 
-    [Required(ErrorMessage = "El correo es obligatorio")]
-    [EmailAddress(ErrorMessage = "El correo no es válido")]
+    [Required(ErrorMessage = MensajesError.EmailObligatorio)]
+    [EmailAddress(ErrorMessage = MensajesError.EmailInvalido)]
     public string Email { get; set; } = null!;
 
-    [Phone(ErrorMessage = "El teléfono no es válido")]
+    [Phone(ErrorMessage = MensajesError.TelefonoInvalido)]
     public string? Telefono { get; set; }
 
-    [Required(ErrorMessage = "El rol es obligatorio")]
-    [Range(1, int.MaxValue, ErrorMessage = "Selecciona un rol")]
+    [Required(ErrorMessage = MensajesError.RolObligatorio)]
+    [Range(1, int.MaxValue, ErrorMessage = MensajesError.RolSeleccionar)]
     public int RolId { get; set; }
 }

@@ -56,18 +56,21 @@
                         </td>
                         <td class="text-end">
                             <div class="ui-actions">
-
                                 <a href="/empleados/editar/@item.Id" title="Editar">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-
                                 @if (item.Activo)
                                 {
-                                    <a href="#" @onclick="() => Desactivar(item.Id)" @onclick:preventDefault title="Desactivar">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
+                                    <button class="btn btn-sm btn-success" @onclick="() => CambiarEstado(item.Id, EmpleadoService.DesactivarAsync)" title="Desactivar">
+                                        <i class="bi bi-toggle-on"></i>
+                                    </button>
                                 }
-
+                                else
+                                {
+                                    <button class="btn btn-sm btn-secondary" @onclick="() => CambiarEstado(item.Id, EmpleadoService.ActivarAsync)" title="Activar">
+                                        <i class="bi bi-toggle-off"></i>
+                                    </button>
+                                }
                             </div>
                         </td>
 
@@ -82,19 +85,16 @@
 @code {
     private List<EmpleadoListDto> empleados = new();
 
-    protected override async Task OnInitializedAsync()
-    {
-        await Cargar();
-    }
+    protected override async Task OnInitializedAsync() => await Cargar();
 
     private async Task Cargar()
     {
         empleados = await EmpleadoService.ObtenerTodosAsync();
     }
 
-    private async Task Desactivar(int id)
+    private async Task CambiarEstado(int id, Func<int, Task> accion)
     {
-        await EmpleadoService.DesactivarAsync(id);
+        await accion(id);
         await Cargar();
     }
 }

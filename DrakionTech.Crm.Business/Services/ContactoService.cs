@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DrakionTech.Crm.Business.Common;
 using DrakionTech.Crm.Business.DTOs.Catalogo;
 using DrakionTech.Crm.Business.DTOs.Contacto;
 using DrakionTech.Crm.Business.Exceptions;
@@ -35,11 +36,11 @@ namespace DrakionTech.Crm.Business.Services
         {
             var existeEmpresa = await _empresaRepository.ExisteAsync(dto.EmpresaId, ct);
             if (!existeEmpresa)
-                throw new ReglaNegocioException("La empresa asociada no existe");
+                throw new ReglaNegocioException(MensajesError.EmpresaAsociadaNoExiste);
 
             var existeRol = await _rolContactoRepository.ExisteAsync(dto.RolContactoId, ct);
             if (!existeRol)
-                throw new ReglaNegocioException("El rol de contacto no existe");
+                throw new ReglaNegocioException(MensajesError.RolContactoNoExiste);
 
             var contacto = _mapper.Map<Contacto>(dto);
 
@@ -58,7 +59,7 @@ namespace DrakionTech.Crm.Business.Services
 
             var existeRol = await _rolContactoRepository.ExisteAsync(dto.RolContactoId, ct);
             if (!existeRol)
-                throw new ReglaNegocioException("El rol de contacto no existe");
+                throw new ReglaNegocioException(MensajesError.RolContactoNoExiste);
 
             _mapper.Map(dto, contacto);
 

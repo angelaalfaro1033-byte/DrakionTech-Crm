@@ -2,6 +2,7 @@
 using System.Net.Mail;
 using Microsoft.Extensions.Options;
 using DrakionTech.Crm.Business.Configurations;
+using DrakionTech.Crm.Business.Common;
 
 namespace DrakionTech.Crm.Business.Services.Email;
 
@@ -18,13 +19,13 @@ public class SmtpEmailSender : IEmailSender
     {
 
         if (string.IsNullOrWhiteSpace(to))
-            throw new Exception("ERROR SMTP: destinatario (to) está vacío");
+            throw new Exception(MensajesError.DestinatarioVacio);
 
         if (string.IsNullOrWhiteSpace(_settings.From))
-            throw new Exception("ERROR SMTP: From está vacío");
+            throw new Exception(MensajesError.DesdeVacio);
 
         if (string.IsNullOrWhiteSpace(_settings.User))
-            throw new Exception("ERROR SMTP: User está vacío");
+            throw new Exception(MensajesError.UsuarioVacio);
 
         using var client = new SmtpClient(_settings.SmtpServer, _settings.Port)
         {
