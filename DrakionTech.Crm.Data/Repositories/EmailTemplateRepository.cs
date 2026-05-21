@@ -11,7 +11,7 @@ public class EmailTemplateRepository : IEmailTemplateRepository
         _context = context;
     }
 
-    public async Task<EmailTemplate?> GetByNombreAsync(string nombre)
+    public async Task<EmailTemplate?> ObtenerPorNombreAsync(string nombre)
     {
         return await _context.EmailTemplates
             .FirstOrDefaultAsync(x => x.Nombre == nombre && x.Activo);

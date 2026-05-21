@@ -1,8 +1,9 @@
-﻿using DrakionTech.Crm.Data.Entities;
-using DrakionTech.Crm.Business.Interfaces;
-using DrakionTech.Crm.Data.Repositories.Interfaces;
+﻿using DrakionTech.Crm.Business.Common;
 using DrakionTech.Crm.Business.DTOs.Empleado;
+using DrakionTech.Crm.Business.Interfaces;
 using DrakionTech.Crm.Business.Services.Email;
+using DrakionTech.Crm.Data.Entities;
+using DrakionTech.Crm.Data.Repositories.Interfaces;
 using Microsoft.Extensions.Configuration;
 namespace DrakionTech.Crm.Business.Services
 {
@@ -31,7 +32,7 @@ namespace DrakionTech.Crm.Business.Services
         public async Task<EmpleadoListDto> ObtenerPorIdAsync(int id)
         {
             var e = await _repository.ObtenerPorIdAsync(id)
-                ?? throw new Exception("Empleado no encontrado");
+                ?? throw new Exception(MensajesError.EmpleadoNoEncontrado);
 
             return MapToDto(e);
         }
@@ -40,7 +41,7 @@ namespace DrakionTech.Crm.Business.Services
         {
 
             if (string.IsNullOrWhiteSpace(dto.Email))
-                throw new Exception("El email es obligatorio");
+                throw new Exception(MensajesError.EmailObligatorio);
 
             var token = Guid.NewGuid().ToString();
 
@@ -72,11 +73,11 @@ namespace DrakionTech.Crm.Business.Services
 
 
             if (string.IsNullOrWhiteSpace(baseUrl))
-                throw new Exception("App:BaseUrl no está configurado");
+                throw new Exception(MensajesError.AppBaseUrlNoConfigurado);
 
             var link = $"{baseUrl}/activate?token={token}";
 
-            await _emailService.SendTemplateAsync(
+            await _emailService.EnviarPlantillaAsync(
                 empleado.Email,
                 "ActivacionCuenta",
                 new Dictionary<string, string>
@@ -108,7 +109,7 @@ namespace DrakionTech.Crm.Business.Services
         public async Task EditarAsync(ActualizarEmpleadoDto dto)
         {
             var empleado = await _repository.ObtenerPorIdAsync(dto.Id)
-                ?? throw new Exception("Empleado no encontrado");
+                ?? throw new Exception(MensajesError.EmpleadoNoEncontrado);
 
             empleado.Nombre = dto.Nombre;
             empleado.Apellido = dto.Apellido;
@@ -136,9 +137,20 @@ namespace DrakionTech.Crm.Business.Services
         public async Task DesactivarAsync(int id)
         {
             var empleado = await _repository.ObtenerPorIdAsync(id)
-                ?? throw new Exception("Empleado no encontrado");
+                ?? throw new Exception(MensajesError.EmpleadoNoEncontrado);
 
             empleado.Activo = false;
+            empleado.FechaModificacion = DateTime.UtcNow;
+
+            await _repository.ActualizarAsync(empleado);
+        }
+
+        public async Task ActivarAsync(int id)
+        {
+            var empleado = await _repository.ObtenerPorIdAsync(id)
+                ?? throw new Exception(MensajesError.EmpleadoNoEncontrado);
+
+            empleado.Activo = true;
             empleado.FechaModificacion = DateTime.UtcNow;
 
             await _repository.ActualizarAsync(empleado);

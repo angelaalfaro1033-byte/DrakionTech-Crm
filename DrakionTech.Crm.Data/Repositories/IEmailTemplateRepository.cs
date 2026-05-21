@@ -2,5 +2,5 @@
 
 public interface IEmailTemplateRepository
 {
-    Task<EmailTemplate?> GetByNombreAsync(string nombre);
+    Task<EmailTemplate?> ObtenerPorNombreAsync(string nombre);
 }

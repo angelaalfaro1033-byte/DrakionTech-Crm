@@ -130,7 +130,6 @@ namespace DrakionTech.Crm.Business.Services
             {
                 var dto = _mapper.Map<ActividadDto>(a);
 
-                // La clasificación ahora viene del estado real en BD
                 dto.ClasificacionEstado = a.EstadoActividadId == EstadoCompletadaId
                     ? "Completada"
                     : "Programada";

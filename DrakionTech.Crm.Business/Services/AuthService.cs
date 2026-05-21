@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using DrakionTech.Crm.Data.Repositories.Interfaces;
+using DrakionTech.Crm.Business.Common;
 
 public class AuthService : IAuthService
 {
@@ -24,7 +25,7 @@ public class AuthService : IAuthService
             return false;
 
         if (!user.IsActive)
-            throw new Exception("Cuenta no activada");
+            throw new Exception(MensajesError.CuentaNoActivada);
 
         if (string.IsNullOrEmpty(user.PasswordHash))
             return false;
