@@ -84,6 +84,17 @@ public class UsuarioService : IUsuarioService
         await _repository.UpdateAsync(usuario);
     }
 
+    public async Task ActivarAsync(int id)
+    {
+        var usuario = await _repository.GetByIdAsync(id)
+            ?? throw new Exception("Usuario no encontrado");
+
+        usuario.IsActive = true;
+        usuario.FechaModificacion = DateTime.UtcNow;
+
+        await _repository.UpdateAsync(usuario);
+    }
+
     public async Task<bool> ActivarCuentaAsync(string token, string password)
     {
         var usuario = (await _repository.GetAllAsync())
