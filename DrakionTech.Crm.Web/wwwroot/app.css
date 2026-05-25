@@ -106,7 +106,7 @@ a, .btn-link {
 }
 
 /* ================================================
-   5. VALIDACIÓN BLAZOR
+   5. VALIDACIï¿½N BLAZOR
    ================================================ */
 .valid.modified:not([type=checkbox]) {
     outline: 1px solid #26b050;
@@ -519,7 +519,6 @@ a, .btn-link {
         color: #374151;
         border-color: #d1d5db;
     }
-
 .action-danger {
     color: #dc2626 !important;
 }
@@ -534,4 +533,26 @@ a, .btn-link {
 
     .action-success:hover {
         color: #15803d !important;
+    }
+
+ul.validation-summary {
+    color: #dc2626;
+    font-size: 0.9rem;
+    padding-left: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+    ul.validation-summary li {
+        margin-bottom: 0.25rem;
+    }
+
+div.validation-summary {
+    color: #dc2626;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+    div.validation-summary ul {
+        padding-left: 1.2rem;
+        margin: 0;
     }

@@ -1,7 +1,9 @@
-﻿using DrakionTech.Crm.Data.Entities;
-using DrakionTech.Crm.Business.Interfaces;
-using DrakionTech.Crm.Data.Repositories.Interfaces;
+﻿using DrakionTech.Crm.Business.Common;
 using DrakionTech.Crm.Business.DTOs.Empleado;
+using DrakionTech.Crm.Business.Interfaces;
+using DrakionTech.Crm.Data.Entities;
+using DrakionTech.Crm.Data.Repositories.Interfaces;
+
 namespace DrakionTech.Crm.Business.Services
 {
     public class EmpleadoService : IEmpleadoService
@@ -22,13 +24,29 @@ namespace DrakionTech.Crm.Business.Services
         public async Task<EmpleadoListDto> ObtenerPorIdAsync(int id)
         {
             var e = await _repository.ObtenerPorIdAsync(id)
-                ?? throw new Exception("Empleado no encontrado");
+                ?? throw new Exception(MensajesError.EmpleadoNoEncontrado);
 
             return MapToDto(e);
         }
 
         public async Task CrearAsync(CrearEmpleadoDto dto)
         {
+            if (string.IsNullOrWhiteSpace(dto.Email))
+                throw new Exception(MensajesError.EmailObligatorio);
+
+            var errores = new List<string>();
+
+            var documentoExistente = await _repository.ObtenerPorNumeroDocumentoAsync(dto.NumeroDocumento);
+            if (documentoExistente != null)
+                errores.Add(MensajesError.DocumentoEmpleadoDuplicado);
+
+            var empleadoExistente = await _repository.ObtenerPorEmailAsync(dto.Email);
+            if (empleadoExistente != null)
+                errores.Add(MensajesError.EmailEmpleadoDuplicado);
+
+            if (errores.Any())
+                throw new Exception(string.Join(" | ", errores));
+
             var empleado = new Empleado
             {
                 Nombre = dto.Nombre,
@@ -51,7 +69,7 @@ namespace DrakionTech.Crm.Business.Services
         public async Task EditarAsync(ActualizarEmpleadoDto dto)
         {
             var empleado = await _repository.ObtenerPorIdAsync(dto.Id)
-                ?? throw new Exception("Empleado no encontrado");
+                ?? throw new Exception(MensajesError.EmpleadoNoEncontrado);
 
             empleado.Nombre = dto.Nombre;
             empleado.Apellido = dto.Apellido;
@@ -79,9 +97,20 @@ namespace DrakionTech.Crm.Business.Services
         public async Task DesactivarAsync(int id)
         {
             var empleado = await _repository.ObtenerPorIdAsync(id)
-                ?? throw new Exception("Empleado no encontrado");
+                ?? throw new Exception(MensajesError.EmpleadoNoEncontrado);
 
             empleado.Activo = false;
+            empleado.FechaModificacion = DateTime.UtcNow;
+
+            await _repository.ActualizarAsync(empleado);
+        }
+
+        public async Task ActivarAsync(int id)
+        {
+            var empleado = await _repository.ObtenerPorIdAsync(id)
+                ?? throw new Exception(MensajesError.EmpleadoNoEncontrado);
+
+            empleado.Activo = true;
             empleado.FechaModificacion = DateTime.UtcNow;
 
             await _repository.ActualizarAsync(empleado);
@@ -100,6 +129,7 @@ namespace DrakionTech.Crm.Business.Services
             NumeroDocumento = e.NumeroDocumento,
             Salario = e.Salario?.Salario
         };
+
         public async Task<EmpleadoListDto?> ObtenerPorEmailAsync(string email)
         {
             var e = await _repository.ObtenerPorEmailAsync(email);

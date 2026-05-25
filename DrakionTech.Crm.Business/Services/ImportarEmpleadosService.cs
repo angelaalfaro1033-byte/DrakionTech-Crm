@@ -68,7 +68,7 @@ namespace DrakionTech.Crm.Business.Services
 
                         var baseUrl = _config["App:BaseUrl"] ?? "";
                         var link = $"{baseUrl}/activate?token={token}";
-                        await _emailService.SendTemplateAsync(nuevo.Email, "ActivacionCuenta",
+                        await _emailService.EnviarPlantillaAsync(nuevo.Email, "ActivacionCuenta",
                             new Dictionary<string, string>
                             {
                                 { "Nombre", nuevo.Nombre },

@@ -1,4 +1,5 @@
-﻿using DrakionTech.Crm.Data.Repositories.Interfaces;
+﻿using DrakionTech.Crm.Business.Common;
+using DrakionTech.Crm.Data.Repositories.Interfaces;
 
 namespace DrakionTech.Crm.Business.Services.Email;
 
@@ -18,12 +19,12 @@ public class EmailService : IEmailService
         _sender = sender;
     }
 
-    public async Task SendTemplateAsync(string to, string templateName, Dictionary<string, string> values)
+    public async Task EnviarPlantillaAsync(string to, string templateName, Dictionary<string, string> values)
     {
-        var template = await _repo.GetByNombreAsync(templateName);
+        var template = await _repo.ObtenerPorNombreAsync(templateName);
 
         if (template == null)
-            throw new Exception("Template no existe");
+            throw new Exception(MensajesError.PlantinaNoExiste);
 
         var body = _renderer.Render(template.TemplateHtml, values);
 

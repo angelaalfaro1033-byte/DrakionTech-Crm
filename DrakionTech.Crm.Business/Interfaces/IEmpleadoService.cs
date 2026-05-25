@@ -9,6 +9,7 @@ namespace DrakionTech.Crm.Business.Interfaces
         Task CrearAsync(CrearEmpleadoDto dto);
         Task EditarAsync(ActualizarEmpleadoDto dto);
         Task DesactivarAsync(int id);
+        Task ActivarAsync(int id);
         Task<EmpleadoListDto> ObtenerPorIdAsync(int id);
 
         Task<EmpleadoListDto?> ObtenerPorEmailAsync(string email);

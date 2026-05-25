@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DrakionTech.Crm.Business.Common;
 using DrakionTech.Crm.Business.DTOs;
 using DrakionTech.Crm.Business.DTOs.Oportunidad;
 using DrakionTech.Crm.Business.Exceptions;
@@ -31,10 +32,10 @@ namespace DrakionTech.Crm.Business.Services
         {
             var existeEmpresa = await _empresaRepository.ExisteAsync(dto.EmpresaId, ct);
             if (!existeEmpresa)
-                throw new ReglaNegocioException("La empresa asociada no existe");
+                throw new ReglaNegocioException(MensajesError.EmpresaAsociadaNoExiste);
 
             if (string.IsNullOrWhiteSpace(dto.NombreProyecto))
-                throw new ReglaNegocioException("El nombre del proyecto es obligatorio");
+                throw new ReglaNegocioException(MensajesError.NombreProyectoObligatorio);
 
             var oportunidad = _mapper.Map<Oportunidad>(dto);
 

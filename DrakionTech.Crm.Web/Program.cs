@@ -26,7 +26,7 @@ builder.Services.AddCrmBusiness();
 builder.Services.AddAutoMapper(typeof(CrmMappingProfile));
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// AUTENTICACIÓN Y AUTORIZACIÓN
+// AUTENTICACIï¿½N Y AUTORIZACIï¿½N
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {

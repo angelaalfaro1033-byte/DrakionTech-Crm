@@ -1,4 +1,5 @@
-﻿using DrakionTech.Crm.Data.Entities.Enums;
+﻿using DrakionTech.Crm.Business.Common;
+using DrakionTech.Crm.Data.Entities.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace DrakionTech.Crm.Business.DTOs.Empleado
@@ -8,15 +9,15 @@ namespace DrakionTech.Crm.Business.DTOs.Empleado
         [Required]
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "El nombre es obligatorio")]
+        [Required(ErrorMessage = MensajesError.NombreObligatorio)]
         [RegularExpression("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$")]
         public string Nombre { get; set; } = null!;
 
-        [Required(ErrorMessage = "El apellido es obligatorio")]
+        [Required(ErrorMessage = MensajesError.ApellidoObligatorio)]
         [RegularExpression("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$")]
         public string Apellido { get; set; } = null!;
 
-        [Required(ErrorMessage = "El correo es obligatorio")]
+        [Required(ErrorMessage = MensajesError.EmailObligatorio)]
         [EmailAddress]
         public string Email { get; set; } = null!;
 
@@ -25,12 +26,12 @@ namespace DrakionTech.Crm.Business.DTOs.Empleado
 
         [Required]
         public string Rol { get; set; } = null!;
-        [Required(ErrorMessage = "El tipo de documento es obligatorio")]
+        [Required(ErrorMessage = MensajesError.TipoDocumentoObligatorio)]
         public TipoDocumento TipoDocumento { get; set; }
 
-        [Required(ErrorMessage = "El número de documento es obligatorio")]
-        [RegularExpression(@"^\d+$", ErrorMessage = "El número de documento solo puede contener números")]
-        [StringLength(20, MinimumLength = 5, ErrorMessage = "El número de documento debe tener entre 5 y 20 dígitos")]
+        [Required(ErrorMessage = MensajesError.NumeroDocumentoObligatorio)]
+        [RegularExpression(@"^\d+$", ErrorMessage = MensajesError.NumeroDocumentoSoloNumeros)]
+        [StringLength(20, MinimumLength = 5, ErrorMessage = MensajesError.NumeroDocumentoLongitud)]
         public string NumeroDocumento { get; set; } = null!;
 
         public decimal? Salario { get; set; }

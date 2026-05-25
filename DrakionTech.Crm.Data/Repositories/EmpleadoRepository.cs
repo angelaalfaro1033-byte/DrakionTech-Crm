@@ -77,5 +77,12 @@ namespace DrakionTech.Crm.Data.Repositories
                 .Include(e => e.Salario)
                 .FirstOrDefaultAsync(e => e.Email == email);
         }
+
+        public async Task<Empleado?> ObtenerPorNumeroDocumentoAsync(string numeroDocumento)
+        {
+            return await _context.Empleados
+                .Include(e => e.Salario)
+                .FirstOrDefaultAsync(e => e.NumeroDocumento == numeroDocumento);
+        }
     }
 }

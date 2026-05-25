@@ -11,5 +11,6 @@ namespace DrakionTech.Crm.Business.Interfaces
         Task EditarAsync(EspecialidadDto dto);
         Task ActivarAsync(int id);
         Task DesactivarAsync(int id);
+        Task<EspecialidadDto> CrearYObtenerAsync(string nombre, int rolUsuarioId);
     }
 }

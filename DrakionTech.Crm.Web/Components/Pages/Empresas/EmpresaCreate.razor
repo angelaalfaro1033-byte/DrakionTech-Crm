@@ -32,16 +32,19 @@
                 <div class="col-md-6">
                     <label class="form-label required">Nombre</label>
                     <InputText class="form-control" @bind-Value="modelo.Nombre" />
+                    <ValidationMessage For="() => modelo.Nombre" class="text-danger small" />
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label required">NIT</label>
                     <InputText class="form-control" @bind-Value="modelo.Nit" />
+                    <ValidationMessage For="() => modelo.Nit" class="text-danger small" />
                 </div>
 
                 <div class="col-md-12">
                     <label class="form-label">Dirección</label>
                     <InputText class="form-control" @bind-Value="modelo.Direccion" />
+                    <ValidationMessage For="() => modelo.Direccion" class="text-danger small" />
                 </div>
 
                 <div class="col-md-6">
@@ -162,6 +165,7 @@
                     <DateInput TValue="DateTime"
                                Placeholder="DD-MM-AAAA"
                                @bind-Value="modelo.FechaVinculacion" />
+                    <ValidationMessage For="() => modelo.FechaVinculacion" class="text-danger small" />
                 </div>
 
                 <div class="col-md-6">

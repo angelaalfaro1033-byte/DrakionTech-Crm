@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using DrakionTech.Crm.Business.Common;
+using System.ComponentModel.DataAnnotations;
 
 namespace DrakionTech.Crm.Business.DTOs.Actividad
 {
@@ -13,13 +14,13 @@ namespace DrakionTech.Crm.Business.DTOs.Actividad
         [Required]
         public int UsuarioId { get; set; }
 
-        [Required(ErrorMessage = "El tipo de actividad es obligatorio")]
+        [Required(ErrorMessage = MensajesError.TipoActividadObligatorio)]
         public int? TipoActividadId { get; set; }
 
-        [Required(ErrorMessage = "El estado de la actividad es obligatorio")]
+        [Required(ErrorMessage = MensajesError.EstadoActividadObligatorio)]
         public int EstadoActividadId { get; set; }
 
-        [Required(ErrorMessage = "La fecha es obligatoria")]
+        [Required(ErrorMessage = MensajesError.FechaObligatoria)]
         public DateTime Fecha { get; set; }
 
         public DateTime? FechaFin { get; set; }

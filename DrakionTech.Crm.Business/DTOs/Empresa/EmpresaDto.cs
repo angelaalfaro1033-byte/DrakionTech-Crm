@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using DrakionTech.Crm.Business.Common;
+using System.ComponentModel.DataAnnotations;
 
 namespace DrakionTech.Crm.Business.DTOs.Empresa
 {
@@ -10,7 +11,7 @@ namespace DrakionTech.Crm.Business.DTOs.Empresa
         public string Nit { get; set; } = null!;
         public string Direccion { get; set; } = null!;
 
-        [EmailAddress(ErrorMessage = "El correo no tiene un formato válido.")]
+        [EmailAddress(ErrorMessage = MensajesError.EmailInvalidoFormato)]
         public string? Correo { get; set; }
 
         public int PaisId { get; set; }

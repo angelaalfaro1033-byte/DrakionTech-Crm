@@ -1,4 +1,5 @@
-﻿using DrakionTech.Crm.Business.DTOs.Usuario;
+﻿using DrakionTech.Crm.Business.Common;
+using DrakionTech.Crm.Business.DTOs.Usuario;
 using DrakionTech.Crm.Business.Interfaces;
 using DrakionTech.Crm.Business.Services.Email;
 using DrakionTech.Crm.Data.Entities;
@@ -32,14 +33,14 @@ public class UsuarioService : IUsuarioService
     public async Task<UsuarioListDto> ObtenerPorIdAsync(int id)
     {
         var usuario = await _repository.GetByIdAsync(id)
-            ?? throw new Exception("Usuario no encontrado");
+            ?? throw new Exception(MensajesError.UsuarioNoEncontrado);
         return MapToDto(usuario);
     }
 
     public async Task CrearAsync(CrearUsuarioDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.Email))
-            throw new Exception("El email es obligatorio");
+            throw new Exception(MensajesError.EmailObligatorio);
 
         var token = Guid.NewGuid().ToString();
 
@@ -59,11 +60,11 @@ public class UsuarioService : IUsuarioService
         await _repository.AddAsync(usuario);
 
         var baseUrl = _config["App:BaseUrl"]
-            ?? throw new Exception("App:BaseUrl no está configurado");
+            ?? throw new Exception(MensajesError.AppBaseUrlNoConfigurado);
 
         var link = $"{baseUrl}/activate?token={token}";
 
-        await _emailService.SendTemplateAsync(
+        await _emailService.EnviarPlantillaAsync(
             usuario.Email,
             "ActivacionCuenta",
             new Dictionary<string, string>
@@ -76,7 +77,7 @@ public class UsuarioService : IUsuarioService
     public async Task DesactivarAsync(int id)
     {
         var usuario = await _repository.GetByIdAsync(id)
-            ?? throw new Exception("Usuario no encontrado");
+            ?? throw new Exception(MensajesError.UsuarioNoEncontrado);
 
         usuario.IsActive = false;
         usuario.FechaModificacion = DateTime.UtcNow;
@@ -126,7 +127,7 @@ public class UsuarioService : IUsuarioService
     public async Task EditarAsync(ActualizarUsuarioDto dto)
     {
         var usuario = await _repository.GetByIdAsync(dto.Id)
-            ?? throw new Exception("Usuario no encontrado");
+            ?? throw new Exception(MensajesError.UsuarioNoEncontrado);
 
         usuario.Nombre = dto.Nombre;
         usuario.Apellido = dto.Apellido;
