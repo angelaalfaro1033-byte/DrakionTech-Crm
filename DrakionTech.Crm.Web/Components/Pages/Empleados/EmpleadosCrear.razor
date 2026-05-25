@@ -14,21 +14,41 @@
     </div>
 
     <div class="ui-card">
+        @if (!string.IsNullOrWhiteSpace(errorMensaje))
+        {
+            <ul class="validation-summary">
+                @foreach (var err in errorMensaje.Split(" | "))
+                {
+                    <li>@err</li>
+                }
+            </ul>
+        }
         <EmpleadoForm Model="empleado"
                       OnValidSubmit="Guardar"
                       OnCancel="Cancelar"
                       TextoBoton="Crear" />
     </div>
-
 </div>
 
 @code {
     private CrearEmpleadoDto empleado = new();
 
+    private string? errorMensaje;
+
     private async Task Guardar()
     {
-        await EmpleadoService.CrearAsync(empleado);
-        Nav.NavigateTo("/empleados");
+        try
+        {
+            errorMensaje = null;
+
+            await EmpleadoService.CrearAsync(empleado);
+
+            Nav.NavigateTo("/empleados");
+        }
+        catch (Exception ex)
+        {
+            errorMensaje = ex.Message;
+        }
     }
 
     private void Cancelar()
