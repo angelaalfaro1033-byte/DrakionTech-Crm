@@ -1,48 +1,67 @@
 ﻿@using DrakionTech.Crm.Business.DTOs.Usuario
 @using DrakionTech.Crm.Business.DTOs.RolUsuario
 
-<EditForm Model="@Model" OnValidSubmit="OnValidSubmit" class="form-container">
+<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
     <DataAnnotationsValidator />
-    <ValidationSummary class="validation-summary" />
-    <div class="form-card">
-        <h3 class="form-title">Información del Usuario</h3>
+
+    @if (tieneErrores)
+    {
+        <div class="alert alert-danger py-2 mb-3">
+            <ValidationSummary />
+        </div>
+    }
+
+    <div class="form-section">
+        <p class="form-section-title">Información personal</p>
         <div class="form-grid">
-            <div class="form-field">
-                <label>Nombre</label>
-                <InputText @bind-Value="Model.Nombre" class="input-control" />
+            <div class="mb-3">
+                <label class="form-label">Nombre <span class="text-danger">*</span></label>
+                <InputText @bind-Value="Model.Nombre" class="form-control" placeholder="Ej: María" />
+                <ValidationMessage For="@(() => Model.Nombre)" class="text-danger small mt-1" />
             </div>
-            <div class="form-field">
-                <label>Apellido</label>
-                <InputText @bind-Value="Model.Apellido" class="input-control" />
+            <div class="mb-3">
+                <label class="form-label">Apellido <span class="text-danger">*</span></label>
+                <InputText @bind-Value="Model.Apellido" class="form-control" placeholder="Ej: González" />
+                <ValidationMessage For="@(() => Model.Apellido)" class="text-danger small mt-1" />
             </div>
-            <div class="form-field">
-                <label>Correo</label>
-                <InputText @bind-Value="Model.Email" class="input-control" />
+            <div class="mb-3">
+                <label class="form-label">Correo electrónico <span class="text-danger">*</span></label>
+                <InputText @bind-Value="Model.Email" class="form-control" placeholder="correo@ejemplo.com" />
+                <ValidationMessage For="@(() => Model.Email)" class="text-danger small mt-1" />
             </div>
-            <div class="form-field">
-                <label>Teléfono</label>
-                <InputText @bind-Value="Model.Telefono" class="input-control" />
-            </div>
-            <div class="form-field full-width">
-                <label>Rol</label>
-                <InputSelect @bind-Value="Model.RolId" class="input-control">
-                    <option value="0">-- Selecciona un rol --</option>
-                    @foreach (var rol in Roles)
-                    {
-                        <option value="@rol.Id">@rol.Nombre</option>
-                    }
-                </InputSelect>
+            <div class="mb-3">
+                <label class="form-label">Teléfono</label>
+                <InputText @bind-Value="Model.Telefono" class="form-control" placeholder="Ej: +57 300 000 0000" />
+                <ValidationMessage For="@(() => Model.Telefono)" class="text-danger small mt-1" />
             </div>
         </div>
-        <div class="form-actions">
-            <button type="submit" class="btn primary">@TextoBoton</button>
-            @if (OnCancel.HasDelegate)
-            {
-                <button type="button" class="btn secondary" @onclick="OnCancel">
-                    Cancelar
-                </button>
-            }
+    </div>
+
+    <div class="form-section">
+        <p class="form-section-title">Acceso y permisos</p>
+        <div class="mb-3">
+            <label class="form-label">Rol <span class="text-danger">*</span></label>
+            <InputSelect @bind-Value="Model.RolId" class="form-select">
+                <option value="0">-- Selecciona un rol --</option>
+                @foreach (var rol in Roles)
+                {
+                    <option value="@rol.Id">@rol.Nombre</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => Model.RolId)" class="text-danger small mt-1" />
         </div>
+    </div>
+
+    <div class="form-footer">
+        <button type="submit" class="btn btn-primary">
+            @TextoBoton
+        </button>
+        @if (OnCancel.HasDelegate)
+        {
+            <button type="button" class="btn btn-secondary" @onclick="OnCancel">
+                Cancelar
+            </button>
+        }
     </div>
 </EditForm>
 
@@ -52,4 +71,6 @@
     [Parameter] public EventCallback OnValidSubmit { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
     [Parameter] public string TextoBoton { get; set; } = "Guardar";
+
+    private bool tieneErrores = false;
 }

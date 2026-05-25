@@ -1,26 +1,18 @@
 ﻿using DrakionTech.Crm.Business.Common;
 using DrakionTech.Crm.Business.DTOs.Empleado;
 using DrakionTech.Crm.Business.Interfaces;
-using DrakionTech.Crm.Business.Services.Email;
 using DrakionTech.Crm.Data.Entities;
 using DrakionTech.Crm.Data.Repositories.Interfaces;
-using Microsoft.Extensions.Configuration;
+
 namespace DrakionTech.Crm.Business.Services
 {
     public class EmpleadoService : IEmpleadoService
     {
         private readonly IEmpleadoRepository _repository;
-        private readonly IEmailService _emailService;
-        private readonly IConfiguration _config;
 
-        public EmpleadoService(
-    IEmpleadoRepository repository,
-    IEmailService emailService,
-    IConfiguration config)
+        public EmpleadoService(IEmpleadoRepository repository)
         {
             _repository = repository;
-            _emailService = emailService;
-            _config = config;
         }
 
         public async Task<List<EmpleadoListDto>> ObtenerTodosAsync()
@@ -55,8 +47,6 @@ namespace DrakionTech.Crm.Business.Services
             if (errores.Any())
                 throw new Exception(string.Join(" | ", errores));
 
-            var token = Guid.NewGuid().ToString();
-
             var empleado = new Empleado
             {
                 Nombre = dto.Nombre,
@@ -66,9 +56,6 @@ namespace DrakionTech.Crm.Business.Services
                 Rol = dto.Rol,
                 Activo = true,
                 FechaCreacion = DateTime.UtcNow,
-                IsActive = false,
-                ActivationToken = token,
-                ActivationTokenExpiration = DateTime.UtcNow.AddHours(24),
                 TipoDocumento = dto.TipoDocumento,
                 NumeroDocumento = dto.NumeroDocumento,
                 Salario = dto.Salario.HasValue
@@ -77,42 +64,8 @@ namespace DrakionTech.Crm.Business.Services
             };
 
             await _repository.AgregarAsync(empleado);
-
-            var baseUrl = _config["App:BaseUrl"];
-            if (string.IsNullOrWhiteSpace(baseUrl))
-                throw new Exception(MensajesError.AppBaseUrlNoConfigurado);
-
-            var link = $"{baseUrl}/activate?token={token}";
-
-            await _emailService.EnviarPlantillaAsync(
-                empleado.Email,
-                "ActivacionCuenta",
-                new Dictionary<string, string>
-                {
-            { "Nombre", empleado.Nombre },
-            { "ActivationLink", link }
-                });
         }
 
-        public async Task<bool> ActivarCuentaAsync(string token, string password)
-        {
-            var empleado = (await _repository.ObtenerTodosAsync())
-                .FirstOrDefault(x => x.ActivationToken == token);
-
-            if (empleado == null)
-                return false;
-
-            if (empleado.ActivationTokenExpiration < DateTime.UtcNow)
-                return false;
-
-            empleado.PasswordHash = BCrypt.Net.BCrypt.HashPassword(password);
-            empleado.IsActive = true;
-            empleado.ActivationToken = null;
-
-            await _repository.ActualizarAsync(empleado);
-
-            return true;
-        } 
         public async Task EditarAsync(ActualizarEmpleadoDto dto)
         {
             var empleado = await _repository.ObtenerPorIdAsync(dto.Id)
@@ -176,6 +129,7 @@ namespace DrakionTech.Crm.Business.Services
             NumeroDocumento = e.NumeroDocumento,
             Salario = e.Salario?.Salario
         };
+
         public async Task<EmpleadoListDto?> ObtenerPorEmailAsync(string email)
         {
             var e = await _repository.ObtenerPorEmailAsync(email);
