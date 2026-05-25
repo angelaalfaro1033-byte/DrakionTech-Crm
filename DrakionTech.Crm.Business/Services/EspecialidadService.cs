@@ -99,5 +99,37 @@ namespace DrakionTech.Crm.Business.Services
             RolUsuarioNombre = e.RolUsuario?.Nombre,
             Activo = e.Activo
         };
+        public async Task<EspecialidadDto> CrearYObtenerAsync(string nombre, int rolUsuarioId)
+        {
+            var lista = await _repository.ObtenerTodosConRolAsync();
+            var existente = lista.FirstOrDefault(e =>
+                Normalizar(e.Nombre) == Normalizar(nombre) &&
+                e.RolUsuarioId == rolUsuarioId);
+
+            if (existente is not null)
+                return MapToDto(existente);
+
+            var nueva = new Especialidad
+            {
+                Nombre = nombre.Trim(),
+                RolUsuarioId = rolUsuarioId,
+                Activo = true
+            };
+            await _repository.AgregarAsync(nueva);
+
+            // Recargar para obtener el nombre del rol incluido
+            var creada = (await _repository.ObtenerTodosConRolAsync())
+                .First(e => e.Nombre == nueva.Nombre && e.RolUsuarioId == rolUsuarioId);
+
+            return MapToDto(creada);
+        }
+
+        private static string Normalizar(string texto) =>
+            string.Concat(
+                texto.Trim().ToLowerInvariant()
+                    .Normalize(System.Text.NormalizationForm.FormD)
+                    .Where(c => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c)
+                        != System.Globalization.UnicodeCategory.NonSpacingMark)
+            );
     }
 }

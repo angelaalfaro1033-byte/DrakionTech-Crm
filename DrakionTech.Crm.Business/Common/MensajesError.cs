@@ -56,6 +56,8 @@
 
         // Empleado
         public const string EmpleadoNoEncontrado = "Empleado no encontrado";
+        public const string EmailEmpleadoDuplicado = "Ya existe un empleado registrado con este correo.";
+        public const string DocumentoEmpleadoDuplicado = "Ya existe un empleado registrado con este número de documento.";
 
         //SMTP
         public const string DestinatarioVacio = "ERROR SMTP: destinatario (to) está vacío";

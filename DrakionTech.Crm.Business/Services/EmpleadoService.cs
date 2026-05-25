@@ -39,9 +39,21 @@ namespace DrakionTech.Crm.Business.Services
 
         public async Task CrearAsync(CrearEmpleadoDto dto)
         {
-
             if (string.IsNullOrWhiteSpace(dto.Email))
                 throw new Exception(MensajesError.EmailObligatorio);
+
+            var errores = new List<string>();
+
+            var documentoExistente = await _repository.ObtenerPorNumeroDocumentoAsync(dto.NumeroDocumento);
+            if (documentoExistente != null)
+                errores.Add(MensajesError.DocumentoEmpleadoDuplicado);
+
+            var empleadoExistente = await _repository.ObtenerPorEmailAsync(dto.Email);
+            if (empleadoExistente != null)
+                errores.Add(MensajesError.EmailEmpleadoDuplicado);
+
+            if (errores.Any())
+                throw new Exception(string.Join(" | ", errores));
 
             var token = Guid.NewGuid().ToString();
 
@@ -54,11 +66,9 @@ namespace DrakionTech.Crm.Business.Services
                 Rol = dto.Rol,
                 Activo = true,
                 FechaCreacion = DateTime.UtcNow,
-
                 IsActive = false,
                 ActivationToken = token,
                 ActivationTokenExpiration = DateTime.UtcNow.AddHours(24),
-
                 TipoDocumento = dto.TipoDocumento,
                 NumeroDocumento = dto.NumeroDocumento,
                 Salario = dto.Salario.HasValue
@@ -66,12 +76,9 @@ namespace DrakionTech.Crm.Business.Services
                     : null,
             };
 
-
             await _repository.AgregarAsync(empleado);
 
             var baseUrl = _config["App:BaseUrl"];
-
-
             if (string.IsNullOrWhiteSpace(baseUrl))
                 throw new Exception(MensajesError.AppBaseUrlNoConfigurado);
 

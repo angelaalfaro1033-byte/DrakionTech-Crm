@@ -19,16 +19,18 @@
             <p>Cargando información...</p>
         </div>
     }
-    else if (!string.IsNullOrEmpty(error))
-    {
-        <div class="ui-card">
-            <p class="text-danger">@error</p>
-        </div>
-    }
     else
     {
-        <!-- FORM -->
         <div class="ui-card">
+            @if (!string.IsNullOrEmpty(error))
+            {
+                <ul class="validation-summary">
+                    @foreach (var err in error.Split(" | "))
+                    {
+                        <li>@err</li>
+                    }
+                </ul>
+            }
             <EmpleadoForm Model="empleado"
                           OnValidSubmit="Guardar"
                           OnCancel="Cancelar"

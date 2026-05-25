@@ -1,0 +1,137 @@
+﻿@typeparam TItem
+
+<div class="creatable-select">
+    @if (!string.IsNullOrEmpty(ValorSeleccionadoTexto) && !editando)
+    {
+        <div class="form-select creatable-display" @onclick="IniciarCambio">
+            <span>@ValorSeleccionadoTexto</span>
+        </div>
+    }
+    else
+    {
+        <input class="form-control"
+               placeholder="@Placeholder"
+               value="@busqueda"
+               @oninput="OnInput"
+               @onfocus="Abrir"
+               @onblur="CerrarConDelay"
+               autocomplete="off" />
+    }
+
+    @if (abierto)
+    {
+        <div class="creatable-dropdown">
+            @if (!itemsFiltrados.Any() && string.IsNullOrWhiteSpace(busqueda))
+            {
+                <div class="creatable-empty">No hay opciones disponibles</div>
+            }
+            else
+            {
+                @foreach (var item in itemsFiltrados)
+                {
+                    <div class="creatable-option" @onclick="() => Seleccionar(item)">
+                        @ObtenerTexto(item)
+                    </div>
+                }
+            }
+
+            @if (!string.IsNullOrWhiteSpace(busqueda) && !ExisteExacto())
+            {
+                <div class="creatable-option creatable-create" @onclick="Crear">
+                    <i class="bi bi-plus-circle me-1"></i> Crear "<strong>@busqueda.Trim()</strong>"
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(ValorSeleccionadoTexto))
+            {
+                <div class="creatable-option creatable-clear" @onclick="Limpiar">
+                    <i class="bi bi-x-circle me-1"></i> Quitar selección
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public List<TItem> Items { get; set; } = [];
+    [Parameter] public Func<TItem, string> ObtenerTexto { get; set; } = _ => "";
+    [Parameter] public Func<TItem, int> ObtenerId { get; set; } = _ => 0;
+    [Parameter] public string Placeholder { get; set; } = "Buscar o crear...";
+    [Parameter] public string? ValorSeleccionadoTexto { get; set; }
+    [Parameter] public EventCallback<TItem> OnSeleccionar { get; set; }
+    [Parameter] public EventCallback<string> OnCrear { get; set; }
+
+    private string busqueda = "";
+    private bool abierto = false;
+    private bool editando = false;
+
+    private List<TItem> itemsFiltrados => Items
+        .Where(i => Normalizar(ObtenerTexto(i) ?? "").Contains(Normalizar(busqueda)))
+        .ToList();
+
+    private void OnInput(ChangeEventArgs e)
+    {
+        busqueda = e.Value?.ToString() ?? "";
+        abierto = true;
+    }
+
+    private void Abrir()
+    {
+        busqueda = "";
+        abierto = true;
+    }
+
+    private void IniciarCambio()
+    {
+        editando = true;
+        busqueda = "";
+        abierto = true;
+    }
+
+    private async Task CerrarConDelay()
+    {
+        await Task.Delay(200);
+        abierto = false;
+        editando = false;
+        busqueda = "";
+    }
+
+    private async Task Seleccionar(TItem item)
+    {
+        busqueda = "";
+        abierto = false;
+        editando = false;
+        await OnSeleccionar.InvokeAsync(item);
+    }
+
+    private async Task Crear()
+    {
+        var texto = busqueda.Trim();
+        busqueda = "";
+        abierto = false;
+        editando = false;
+        await OnCrear.InvokeAsync(texto);
+    }
+
+    private void Limpiar()
+    {
+        busqueda = "";
+        abierto = false;
+        editando = false;
+        OnSeleccionar.InvokeAsync(default!);
+    }
+
+    private bool ExisteExacto() => Items.Any(i =>
+        Normalizar(ObtenerTexto(i)) == Normalizar(busqueda.Trim()));
+
+    private static string Normalizar(string texto)
+    {
+        if (string.IsNullOrWhiteSpace(texto)) return "";
+        return string.Concat(
+            texto.Trim().ToLowerInvariant()
+                .Normalize(System.Text.NormalizationForm.FormD)
+                .Where(c => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c)
+                    != System.Globalization.UnicodeCategory.NonSpacingMark)
+        );
+    }
+}

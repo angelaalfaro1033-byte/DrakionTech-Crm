@@ -72,5 +72,27 @@ namespace DrakionTech.Crm.Business.Services
             Nombre = r.Nombre,
             Activo = r.Activo,
         };
+
+        public async Task<RolUsuarioDto> CrearYObtenerAsync(string nombre)
+        {
+            var todos = await _repository.ObtenerTodosAsync();
+            var existente = todos.FirstOrDefault(r =>
+                Normalizar(r.Nombre) == Normalizar(nombre));
+
+            if (existente is not null)
+                return MapToDto(existente);
+
+            var nuevo = new RolUsuario { Nombre = nombre.Trim(), Activo = true };
+            await _repository.AgregarAsync(nuevo);
+            return MapToDto(nuevo);
+        }
+
+        private static string Normalizar(string texto) =>
+            string.Concat(
+                texto.Trim().ToLowerInvariant()
+                    .Normalize(System.Text.NormalizationForm.FormD)
+                    .Where(c => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c)
+                        != System.Globalization.UnicodeCategory.NonSpacingMark)
+            );
     }
 }

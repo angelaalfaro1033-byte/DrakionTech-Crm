@@ -3,13 +3,13 @@
 @using DrakionTech.Crm.Business.DTOs.Especialidad
 @using DrakionTech.Crm.Business.Interfaces
 @using DrakionTech.Crm.Data.Entities.Enums
+@using DrakionTech.Crm.Business.Common
 @inject IRolUsuarioService RolService
 @inject IEspecialidadService EspecialidadService
 
 <EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
     <DataAnnotationsValidator />
-    <ValidationSummary class="validation-summary-errors mb-3" />
-
+    <ValidationSummary class="validation-summary" />
     <div class="row g-3">
 
         <div class="col-md-6">
@@ -55,28 +55,27 @@
 
         <div class="col-md-6">
             <label class="form-label">Rol</label>
-            <select class="form-select" value="@Model.RolUsuarioId"
-                    @onchange="OnRolChanged">
-                <option value="">-- Selecciona un rol --</option>
-                @foreach (var rol in roles)
-                {
-                    <option value="@rol.Id">@rol.Nombre</option>
-                }
-            </select>
+            <CreatableSelect TItem="RolUsuarioDto"
+                             Items="roles"
+                             ObtenerTexto="r => r.Nombre"
+                             ObtenerId="r => r.Id"
+                             Placeholder="Buscar o crear rol..."
+                             ValorSeleccionadoTexto="@Model.Rol"
+                             OnSeleccionar="OnRolSeleccionado"
+                             OnCrear="OnRolCreado" />
             <ValidationMessage For="@(() => Model.Rol)" class="text-danger small" />
         </div>
 
         <div class="col-md-6">
-            <label class="form-label">Cargo</label>
-            <select class="form-select" value="@Model.EspecialidadId"
-                    @onchange="OnCargoChanged"
-                    disabled="@(Model.RolUsuarioId is null)">
-                <option value="">-- Selecciona un cargo --</option>
-                @foreach (var esp in especialidadesFiltradas)
-                {
-                    <option value="@esp.Id">@esp.Nombre</option>
-                }
-            </select>
+            <label class="form-label">Especialidad</label>
+            <CreatableSelect TItem="EspecialidadDto"
+                             Items="especialidadesFiltradas"
+                             ObtenerTexto="e => e.Nombre"
+                             ObtenerId="e => e.Id"
+                             Placeholder="@(Model.RolUsuarioId is null ? "Selecciona un rol primero" : "Buscar o crear especialidad...")"
+                             ValorSeleccionadoTexto="@Model.Cargo"
+                             OnSeleccionar="OnEspecialidadSeleccionada"
+                             OnCrear="OnEspecialidadCreada" />
             <ValidationMessage For="@(() => Model.Cargo)" class="text-danger small" />
         </div>
 
@@ -120,7 +119,6 @@
             {
                 Model.RolUsuarioId = rol.Id;
                 FiltrarEspecialidades(rol.Id);
-
                 if (!string.IsNullOrEmpty(Model.Cargo) && Model.EspecialidadId is null)
                 {
                     var esp = especialidadesFiltradas.FirstOrDefault(e => e.Nombre == Model.Cargo);
@@ -134,37 +132,62 @@
         }
     }
 
-    private void OnRolChanged(ChangeEventArgs e)
+    private async Task OnRolSeleccionado(RolUsuarioDto? rol)
     {
-        if (int.TryParse(e.Value?.ToString(), out var id))
-        {
-            Model.RolUsuarioId = id;
-            Model.Rol = roles.FirstOrDefault(r => r.Id == id)?.Nombre ?? string.Empty;
-            FiltrarEspecialidades(id);
-        }
-        else
+        if (rol is null)
         {
             Model.RolUsuarioId = null;
             Model.Rol = string.Empty;
             especialidadesFiltradas = [];
         }
-
+        else
+        {
+            Model.RolUsuarioId = rol.Id;
+            Model.Rol = rol.Nombre;
+            FiltrarEspecialidades(rol.Id);
+        }
         Model.EspecialidadId = null;
         Model.Cargo = string.Empty;
     }
 
-    private void OnCargoChanged(ChangeEventArgs e)
+    private async Task OnRolCreado(string nombre)
     {
-        if (int.TryParse(e.Value?.ToString(), out var id))
-        {
-            Model.EspecialidadId = id;
-            Model.Cargo = todasEspecialidades.FirstOrDefault(x => x.Id == id)?.Nombre ?? string.Empty;
-        }
-        else
+        var nuevo = await RolService.CrearYObtenerAsync(nombre);
+        if (!roles.Any(r => r.Id == nuevo.Id))
+            roles.Add(nuevo);
+
+        Model.RolUsuarioId = nuevo.Id;
+        Model.Rol = nuevo.Nombre;
+        FiltrarEspecialidades(nuevo.Id);
+        Model.EspecialidadId = null;
+        Model.Cargo = string.Empty;
+    }
+
+    private async Task OnEspecialidadSeleccionada(EspecialidadDto? esp)
+    {
+        if (esp is null)
         {
             Model.EspecialidadId = null;
             Model.Cargo = string.Empty;
         }
+        else
+        {
+            Model.EspecialidadId = esp.Id;
+            Model.Cargo = esp.Nombre;
+        }
+    }
+
+    private async Task OnEspecialidadCreada(string nombre)
+    {
+        if (Model.RolUsuarioId is null) return;
+
+        var nueva = await EspecialidadService.CrearYObtenerAsync(nombre, Model.RolUsuarioId.Value);
+        if (!todasEspecialidades.Any(e => e.Id == nueva.Id))
+            todasEspecialidades.Add(nueva);
+
+        FiltrarEspecialidades(Model.RolUsuarioId.Value);
+        Model.EspecialidadId = nueva.Id;
+        Model.Cargo = nueva.Nombre;
     }
 
     private void FiltrarEspecialidades(int rolId)
