@@ -146,20 +146,10 @@
         debounceNombre.Start();
     }
 
-    private async Task OnResponsableCambiado()
+    private void OnResponsableCambiado()
     {
         errorResponsable = null;
         modelo.ResponsableId = responsableSeleccionado == 0 ? null : responsableSeleccionado;
-
-        // Solo validar pertenencia en modo edición
-        if (modelo.ResponsableId.HasValue && AreaId.HasValue && AreaId > 0)
-        {
-            var perteneceAlArea = await AreaService.ResponsablePerteneceAlAreaAsync(
-                modelo.ResponsableId.Value, AreaId.Value);
-
-            if (!perteneceAlArea)
-                errorResponsable = "Este usuario no pertenece al área. Asígnalo primero como miembro.";
-        }
     }
 
     private async Task HandleSubmit()

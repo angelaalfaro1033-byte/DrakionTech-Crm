@@ -1,0 +1,63 @@
+﻿@namespace DrakionTech.Crm.Web.Components
+@typeparam TItem
+
+<div class="ui-toolbar">
+    <div class="ui-search">
+        <i class="bi bi-search"></i>
+        <input class="form-control"
+               placeholder="@PlaceholderBusqueda"
+               @oninput="OnBusquedaChanged" />
+    </div>
+
+    @if (MostrarFiltroEstado)
+    {
+        <select class="form-select" @onchange="OnEstadoChanged">
+            <option value="">Todos</option>
+            <option value="true">Activos</option>
+            <option value="false">Inactivos</option>
+        </select>
+    }
+</div>
+
+@code {
+    [Parameter] public IEnumerable<TItem>? Items { get; set; }
+    [Parameter] public EventCallback<IEnumerable<TItem>> OnFiltrado { get; set; }
+    [Parameter] public Dictionary<string, Func<TItem, string, bool>> Filtros { get; set; } = new();
+    [Parameter] public string PlaceholderBusqueda { get; set; } = "Buscar...";
+    [Parameter] public bool MostrarFiltroEstado { get; set; } = true;
+
+    private readonly Dictionary<string, string?> _valores = new();
+
+    private async Task OnBusquedaChanged(ChangeEventArgs e) =>
+        await SetValor("busqueda", e.Value?.ToString());
+
+    private async Task OnEstadoChanged(ChangeEventArgs e) =>
+        await SetValor("estado", e.Value?.ToString());
+
+    public async Task SetValor(string clave, string? valor)
+    {
+        _valores[clave] = valor;
+        await Aplicar();
+    }
+
+    public async Task Refrescar(IEnumerable<TItem> nuevosItems)
+    {
+        Items = nuevosItems;
+        await Aplicar();
+    }
+
+    private async Task Aplicar()
+    {
+        if (Items is null) return;
+
+        var resultado = Items.AsEnumerable();
+
+        foreach (var (clave, predicado) in Filtros)
+        {
+            if (_valores.TryGetValue(clave, out var valor) && !string.IsNullOrWhiteSpace(valor))
+                resultado = resultado.Where(item => predicado(item, valor.Trim().ToLower()));
+        }
+
+        await OnFiltrado.InvokeAsync(resultado);
+    }
+}
