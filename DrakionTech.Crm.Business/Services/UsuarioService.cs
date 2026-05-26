@@ -144,4 +144,13 @@ public class UsuarioService : IUsuarioService
         var usuarios = await _repository.GetAllAsync();
         return usuarios.Count > 0;
     }
+
+    public async Task<IEnumerable<UsuarioListDto>> ObtenerPorAreaAsync(int areaId)
+    {
+        var usuarios = await _repository.GetAllAsync();
+        return usuarios
+            .Where(u => u.AreaId == areaId && u.IsActive)
+            .Select(MapToDto)
+            .ToList();
+    }
 }

@@ -70,5 +70,10 @@
 
         // Duplicados (con formato, usar string.Format o interpolación)
         public const string EspecialidadDuplicada = "Ya existe una especialidad con el nombre '{0}' para ese rol.";
+
+        // Areas
+        public const string AreaNombreObligatorio = "El nombre del área es obligatorio.";
+        public const string AreaNombreLongitud = "El nombre debe tener entre 2 y 100 caracteres.";
+        public const string AreaDescripcionLongitud = "La descripción no puede superar los 300 caracteres.";
     }
 }

@@ -1,0 +1,238 @@
+﻿@page "/areas"
+@using DrakionTech.Crm.Business.DTOs.Area
+@inject IAreaService AreaService
+@inject NavigationManager Nav
+
+<PageTitle>Áreas – DrakionTech CRM</PageTitle>
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="mb-0">Áreas organizacionales</h2>
+        <p class="text-muted mb-0" style="font-size:13px">Gestiona las áreas y sus responsables</p>
+    </div>
+    <a href="/areas/nueva" class="btn btn-primary d-flex align-items-center gap-2">
+        <i class="bi bi-plus-lg"></i> Nueva área
+    </a>
+</div>
+
+<div class="ui-toolbar">
+    <div class="ui-search">
+        <i class="bi bi-search"></i>
+        <input class="form-control"
+               placeholder="Buscar por nombre, descripción o responsable…"
+               value="@busqueda"
+               @oninput="OnBusquedaChanged" />
+    </div>
+    <select class="form-select" @bind="filtroActiva" @bind:after="CargarAsync">
+        <option value="">Todos los estados</option>
+        <option value="true">Activas</option>
+        <option value="false">Inactivas</option>
+    </select>
+</div>
+
+<div class="ui-card">
+    @if (cargando)
+    {
+        <div class="text-center py-5 text-muted">
+            <div class="spinner-border spinner-border-sm me-2"></div> Cargando áreas…
+        </div>
+    }
+    else if (!areas.Any())
+    {
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-diagram-3 fs-2 d-block mb-2"></i>
+            No se encontraron áreas con los filtros aplicados.
+        </div>
+    }
+    else
+    {
+        <table class="ui-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Responsable</th>
+                    <th>Usuarios</th>
+                    <th>Estado</th>
+                    <th>Creada</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var a in areas)
+                {
+                    <tr>
+                        <td>
+                            <span style="font-weight:500;color:var(--text-main)">@a.Nombre</span>
+                        </td>
+                        <td style="color:var(--text-muted);font-size:13px;max-width:220px">
+                            @(string.IsNullOrEmpty(a.Descripcion) ? "—" : a.Descripcion)
+                        </td>
+                        <td style="font-size:13px">
+                            @if (string.IsNullOrEmpty(a.ResponsableNombre))
+                            {
+                                <span class="text-muted">Sin asignar</span>
+                            }
+                            else
+                            {
+                                <span>@a.ResponsableNombre</span>
+                            }
+                        </td>
+                        <td>
+                            <span class="badge" style="background:#eff6ff;color:#1d4ed8">
+                                @a.TotalUsuarios usuario@(a.TotalUsuarios == 1 ? "" : "s")
+                            </span>
+                        </td>
+                        <td>
+                            @if (a.Activa)
+                            {
+                                <span class="badge badge-success">Activa</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-danger">Inactiva</span>
+                            }
+                        </td>
+                        <td style="font-size:13px;color:var(--text-muted)">
+                            @a.FechaCreacion.ToString("dd/MM/yyyy")
+                        </td>
+                        <td>
+                            <div class="ui-actions">
+                                <a href="/areas/editar/@a.Id" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                @if (a.Activa)
+                                {
+                                    <a href="#" class="action-danger" title="Desactivar"
+                                       @onclick="() => ConfirmarCambioEstado(a)" @onclick:preventDefault>
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="#" class="action-success" title="Activar"
+                                       @onclick="() => ConfirmarCambioEstado(a)" @onclick:preventDefault>
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                    </a>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@if (areaACambiar is not null)
+{
+    <div class="modal-backdrop-custom" @onclick="CancelarCambio"></div>
+    <div class="modal-custom">
+        <div class="modal-custom-header">
+            <i class="bi bi-@(areaACambiar.Activa ? "slash-circle" : "check-circle") @(areaACambiar.Activa ? "text-danger" : "text-success") me-2"></i>
+            <span>@(areaACambiar.Activa ? "Desactivar" : "Activar") área</span>
+        </div>
+        <div class="modal-custom-body">
+            <p>
+                ¿Seguro que deseas <strong>@(areaACambiar.Activa ? "desactivar" : "activar")</strong>
+                el área <strong>@areaACambiar.Nombre</strong>?
+            </p>
+            @if (!string.IsNullOrEmpty(errorAccion))
+            {
+                <div class="alert alert-danger py-2" style="font-size:13px">
+                    <i class="bi bi-x-circle me-1"></i> @errorAccion
+                </div>
+            }
+        </div>
+        <div class="modal-custom-footer">
+            <button class="btn btn-sm btn-outline-secondary" @onclick="CancelarCambio">Cancelar</button>
+            <button class="btn btn-sm @(areaACambiar.Activa ? "btn-danger" : "btn-success")"
+                    @onclick="EjecutarCambioEstado" disabled="@procesando">
+                @if (procesando)
+                {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                }
+                @(areaACambiar.Activa ? "Desactivar" : "Activar")
+            </button>
+        </div>
+    </div>
+}
+
+@code {
+    private List<AreaListDto> areas = new();
+    private string busqueda = string.Empty;
+    private string filtroActiva = "";
+    private bool cargando = true;
+
+    private AreaListDto? areaACambiar;
+    private bool procesando;
+    private string? errorAccion;
+    private System.Timers.Timer? debounceTimer;
+
+    protected override async Task OnInitializedAsync() => await CargarAsync();
+
+    private async Task CargarAsync()
+    {
+        cargando = true;
+        StateHasChanged();
+
+        bool? soloActivas = filtroActiva switch
+        {
+            "true" => true,
+            "false" => false,
+            _ => null
+        };
+
+        areas = (await AreaService.ObtenerTodasAsync(
+            string.IsNullOrWhiteSpace(busqueda) ? null : busqueda,
+            soloActivas)).ToList();
+
+        cargando = false;
+    }
+
+    private void OnBusquedaChanged(ChangeEventArgs e)
+    {
+        busqueda = e.Value?.ToString() ?? string.Empty;
+        debounceTimer?.Stop();
+        debounceTimer?.Dispose();
+        debounceTimer = new System.Timers.Timer(350) { AutoReset = false };
+        debounceTimer.Elapsed += async (_, _) =>
+            await InvokeAsync(async () => { await CargarAsync(); StateHasChanged(); });
+        debounceTimer.Start();
+    }
+
+    private void ConfirmarCambioEstado(AreaListDto area)
+    {
+        areaACambiar = area;
+        errorAccion = null;
+    }
+
+    private void CancelarCambio()
+    {
+        areaACambiar = null;
+        errorAccion = null;
+        procesando = false;
+    }
+
+    private async Task EjecutarCambioEstado()
+    {
+        if (areaACambiar is null) return;
+        procesando = true;
+        errorAccion = null;
+
+        try
+        {
+            await AreaService.CambiarEstadoAsync(areaACambiar.Id, !areaACambiar.Activa);
+            areaACambiar = null;
+            await CargarAsync();
+        }
+        catch (InvalidOperationException ex)
+        {
+            errorAccion = ex.Message;
+        }
+        finally
+        {
+            procesando = false;
+        }
+    }
+}

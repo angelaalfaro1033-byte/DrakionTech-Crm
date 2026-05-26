@@ -37,6 +37,8 @@ namespace DrakionTech.Crm.Data.Context
         public DbSet<Usuario> Usuarios => Set<Usuario>();
         public DbSet<EmpleadoSalario> EmpleadoSalarios { get; set; } = null!;
 
+        public DbSet<Area> Areas { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Aplicar todas las configuraciones de entidades
@@ -63,6 +65,8 @@ namespace DrakionTech.Crm.Data.Context
             modelBuilder.ApplyConfiguration(new EmailTemplateConfiguration());
             modelBuilder.ApplyConfiguration(new UsuarioConfiguration());
             modelBuilder.ApplyConfiguration(new EmpleadoSalarioConfiguration());
+            modelBuilder.Entity<Area>()  .HasOne(a => a.Responsable) .WithMany() .HasForeignKey(a => a.ResponsableId) .OnDelete(DeleteBehavior.SetNull) .IsRequired(false);
+            modelBuilder.Entity<Usuario>() .HasOne(u => u.Area).WithMany(a => a.Usuarios) .HasForeignKey(u => u.AreaId) .OnDelete(DeleteBehavior.SetNull) .IsRequired(false);
 
             InitialSeed.Seed(modelBuilder);
 

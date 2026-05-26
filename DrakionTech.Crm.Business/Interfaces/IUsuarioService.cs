@@ -13,4 +13,5 @@ public interface IUsuarioService
     Task ActivarAsync(int id);
     Task<bool> ActivarCuentaAsync(string token, string password);
     Task<bool> ExisteAlgunUsuarioAsync();
+    Task<IEnumerable<UsuarioListDto>> ObtenerPorAreaAsync(int areaId);
 }
