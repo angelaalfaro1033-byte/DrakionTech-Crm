@@ -18,7 +18,12 @@
         </a>
     </div>
 
-    @if (roles is null)
+    <FiltroTabla TItem="RolUsuarioDto"
+                 PlaceholderBusqueda="Buscar por nombre..."
+                 MostrarFiltroEstado="true"
+                 OnFiltroChanged="OnFiltroChanged" />
+
+    @if (cargando)
     {
         <p>Cargando roles...</p>
     }
@@ -30,14 +35,6 @@
     }
     else
     {
-        <FiltroTabla TItem="RolUsuarioDto"
-                     Items="roles"
-                     Filtros="filtros"
-                     OnFiltrado="items => rolesFiltrados = items"
-                     PlaceholderBusqueda="Buscar por nombre..."
-                     MostrarFiltroEstado="true"
-                     @ref="filtroRef" />
-
         <div class="ui-card">
             <table class="ui-table">
                 <thead>
@@ -48,7 +45,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in rolesFiltrados ?? Enumerable.Empty<RolUsuarioDto>())
+                    @foreach (var item in roles)
                     {
                         <tr>
                             <td class="fw-semibold">@item.Nombre</td>
@@ -90,28 +87,27 @@
 </div>
 
 @code {
-    private List<RolUsuarioDto>? roles;
-    private IEnumerable<RolUsuarioDto>? rolesFiltrados;
-    private FiltroTabla<RolUsuarioDto>? filtroRef;
-
-    private readonly Dictionary<string, Func<RolUsuarioDto, string, bool>> filtros = new()
-    {
-        ["busqueda"] = (r, v) => r.Nombre != null && r.Nombre.ToLower().Contains(v),
-        ["estado"]   = (r, v) => r.Activo == bool.Parse(v)
-    };
+    private List<RolUsuarioDto> roles = new();
+    private bool cargando = true;
+    private string? busqueda;
+    private bool? soloActivos;
 
     protected override async Task OnInitializedAsync() => await Cargar();
 
     private async Task Cargar()
     {
-        roles = await RolUsuarioService.ObtenerTodosAsync();
-        rolesFiltrados = roles;
+        cargando = true;
+        StateHasChanged();
+        roles = (await RolUsuarioService.ObtenerTodosAsync(busqueda, soloActivos)).ToList();
+        cargando = false;
     }
 
-    private async Task Recargar()
+    private async Task OnFiltroChanged(Dictionary<string, string?> valores)
     {
-        roles = await RolUsuarioService.ObtenerTodosAsync();
-        await filtroRef!.Refrescar(roles);
+        busqueda = valores.GetValueOrDefault("busqueda");
+        var estado = valores.GetValueOrDefault("estado");
+        soloActivos = string.IsNullOrWhiteSpace(estado) ? null : bool.Parse(estado);
+        await Cargar();
     }
 
     private async Task Desactivar(int id) => await CambiarEstado(id, RolUsuarioService.DesactivarAsync);
@@ -120,6 +116,6 @@
     private async Task CambiarEstado(int id, Func<int, Task> accion)
     {
         await accion(id);
-        await Recargar();
+        await Cargar();
     }
 }

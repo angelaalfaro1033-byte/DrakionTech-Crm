@@ -1,31 +1,49 @@
 ﻿using DrakionTech.Crm.Business.Common;
 using DrakionTech.Crm.Business.DTOs.RolUsuario;
 using DrakionTech.Crm.Business.Interfaces;
+using DrakionTech.Crm.Data.Context;
 using DrakionTech.Crm.Data.Entities;
-using DrakionTech.Crm.Data.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace DrakionTech.Crm.Business.Services
 {
     public class RolUsuarioService : IRolUsuarioService
     {
-        private readonly IRolUsuarioRepository _repository;
+        private readonly ApplicationDbContext _db;
 
-        public RolUsuarioService(IRolUsuarioRepository repository)
+        public RolUsuarioService(ApplicationDbContext db)
         {
-            _repository = repository;
+            _db = db;
         }
 
-        public async Task<List<RolUsuarioDto>> ObtenerTodosAsync()
+        public async Task<List<RolUsuarioDto>> ObtenerTodosAsync(string? busqueda = null, bool? soloActivos = null)
         {
-            var roles = await _repository.ObtenerTodosAsync();
-            return roles.Select(MapToDto).ToList();
+            var query = _db.RolesUsuario.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(busqueda))
+            {
+                var term = busqueda.Trim().ToLower();
+                query = query.Where(r => r.Nombre.ToLower().Contains(term));
+            }
+
+            if (soloActivos.HasValue)
+                query = query.Where(r => r.Activo == soloActivos.Value);
+
+            return await query
+                .OrderBy(r => r.Nombre)
+                .Select(r => new RolUsuarioDto
+                {
+                    Id = r.Id,
+                    Nombre = r.Nombre,
+                    Activo = r.Activo
+                })
+                .ToListAsync();
         }
 
         public async Task<RolUsuarioDto> ObtenerPorIdAsync(int id)
         {
-            var rol = await _repository.ObtenerPorIdAsync(id)
+            var rol = await _db.RolesUsuario.FindAsync(id)
                 ?? throw new Exception(MensajesError.RolNoEncontrado);
-
             return MapToDto(rol);
         }
 
@@ -33,59 +51,59 @@ namespace DrakionTech.Crm.Business.Services
         {
             var rol = new RolUsuario
             {
-                Nombre = dto.Nombre
+                Nombre = dto.Nombre.Trim(),
+                Activo = true
             };
-
-            await _repository.AgregarAsync(rol);
+            _db.RolesUsuario.Add(rol);
+            await _db.SaveChangesAsync();
         }
 
         public async Task EditarAsync(RolUsuarioDto dto)
         {
-            var rol = await _repository.ObtenerPorIdAsync(dto.Id)
+            var rol = await _db.RolesUsuario.FindAsync(dto.Id)
                 ?? throw new Exception(MensajesError.RolNoEncontrado);
-
-            rol.Nombre = dto.Nombre;
+            rol.Nombre = dto.Nombre.Trim();
             rol.Activo = dto.Activo;
-
-            await _repository.ActualizarAsync(rol);
+            await _db.SaveChangesAsync();
         }
 
         public async Task DesactivarAsync(int id)
         {
-            var rol = await _repository.ObtenerPorIdAsync(id)
+            var rol = await _db.RolesUsuario.FindAsync(id)
                 ?? throw new Exception(MensajesError.RolNoEncontrado);
             rol.Activo = false;
-            await _repository.ActualizarAsync(rol);
+            await _db.SaveChangesAsync();
         }
 
         public async Task ActivarAsync(int id)
         {
-            var rol = await _repository.ObtenerPorIdAsync(id)
+            var rol = await _db.RolesUsuario.FindAsync(id)
                 ?? throw new Exception(MensajesError.RolNoEncontrado);
             rol.Activo = true;
-            await _repository.ActualizarAsync(rol);
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task<RolUsuarioDto> CrearYObtenerAsync(string nombre)
+        {
+            var normalizado = Normalizar(nombre);
+            var existente = await _db.RolesUsuario
+                .FirstOrDefaultAsync(r => r.Nombre.ToLower() == normalizado);
+
+            if (existente is not null)
+                return MapToDto(existente);
+
+            var nuevo = new RolUsuario { Nombre = nombre.Trim(), Activo = true };
+            _db.RolesUsuario.Add(nuevo);
+            await _db.SaveChangesAsync();
+            return MapToDto(nuevo);
         }
 
         private static RolUsuarioDto MapToDto(RolUsuario r) => new()
         {
             Id = r.Id,
             Nombre = r.Nombre,
-            Activo = r.Activo,
+            Activo = r.Activo
         };
-
-        public async Task<RolUsuarioDto> CrearYObtenerAsync(string nombre)
-        {
-            var todos = await _repository.ObtenerTodosAsync();
-            var existente = todos.FirstOrDefault(r =>
-                Normalizar(r.Nombre) == Normalizar(nombre));
-
-            if (existente is not null)
-                return MapToDto(existente);
-
-            var nuevo = new RolUsuario { Nombre = nombre.Trim(), Activo = true };
-            await _repository.AgregarAsync(nuevo);
-            return MapToDto(nuevo);
-        }
 
         private static string Normalizar(string texto) =>
             string.Concat(

@@ -8,7 +8,6 @@
                placeholder="@PlaceholderBusqueda"
                @oninput="OnBusquedaChanged" />
     </div>
-
     @if (MostrarFiltroEstado)
     {
         <select class="form-select" @onchange="OnEstadoChanged">
@@ -20,44 +19,28 @@
 </div>
 
 @code {
-    [Parameter] public IEnumerable<TItem>? Items { get; set; }
-    [Parameter] public EventCallback<IEnumerable<TItem>> OnFiltrado { get; set; }
-    [Parameter] public Dictionary<string, Func<TItem, string, bool>> Filtros { get; set; } = new();
     [Parameter] public string PlaceholderBusqueda { get; set; } = "Buscar...";
     [Parameter] public bool MostrarFiltroEstado { get; set; } = true;
+    [Parameter] public int DebounceMs { get; set; } = 350;
+    [Parameter] public EventCallback<Dictionary<string, string?>> OnFiltroChanged { get; set; }
 
     private readonly Dictionary<string, string?> _valores = new();
+    private System.Timers.Timer? _debounce;
 
-    private async Task OnBusquedaChanged(ChangeEventArgs e) =>
-        await SetValor("busqueda", e.Value?.ToString());
-
-    private async Task OnEstadoChanged(ChangeEventArgs e) =>
-        await SetValor("estado", e.Value?.ToString());
-
-    public async Task SetValor(string clave, string? valor)
+    private async Task OnBusquedaChanged(ChangeEventArgs e)
     {
-        _valores[clave] = valor;
-        await Aplicar();
+        _valores["busqueda"] = e.Value?.ToString();
+        _debounce?.Stop();
+        _debounce?.Dispose();
+        _debounce = new System.Timers.Timer(DebounceMs) { AutoReset = false };
+        _debounce.Elapsed += async (_, _) =>
+            await InvokeAsync(async () => await OnFiltroChanged.InvokeAsync(_valores));
+        _debounce.Start();
     }
 
-    public async Task Refrescar(IEnumerable<TItem> nuevosItems)
+    private async Task OnEstadoChanged(ChangeEventArgs e)
     {
-        Items = nuevosItems;
-        await Aplicar();
-    }
-
-    private async Task Aplicar()
-    {
-        if (Items is null) return;
-
-        var resultado = Items.AsEnumerable();
-
-        foreach (var (clave, predicado) in Filtros)
-        {
-            if (_valores.TryGetValue(clave, out var valor) && !string.IsNullOrWhiteSpace(valor))
-                resultado = resultado.Where(item => predicado(item, valor.Trim().ToLower()));
-        }
-
-        await OnFiltrado.InvokeAsync(resultado);
+        _valores["estado"] = e.Value?.ToString();
+        await OnFiltroChanged.InvokeAsync(_valores);
     }
 }

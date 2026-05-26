@@ -65,6 +65,9 @@ builder.Services.AddScoped<IEmpleadoService, EmpleadoService>();
 //AREAS
 builder.Services.AddScoped<IAreaService, AreaService>();
 
+//Roles
+builder.Services.AddScoped<IRolUsuarioService, RolUsuarioService>();
+
 //USUARIOS
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
