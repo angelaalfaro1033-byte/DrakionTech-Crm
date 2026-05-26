@@ -3,6 +3,7 @@
 @inject AuthenticationStateProvider AuthState
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
+
 <div class="crm-sidebar @(collapsed ? "collapsed" : "")">
 
     @* Botón toggle *@
@@ -48,6 +49,15 @@
                     @if (!collapsed)
                     {
                         <span>Empresas</span>
+                    }
+                </a>
+            </li>
+            <li class="@GetNavClass("/areas")">
+                <a href="/areas" title="Áreas">
+                    <i class="bi bi-diagram-3"></i>
+                    @if (!collapsed)
+                    {
+                        <span>Áreas</span>
                     }
                 </a>
             </li>
@@ -155,6 +165,7 @@
             return current == "/" ? "nav-item active" : "nav-item";
         return current.StartsWith(url) ? "nav-item active" : "nav-item";
     }
+
     private string nombreUsuario = "";
     private string inicialesUsuario = "";
 

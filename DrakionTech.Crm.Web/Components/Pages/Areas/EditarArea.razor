@@ -1,0 +1,26 @@
+﻿@page "/areas/editar/{Id:int}"
+@using DrakionTech.Crm.Business.DTOs.Area
+@using DrakionTech.Crm.Web.Components.Areas
+@inject NavigationManager Nav
+
+<PageTitle>Editar área – DrakionTech CRM</PageTitle>
+
+<div class="d-flex align-items-center gap-2 mb-4">
+    <a href="/areas" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+        <h2 class="mb-0">Editar área</h2>
+        <p class="text-muted mb-0" style="font-size:13px">Modifica los datos del área organizacional</p>
+    </div>
+</div>
+
+<div class="ui-card form-card">
+    <AreaForm AreaId="Id" OnGuardado="OnGuardado" />
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private void OnGuardado(AreaDto _) => Nav.NavigateTo("/areas");
+}

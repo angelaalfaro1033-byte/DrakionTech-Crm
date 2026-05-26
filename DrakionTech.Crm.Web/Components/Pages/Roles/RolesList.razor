@@ -2,12 +2,12 @@
 
 @using DrakionTech.Crm.Business.DTOs.RolUsuario
 @using DrakionTech.Crm.Business.Interfaces
+@using DrakionTech.Crm.Web.Components
 
 @inject IRolUsuarioService RolUsuarioService
 
 <div class="roles-container">
 
-    <!-- HEADER -->
     <div class="empresas-header">
         <div>
             <h1 class="empresas-title">Roles</h1>
@@ -18,7 +18,12 @@
         </a>
     </div>
 
-    @if (roles is null)
+    <FiltroTabla TItem="RolUsuarioDto"
+                 PlaceholderBusqueda="Buscar por nombre..."
+                 MostrarFiltroEstado="true"
+                 OnFiltroChanged="OnFiltroChanged" />
+
+    @if (cargando)
     {
         <p>Cargando roles...</p>
     }
@@ -30,22 +35,6 @@
     }
     else
     {
-        <div class="ui-toolbar">
-            <div class="ui-search">
-                <i class="bi bi-search"></i>
-                <input class="form-control"
-                       placeholder="Buscar por nombre..."
-                       @bind="busqueda"
-                       @bind:event="oninput" />
-            </div>
-
-            <select class="form-select" @bind="estadoSeleccionado">
-                <option value="">Todos</option>
-                <option value="true">Activos</option>
-                <option value="false">Inactivos</option>
-            </select>
-        </div>
-
         <div class="ui-card">
             <table class="ui-table">
                 <thead>
@@ -56,7 +45,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in rolesFiltrados!)
+                    @foreach (var item in roles)
                     {
                         <tr>
                             <td class="fw-semibold">@item.Nombre</td>
@@ -72,13 +61,17 @@
                                     </a>
                                     @if (item.Activo)
                                     {
-                                        <button class="btn btn-sm btn-success" @onclick="() => Desactivar(item.Id)" title="Desactivar">
+                                        <button class="btn btn-sm btn-success"
+                                                @onclick="() => Desactivar(item.Id)"
+                                                title="Desactivar">
                                             <i class="bi bi-toggle-on"></i>
                                         </button>
                                     }
                                     else
                                     {
-                                        <button class="btn btn-sm btn-secondary" @onclick="() => Activar(item.Id)" title="Activar">
+                                        <button class="btn btn-sm btn-secondary"
+                                                @onclick="() => Activar(item.Id)"
+                                                title="Activar">
                                             <i class="bi bi-toggle-off"></i>
                                         </button>
                                     }
@@ -94,58 +87,31 @@
 </div>
 
 @code {
-    private List<RolUsuarioDto>? roles;
-    private IEnumerable<RolUsuarioDto>? rolesFiltrados;
+    private List<RolUsuarioDto> roles = new();
+    private bool cargando = true;
+    private string? busqueda;
+    private bool? soloActivos;
 
-    private string? _busqueda;
-    private string? _estadoSeleccionado;
-
-    private string? busqueda
-    {
-        get => _busqueda;
-        set { _busqueda = value; AplicarFiltros(); }
-    }
-
-    private string? estadoSeleccionado
-    {
-        get => _estadoSeleccionado;
-        set { _estadoSeleccionado = value; AplicarFiltros(); }
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        await Cargar();
-    }
+    protected override async Task OnInitializedAsync() => await Cargar();
 
     private async Task Cargar()
     {
-        roles = await RolUsuarioService.ObtenerTodosAsync();
-        AplicarFiltros();
+        cargando = true;
+        StateHasChanged();
+        roles = (await RolUsuarioService.ObtenerTodosAsync(busqueda, soloActivos)).ToList();
+        cargando = false;
     }
 
-    private void AplicarFiltros()
+    private async Task OnFiltroChanged(Dictionary<string, string?> valores)
     {
-        if (roles is null) return;
-
-        var query = roles.AsQueryable();
-
-        if (!string.IsNullOrWhiteSpace(busqueda))
-        {
-            var texto = busqueda.Trim().ToLower();
-            query = query.Where(r => r.Nombre != null && r.Nombre.ToLower().Contains(texto));
-        }
-
-        if (!string.IsNullOrWhiteSpace(estadoSeleccionado))
-        {
-            var activo = bool.Parse(estadoSeleccionado);
-            query = query.Where(r => r.Activo == activo);
-        }
-
-        rolesFiltrados = query.ToList();
+        busqueda = valores.GetValueOrDefault("busqueda");
+        var estado = valores.GetValueOrDefault("estado");
+        soloActivos = string.IsNullOrWhiteSpace(estado) ? null : bool.Parse(estado);
+        await Cargar();
     }
 
     private async Task Desactivar(int id) => await CambiarEstado(id, RolUsuarioService.DesactivarAsync);
-    private async Task Activar(int id) => await CambiarEstado(id, RolUsuarioService.ActivarAsync);
+    private async Task Activar(int id)    => await CambiarEstado(id, RolUsuarioService.ActivarAsync);
 
     private async Task CambiarEstado(int id, Func<int, Task> accion)
     {

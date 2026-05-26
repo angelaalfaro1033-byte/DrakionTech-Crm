@@ -1,0 +1,46 @@
+﻿@namespace DrakionTech.Crm.Web.Components
+@typeparam TItem
+
+<div class="ui-toolbar">
+    <div class="ui-search">
+        <i class="bi bi-search"></i>
+        <input class="form-control"
+               placeholder="@PlaceholderBusqueda"
+               @oninput="OnBusquedaChanged" />
+    </div>
+    @if (MostrarFiltroEstado)
+    {
+        <select class="form-select" @onchange="OnEstadoChanged">
+            <option value="">Todos</option>
+            <option value="true">Activos</option>
+            <option value="false">Inactivos</option>
+        </select>
+    }
+</div>
+
+@code {
+    [Parameter] public string PlaceholderBusqueda { get; set; } = "Buscar...";
+    [Parameter] public bool MostrarFiltroEstado { get; set; } = true;
+    [Parameter] public int DebounceMs { get; set; } = 350;
+    [Parameter] public EventCallback<Dictionary<string, string?>> OnFiltroChanged { get; set; }
+
+    private readonly Dictionary<string, string?> _valores = new();
+    private System.Timers.Timer? _debounce;
+
+    private async Task OnBusquedaChanged(ChangeEventArgs e)
+    {
+        _valores["busqueda"] = e.Value?.ToString();
+        _debounce?.Stop();
+        _debounce?.Dispose();
+        _debounce = new System.Timers.Timer(DebounceMs) { AutoReset = false };
+        _debounce.Elapsed += async (_, _) =>
+            await InvokeAsync(async () => await OnFiltroChanged.InvokeAsync(_valores));
+        _debounce.Start();
+    }
+
+    private async Task OnEstadoChanged(ChangeEventArgs e)
+    {
+        _valores["estado"] = e.Value?.ToString();
+        await OnFiltroChanged.InvokeAsync(_valores);
+    }
+}

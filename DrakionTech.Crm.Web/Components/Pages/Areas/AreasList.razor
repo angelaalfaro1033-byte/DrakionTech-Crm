@@ -1,0 +1,247 @@
+﻿@page "/areas"
+@using DrakionTech.Crm.Business.DTOs.Area
+@inject IAreaService AreaService
+@inject NavigationManager Nav
+
+<PageTitle>Áreas – DrakionTech CRM</PageTitle>
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="mb-0">Áreas organizacionales</h2>
+    </div>
+
+    <a href="/areas/nueva" class="btn btn-primary d-flex align-items-center gap-2">
+        <i class="bi bi-plus-lg"></i> Nueva área
+    </a>
+</div>
+
+<div class="ui-toolbar">
+    <div class="ui-search">
+        <i class="bi bi-search"></i>
+
+        <input class="form-control"
+               placeholder="Buscar por nombre, descripción o responsable…"
+               value="@busqueda"
+               @oninput="OnBusquedaChanged" />
+    </div>
+
+    <select class="form-select"
+            @bind="filtroActiva"
+            @bind:after="CargarAsync">
+
+        <option value="">Todos los estados</option>
+        <option value="true">Activas</option>
+        <option value="false">Inactivas</option>
+    </select>
+</div>
+
+<div class="ui-card">
+
+    @if (cargando)
+    {
+        <div class="text-center py-5 text-muted">
+            <div class="spinner-border spinner-border-sm me-2"></div>
+            Cargando áreas…
+        </div>
+    }
+    else if (!areas.Any())
+    {
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-diagram-3 fs-2 d-block mb-2"></i>
+            No se encontraron áreas con los filtros aplicados.
+        </div>
+    }
+    else
+    {
+        <table class="ui-table">
+
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Responsable</th>
+                    <th>Estado</th>
+                    <th>Creada</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @foreach (var a in areas)
+                {
+                    <tr>
+
+                        <td>
+                            <span style="font-weight:500;color:var(--text-main)">
+                                @a.Nombre
+                            </span>
+                        </td>
+
+                        <td style="color:var(--text-muted);font-size:13px;max-width:220px">
+                            @(string.IsNullOrEmpty(a.Descripcion)
+                                ? "—"
+                                : a.Descripcion)
+                        </td>
+
+                        <td style="font-size:13px">
+
+                            @if (string.IsNullOrEmpty(a.ResponsableNombre))
+                            {
+                                <span class="text-muted">Sin asignar</span>
+                            }
+                            else
+                            {
+                                <span>@a.ResponsableNombre</span>
+                            }
+
+                        </td>
+
+                        <td>
+
+                            @if (a.Activa)
+                            {
+                                <span class="badge badge-success">
+                                    Activa
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-danger">
+                                    Inactiva
+                                </span>
+                            }
+
+                        </td>
+
+                        <td style="font-size:13px;color:var(--text-muted)">
+                            @a.FechaCreacion.ToString("dd/MM/yyyy")
+                        </td>
+
+                        <td>
+
+                            <div class="ui-actions">
+
+                                <a href="/areas/editar/@a.Id"
+                                   title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+
+                                @if (a.Activa)
+                                {
+                                    <button type="button"
+                                            class="action-danger border-0 bg-transparent"
+                                            title="Desactivar"
+                                            @onclick="() => CambiarEstado(a)">
+
+                                        <i class="bi bi-trash"></i>
+
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button"
+                                            class="action-success border-0 bg-transparent"
+                                            title="Activar"
+                                            @onclick="() => CambiarEstado(a)">
+
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+
+                                    </button>
+                                }
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+    }
+
+</div>
+
+@code {
+
+    private List<AreaListDto> areas = new();
+
+    private string busqueda = string.Empty;
+
+    private string filtroActiva = "";
+
+    private bool cargando = true;
+
+    private string? errorAccion;
+
+    private System.Timers.Timer? debounceTimer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarAsync();
+    }
+
+    private async Task CargarAsync()
+    {
+        cargando = true;
+
+        StateHasChanged();
+
+        bool? soloActivas = filtroActiva switch
+        {
+            "true" => true,
+            "false" => false,
+            _ => null
+        };
+
+        areas = (await AreaService.ObtenerTodasAsync(
+            string.IsNullOrWhiteSpace(busqueda)
+                ? null
+                : busqueda,
+            soloActivas))
+            .ToList();
+
+        cargando = false;
+    }
+
+    private void OnBusquedaChanged(ChangeEventArgs e)
+    {
+        busqueda = e.Value?.ToString() ?? string.Empty;
+
+        debounceTimer?.Stop();
+
+        debounceTimer?.Dispose();
+
+        debounceTimer = new System.Timers.Timer(350)
+            {
+                AutoReset = false
+            };
+
+        debounceTimer.Elapsed += async (_, _) =>
+            await InvokeAsync(async () =>
+            {
+                await CargarAsync();
+                StateHasChanged();
+            });
+
+        debounceTimer.Start();
+    }
+
+    private async Task CambiarEstado(AreaListDto area)
+    {
+        try
+        {
+            await AreaService.CambiarEstadoAsync(
+                area.Id,
+                !area.Activa);
+
+            await CargarAsync();
+        }
+        catch (InvalidOperationException ex)
+        {
+            errorAccion = ex.Message;
+        }
+    }
+}

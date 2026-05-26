@@ -15,4 +15,6 @@ public class Usuario
     public string? ActivationToken { get; set; }
     public DateTime? ActivationTokenExpiration { get; set; }
     public RolUsuario Rol { get; set; } = null!;
+    public int? AreaId { get; set; }
+    public virtual Area? Area { get; set; }
 }
