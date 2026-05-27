@@ -50,6 +50,10 @@ namespace DrakionTech.Crm.Data.Configurations
                 .HasMaxLength(150)
                 .IsRequired(false);
 
+            builder.Property(e => e.Activa)
+                .IsRequired()
+                .HasDefaultValue(true);
+
             builder.HasOne(e => e.Pais)
                 .WithMany()
                 .HasForeignKey(e => e.PaisId)

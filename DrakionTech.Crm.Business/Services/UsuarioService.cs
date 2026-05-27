@@ -24,10 +24,26 @@ public class UsuarioService : IUsuarioService
         _config = config;
     }
 
-    public async Task<List<UsuarioListDto>> ObtenerTodosAsync()
+    public async Task<List<UsuarioListDto>> ObtenerTodosAsync(string? busqueda = null, bool? soloActivos = null)
     {
         var usuarios = await _repository.GetAllAsync();
-        return usuarios.Select(MapToDto).ToList();
+
+        var query = usuarios.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(busqueda))
+        {
+            var term = busqueda.Trim().ToLower();
+            query = query.Where(u =>
+                (u.Nombre != null && u.Nombre.ToLower().Contains(term)) ||
+                (u.Apellido != null && u.Apellido.ToLower().Contains(term)) ||
+                (u.Email != null && u.Email.ToLower().Contains(term)) ||
+                (u.Rol != null && u.Rol.Nombre != null && u.Rol.Nombre.ToLower().Contains(term)));
+        }
+
+        if (soloActivos.HasValue)
+            query = query.Where(u => u.IsActive == soloActivos.Value);
+
+        return query.Select(MapToDto).ToList();
     }
 
     public async Task<UsuarioListDto> ObtenerPorIdAsync(int id)

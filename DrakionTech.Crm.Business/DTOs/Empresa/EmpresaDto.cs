@@ -19,7 +19,7 @@ namespace DrakionTech.Crm.Business.DTOs.Empresa
 
         public int CiudadId { get; set; }
         public string CiudadNombre { get; set; } = string.Empty;
-
+        public bool Activa { get; set; } = true;
         public int? SectorId { get; set; }
         public string SectorNombre { get; set; } = string.Empty;
         public string? SectorOtro { get; set; }

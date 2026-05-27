@@ -27,88 +27,88 @@ namespace DrakionTech.Crm.Business.Services
             _mapper = mapper;
         }
 
-        // CREAR
         public async Task<int> CrearAsync(CrearEmpresaDto dto, CancellationToken ct = default)
         {
             await ValidarCatalogosAsync(dto, ct);
-
             NormalizarEmpresa(dto);
-
             var empresa = _mapper.Map<Empresa>(dto);
-
             await _empresaRepository.AgregarAsync(empresa, ct);
-
             return empresa.Id;
         }
 
-        // ACTUALIZAR
         public async Task ActualizarAsync(int empresaId, ActualizarEmpresaDto dto, CancellationToken ct = default)
         {
             await ValidarCatalogosAsync(dto, ct);
-
             var empresa = await _empresaRepository.ObtenerPorIdAsync(empresaId, ct)
                 ?? throw new EntidadNoEncontradaException("Empresa", empresaId);
-
             _mapper.Map(dto, empresa);
-
             await _empresaRepository.ActualizarAsync(empresa, ct);
         }
 
-        // OBTENER POR ID
         public async Task<EmpresaDto> ObtenerPorIdAsync(int empresaId, CancellationToken ct = default)
         {
             var empresa = await _empresaRepository.ObtenerConUbicacionAsync(empresaId, ct)
                 ?? throw new EntidadNoEncontradaException("Empresa", empresaId);
-
             return _mapper.Map<EmpresaDto>(empresa);
         }
 
-        // LISTADO GENERAL
-        public async Task<IEnumerable<EmpresaDto>> ObtenerTodasAsync(CancellationToken ct = default)
+        public async Task<IEnumerable<EmpresaDto>> ObtenerTodasAsync(string? busqueda = null, bool? soloActivas = null, CancellationToken ct = default)
         {
             var empresas = await _empresaRepository.ObtenerTodasConRelacionesAsync(ct);
 
-            return _mapper.Map<IEnumerable<EmpresaDto>>(empresas);
+            var query = empresas.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(busqueda))
+            {
+                var term = busqueda.Trim().ToLower();
+                query = query.Where(e =>
+                    (e.Nombre != null && e.Nombre.ToLower().Contains(term)) ||
+                    (e.Nit != null && e.Nit.ToLower().Contains(term)) ||
+                    (e.Correo != null && e.Correo.ToLower().Contains(term)));
+            }
+
+            if (soloActivas.HasValue)
+                query = query.Where(e => e.Activa == soloActivas.Value);
+
+            return _mapper.Map<IEnumerable<EmpresaDto>>(query.ToList());
         }
 
-        // VALIDACIONES
+        public async Task ActivarAsync(int empresaId, CancellationToken ct = default)
+        {
+            var empresa = await _empresaRepository.ObtenerPorIdAsync(empresaId, ct)
+                ?? throw new EntidadNoEncontradaException("Empresa", empresaId);
+            empresa.Activa = true;
+            await _empresaRepository.ActualizarAsync(empresa, ct);
+        }
+
+        public async Task DesactivarAsync(int empresaId, CancellationToken ct = default)
+        {
+            var empresa = await _empresaRepository.ObtenerPorIdAsync(empresaId, ct)
+                ?? throw new EntidadNoEncontradaException("Empresa", empresaId);
+            empresa.Activa = false;
+            await _empresaRepository.ActualizarAsync(empresa, ct);
+        }
 
         private async Task ValidarCatalogosAsync(IEmpresaCatalogoDto dto, CancellationToken ct)
         {
-            await ValidarCatalogoAsync(
-                dto.SectorId,
-                dto.SectorOtro,
-                "sector",
-                _sectorRepository.ExisteAsync,
-                ct);
-
-            await ValidarCatalogoAsync(
-                dto.EstadoId,
-                dto.EstadoOtro,
-                "estado",
-                _estadoRepository.ExisteAsync,
-                ct);
+            await ValidarCatalogoAsync(dto.SectorId, dto.SectorOtro, "sector", _sectorRepository.ExisteAsync, ct);
+            await ValidarCatalogoAsync(dto.EstadoId, dto.EstadoOtro, "estado", _estadoRepository.ExisteAsync, ct);
         }
 
         private static async Task ValidarCatalogoAsync(
-            int? id,
-            string? otro,
-            string nombreCampo,
+            int? id, string? otro, string nombreCampo,
             Func<int, CancellationToken, Task<bool>> existsFunc,
             CancellationToken ct)
         {
-            // Regla 1: uno u otro, no ambos ni ninguno
             if (id == null && string.IsNullOrWhiteSpace(otro))
                 throw new ReglaNegocioException($"Debe seleccionar un {nombreCampo} o ingresar otro.");
 
             if (id != null && !string.IsNullOrWhiteSpace(otro))
                 throw new ReglaNegocioException($"No puede seleccionar un {nombreCampo} y escribir otro al mismo tiempo.");
 
-            // Regla 2: si viene id, debe existir en BD
             if (id != null)
             {
                 var existe = await existsFunc(id.Value, ct);
-
                 if (!existe)
                     throw new ReglaNegocioException($"El {nombreCampo} seleccionado no existe.");
             }

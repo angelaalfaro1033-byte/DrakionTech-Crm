@@ -2,9 +2,11 @@
 @attribute [Authorize]
 @using DrakionTech.Crm.Business.Interfaces
 @using DrakionTech.Crm.Business.DTOs.Usuario
+@using DrakionTech.Crm.Web.Components
 @inject IUsuarioService UsuarioService
 
 <div class="empleados-container">
+
     <div class="empresas-header">
         <div class="header-text">
             <h1 class="empresas-title">Usuarios</h1>
@@ -16,80 +18,105 @@
             </a>
         </div>
     </div>
-    <div class="ui-card">
-        <table class="ui-table">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Email</th>
-                    <th>Teléfono</th>
-                    <th>Rol</th>
-                    <th>Estado</th>
-                    <th class="text-end">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in usuarios)
-                {
+
+    <FiltroTabla TItem="UsuarioListDto"
+                 PlaceholderBusqueda="Buscar por nombre, email o rol..."
+                 MostrarFiltroEstado="true"
+                 OnFiltroChanged="OnFiltroChanged" />
+
+    @if (cargando)
+    {
+        <p>Cargando usuarios...</p>
+    }
+    else if (!usuarios.Any())
+    {
+        <div class="alert alert-info">No hay usuarios registrados.</div>
+    }
+    else
+    {
+        <div class="ui-card">
+            <table class="ui-table">
+                <thead>
                     <tr>
-                        <td>@item.Nombre @item.Apellido</td>
-                        <td class="email-cell" title="@item.Email">
-                            @item.Email
-                        </td>
-                        <td>@(item.Telefono ?? "—")</td>
-                        <td>@item.Rol</td>
-                        <td>
-                            <span class="badge @(item.IsActive ? "badge-success" : "badge-danger")">
-                                @(item.IsActive ? "Activo" : "Inactivo")
-                            </span>
-                        </td>
-                        <td class="text-end">
-                            <div class="ui-actions">
-                                <a href="/usuarios/editar/@item.Id" title="Editar">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                @if (item.IsActive)
-                                {
-                                    <a href="#"
-                                       class="action-danger"
-                                       @onclick="() => Desactivar(item.Id)"
-                                    @onclick:preventDefault
-                                       title="Desactivar">
-
-                                        <i class="bi bi-person-slash"></i>
-                                    </a>
-                                }
-                                else
-                                {
-                                    <a href="#"
-                                       class="action-success"
-                                       @onclick="() => Activar(item.Id)"
-                                    @onclick:preventDefault
-                                       title="Activar">
-
-                                        <i class="bi bi-person-check"></i>
-                                    </a>
-                                }
-                            </div>
-                        </td>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th class="text-end">Acciones</th>
                     </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    @foreach (var item in usuarios)
+                    {
+                        <tr>
+                            <td>@item.Nombre @item.Apellido</td>
+                            <td class="email-cell" title="@item.Email">@item.Email</td>
+                            <td>@(item.Telefono ?? "—")</td>
+                            <td>@item.Rol</td>
+                            <td>
+                                <span class="badge @(item.IsActive ? "badge-success" : "badge-danger")">
+                                    @(item.IsActive ? "Activo" : "Inactivo")
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="ui-actions">
+                                    <a href="/usuarios/editar/@item.Id" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    @if (item.IsActive)
+                                    {
+                                        <a href="#"
+                                           class="action-danger"
+                                           @onclick="() => Desactivar(item.Id)"
+                                           @onclick:preventDefault
+                                           title="Desactivar">
+                                            <i class="bi bi-person-slash"></i>
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a href="#"
+                                           class="action-success"
+                                           @onclick="() => Activar(item.Id)"
+                                           @onclick:preventDefault
+                                           title="Activar">
+                                            <i class="bi bi-person-check"></i>
+                                        </a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
 </div>
 
 @code {
     private List<UsuarioListDto> usuarios = new();
+    private bool cargando = true;
+    private string? busqueda;
+    private bool? soloActivos;
 
-    protected override async Task OnInitializedAsync()
-    {
-        await Cargar();
-    }
+    protected override async Task OnInitializedAsync() => await Cargar();
 
     private async Task Cargar()
     {
-        usuarios = await UsuarioService.ObtenerTodosAsync();
+        cargando = true;
+        StateHasChanged();
+        usuarios = await UsuarioService.ObtenerTodosAsync(busqueda, soloActivos);
+        cargando = false;
+    }
+
+    private async Task OnFiltroChanged(Dictionary<string, string?> valores)
+    {
+        busqueda = valores.GetValueOrDefault("busqueda");
+        var estado = valores.GetValueOrDefault("estado");
+        soloActivos = string.IsNullOrWhiteSpace(estado) ? null : bool.Parse(estado);
+        await Cargar();
     }
 
     private async Task Desactivar(int id)

@@ -15,10 +15,26 @@ namespace DrakionTech.Crm.Business.Services
             _repository = repository;
         }
 
-        public async Task<List<EmpleadoListDto>> ObtenerTodosAsync()
+        public async Task<List<EmpleadoListDto>> ObtenerTodosAsync(string? busqueda = null, bool? soloActivos = null)
         {
             var empleados = await _repository.ObtenerTodosAsync();
-            return empleados.Select(MapToDto).ToList();
+
+            var query = empleados.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(busqueda))
+            {
+                var term = busqueda.Trim().ToLower();
+                query = query.Where(e =>
+                    (e.Nombre != null && e.Nombre.ToLower().Contains(term)) ||
+                    (e.Apellido != null && e.Apellido.ToLower().Contains(term)) ||
+                    (e.Email != null && e.Email.ToLower().Contains(term)) ||
+                    (e.Cargo != null && e.Cargo.ToLower().Contains(term)));
+            }
+
+            if (soloActivos.HasValue)
+                query = query.Where(e => e.Activo == soloActivos.Value);
+
+            return query.Select(MapToDto).ToList();
         }
 
         public async Task<EmpleadoListDto> ObtenerPorIdAsync(int id)
