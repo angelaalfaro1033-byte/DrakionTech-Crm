@@ -1,0 +1,138 @@
+﻿/* Encabezado de página con título y botón */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.page-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.page-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* Barra de búsqueda y filtros */
+.ui-toolbar {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    border-radius: var(--radius-lg);
+    background: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.ui-search {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+}
+
+    .ui-search i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9aa0a6;
+        font-size: 14px;
+        pointer-events: none;
+    }
+
+    .ui-search input {
+        width: 100%;
+        padding-left: 36px;
+        height: 40px;
+        font-size: 14px;
+        border-radius: var(--radius-sm);
+    }
+
+.ui-toolbar .form-select {
+    width: 200px;
+    min-width: 140px;
+    max-width: 180px;
+    flex: 0 0 auto;
+}
+
+/* Tarjeta contenedora de tabla */
+.ui-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-soft);
+    padding: 12px;
+}
+
+/* Tabla */
+.ui-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .ui-table th {
+        font-size: 13px;
+        color: var(--text-muted);
+        padding: 12px;
+        border-bottom: 1px solid var(--border-soft);
+        text-align: left;
+    }
+
+    .ui-table td {
+        padding: 14px 12px;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+/* Botones de acción en la tabla */
+.ui-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+    .ui-actions a {
+        color: #6b7280;
+        font-size: 14px;
+        transition: color 0.2s;
+    }
+
+        .ui-actions a:hover {
+            color: #111827;
+        }
+
+/* Badges de estado */
+.badge {
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.badge-success {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.badge-danger {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+/* Enlace genérico en tabla */
+.link-tabla {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+    .link-tabla:hover {
+        text-decoration: underline;
+    }
+
+.header-right form {
+    margin: 0;
+}
