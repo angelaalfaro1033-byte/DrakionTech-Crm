@@ -10,29 +10,18 @@
     .home-header h1 {
         font-size: 28px;
         font-weight: 700;
-        color: #111827;
+        color: var(--text-main);
         margin: 0 0 6px;
         letter-spacing: -0.4px;
     }
 
     .home-header p {
-        color: #9aa0a6;
+        color: var(--text-muted);
         font-size: 15px;
         margin: 0;
     }
 
-.section-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: #9aa0a6;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 14px;
-}
-
 .resumen-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
     gap: 16px;
     margin-bottom: 1rem;
 }
@@ -50,7 +39,7 @@
 
     .resumen-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
     .resumen-card.programada {
@@ -113,16 +102,14 @@
 }
 
 .actions-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
     gap: 14px;
 }
 
 .action-card {
     position: relative;
-    background: #ffffff;
+    background: var(--bg-card);
     border-radius: 16px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border-soft);
     padding: 22px 24px;
     display: flex;
     flex-direction: row;
@@ -130,13 +117,13 @@
     gap: 16px;
     cursor: pointer;
     transition: all 0.2s ease;
-    color: #1e293b;
+    color: var(--text-main);
 }
 
     .action-card:hover {
         border-color: #d1d5db;
         transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.07);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
     }
 
     .action-card.loading {
@@ -165,49 +152,23 @@
 .card-title {
     font-size: 15px;
     font-weight: 600;
-    color: #111827;
+    color: var(--text-main);
 }
 
 .card-desc {
     font-size: 13px;
-    color: #9aa0a6;
+    color: var(--text-muted);
     font-weight: 400;
 }
 
 .card-arrow {
     font-size: 14px;
-    color: #d1d5db;
+    color: var(--border-soft);
     transition: transform 0.2s, color 0.2s;
     flex-shrink: 0;
 }
 
 .action-card:hover .card-arrow {
-    color: #6b7280;
+    color: var(--text-muted);
     transform: translateX(3px);
-}
-
-.card-loading {
-    position: absolute;
-    inset: 0;
-    background: rgba(255,255,255,0.65);
-    backdrop-filter: blur(2px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 16px;
-}
-
-.spinner.small {
-    width: 24px;
-    height: 24px;
-    border: 3px solid #e5e7eb;
-    border-top: 3px solid #111827;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
 }

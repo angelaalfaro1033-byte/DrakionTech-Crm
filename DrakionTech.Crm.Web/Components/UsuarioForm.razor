@@ -17,22 +17,22 @@
             <div class="mb-3">
                 <label class="form-label">Nombre <span class="text-danger">*</span></label>
                 <InputText @bind-Value="Model.Nombre" class="form-control" placeholder="Ej: María" />
-                <ValidationMessage For="@(() => Model.Nombre)" class="text-danger small mt-1" />
+                <ValidationMessage For="@(() => Model.Nombre)" class="validation-message mt-1" />
             </div>
             <div class="mb-3">
                 <label class="form-label">Apellido <span class="text-danger">*</span></label>
                 <InputText @bind-Value="Model.Apellido" class="form-control" placeholder="Ej: González" />
-                <ValidationMessage For="@(() => Model.Apellido)" class="text-danger small mt-1" />
+                <ValidationMessage For="@(() => Model.Apellido)" class="validation-message mt-1" />
             </div>
             <div class="mb-3">
                 <label class="form-label">Correo electrónico <span class="text-danger">*</span></label>
                 <InputText @bind-Value="Model.Email" class="form-control" placeholder="correo@ejemplo.com" />
-                <ValidationMessage For="@(() => Model.Email)" class="text-danger small mt-1" />
+                <ValidationMessage For="@(() => Model.Email)" class="validation-message mt-1" />
             </div>
             <div class="mb-3">
                 <label class="form-label">Teléfono</label>
                 <InputText @bind-Value="Model.Telefono" class="form-control" placeholder="Ej: +57 300 000 0000" />
-                <ValidationMessage For="@(() => Model.Telefono)" class="text-danger small mt-1" />
+                <ValidationMessage For="@(() => Model.Telefono)" class="validation-message mt-1" />
             </div>
         </div>
     </div>
@@ -48,7 +48,7 @@
                     <option value="@rol.Id">@rol.Nombre</option>
                 }
             </InputSelect>
-            <ValidationMessage For="@(() => Model.RolId)" class="text-danger small mt-1" />
+            <ValidationMessage For="@(() => Model.RolId)" class="validation-message mt-1" />
         </div>
     </div>
 

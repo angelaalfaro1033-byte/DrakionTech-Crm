@@ -3,32 +3,32 @@
 }
 
 /* HEADER */
-.empresas-header {
+.page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
 }
 
-.empresas-title {
+.page-title {
     margin: 0;
     font-size: 28px;
     font-weight: 600;
 }
 
-.empresas-subtitle {
+.page-subtitle {
     margin: 0;
     color: #6c757d;
     font-size: 14px;
 }
 
 /* LINKS */
-.link-empresa {
+.link-tabla {
     text-decoration: none;
     color: #212529;
 }
 
-    .link-empresa:hover {
+    .link-tabla:hover {
         color: var(--primary);
     }
 

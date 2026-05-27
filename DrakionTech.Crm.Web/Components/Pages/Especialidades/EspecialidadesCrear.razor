@@ -10,10 +10,10 @@
 
 <div class="roles-container">
 
-    <div class="empresas-header">
+    <div class="page-header">
         <div>
-            <h1 class="empresas-title">Crear especialidad</h1>
-            <p class="empresas-subtitle">Registra una nueva especialidad</p>
+            <h1 class="page-title">Crear especialidad</h1>
+            <p class="page-subtitle">Registra una nueva especialidad</p>
         </div>
     </div>
 
@@ -41,7 +41,7 @@
                         <option value="@rol.Id">@rol.Nombre</option>
                     }
                 </InputSelect>
-                <ValidationMessage For="@(() => especialidad.RolUsuarioId)" class="text-danger small" />
+                <ValidationMessage For="@(() => especialidad.RolUsuarioId)" class="validation-message" />
             </div>
 
             @if (!string.IsNullOrEmpty(error))

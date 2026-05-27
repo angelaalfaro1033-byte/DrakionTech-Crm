@@ -23,7 +23,7 @@
                 <option value="@TipoDocumento.RC">Registro civil</option>
                 <option value="@TipoDocumento.TI">Tarjeta de identidad</option>
             </InputSelect>
-            <ValidationMessage For="@(() => Model.TipoDocumento)" class="text-danger small" />
+            <ValidationMessage For="@(() => Model.TipoDocumento)" class="validation-message" />
         </div>
 
         <div class="col-md-6">
@@ -32,25 +32,25 @@
                        class="form-control"
                        placeholder="Solo números"
                        inputmode="numeric" />
-            <ValidationMessage For="@(() => Model.NumeroDocumento)" class="text-danger small" />
+            <ValidationMessage For="@(() => Model.NumeroDocumento)" class="validation-message" />
         </div>
 
         <div class="col-md-6">
             <label class="form-label">Nombre</label>
             <InputText @bind-Value="Model.Nombre" class="form-control" />
-            <ValidationMessage For="@(() => Model.Nombre)" class="text-danger small" />
+            <ValidationMessage For="@(() => Model.Nombre)" class="validation-message" />
         </div>
 
         <div class="col-md-6">
             <label class="form-label">Apellido</label>
             <InputText @bind-Value="Model.Apellido" class="form-control" />
-            <ValidationMessage For="@(() => Model.Apellido)" class="text-danger small" />
+            <ValidationMessage For="@(() => Model.Apellido)" class="validation-message" />
         </div>
 
         <div class="col-md-6">
             <label class="form-label">Correo electrónico</label>
             <InputText @bind-Value="Model.Email" class="form-control" />
-            <ValidationMessage For="@(() => Model.Email)" class="text-danger small" />
+            <ValidationMessage For="@(() => Model.Email)" class="validation-message" />
         </div>
 
         <div class="col-md-6">
@@ -63,7 +63,7 @@
                              ValorSeleccionadoTexto="@Model.Rol"
                              OnSeleccionar="OnRolSeleccionado"
                              OnCrear="OnRolCreado" />
-            <ValidationMessage For="@(() => Model.Rol)" class="text-danger small" />
+            <ValidationMessage For="@(() => Model.Rol)" class="validation-message" />
         </div>
 
         <div class="col-md-6">
@@ -76,18 +76,18 @@
                              ValorSeleccionadoTexto="@Model.Cargo"
                              OnSeleccionar="OnEspecialidadSeleccionada"
                              OnCrear="OnEspecialidadCreada" />
-            <ValidationMessage For="@(() => Model.Cargo)" class="text-danger small" />
+            <ValidationMessage For="@(() => Model.Cargo)" class="validation-message" />
         </div>
 
         <div class="col-md-6">
             <label class="form-label">Salario</label>
             <InputNumber @bind-Value="Model.Salario" class="form-control" placeholder="0.00" />
-            <ValidationMessage For="@(() => Model.Salario)" class="text-danger small" />
+            <ValidationMessage For="@(() => Model.Salario)" class="validation-message" />
         </div>
 
     </div>
 
-    <div class="empleado-form-actions">
+    <div class="form-actions">
         <button type="submit" class="btn btn-primary">@TextoBoton</button>
         @if (OnCancel.HasDelegate)
         {
