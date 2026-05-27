@@ -41,7 +41,7 @@
                         <option value="@rol.Id">@rol.Nombre</option>
                     }
                 </InputSelect>
-                <ValidationMessage For="@(() => especialidad.RolUsuarioId)" class="text-danger small" />
+                <ValidationMessage For="@(() => especialidad.RolUsuarioId)" class="validation-message" />
             </div>
 
             @if (!string.IsNullOrEmpty(error))

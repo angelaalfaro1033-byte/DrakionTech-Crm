@@ -19,6 +19,52 @@
     margin: 0;
 }
 
+/* Título de sección reutilizable */
+.section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 14px;
+}
+
+/* Secciones de formulario */
+.form-section {
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+    .form-section:last-of-type {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+/* Acciones de formulario */
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 1.5rem;
+}
+
+.form-actions--end {
+    justify-content: flex-end;
+}
+
+/* Grid de 2 columnas reutilizable */
+.grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+@media (max-width: 640px) {
+    .grid-2col {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Barra de búsqueda y filtros */
 .ui-toolbar {
     display: flex;
@@ -42,7 +88,7 @@
         left: 12px;
         top: 50%;
         transform: translateY(-50%);
-        color: #9aa0a6;
+        color: var(--text-muted);
         font-size: 14px;
         pointer-events: none;
     }
@@ -97,13 +143,13 @@
 }
 
     .ui-actions a {
-        color: #6b7280;
+        color: var(--text-muted);
         font-size: 14px;
         transition: color 0.2s;
     }
 
         .ui-actions a:hover {
-            color: #111827;
+            color: var(--text-main);
         }
 
 /* Badges de estado */
@@ -132,6 +178,36 @@
     .link-tabla:hover {
         text-decoration: underline;
     }
+
+/* Loading overlay reutilizable para cards */
+.card-loading {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+}
+
+.spinner {
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+    .spinner.small {
+        width: 24px;
+        height: 24px;
+        border: 3px solid var(--border-soft);
+        border-top: 3px solid var(--text-main);
+    }
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
 
 .header-right form {
     margin: 0;
