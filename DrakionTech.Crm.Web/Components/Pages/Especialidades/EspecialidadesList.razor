@@ -2,6 +2,7 @@
 
 @using DrakionTech.Crm.Business.DTOs.Especialidad
 @using DrakionTech.Crm.Business.Interfaces
+@using DrakionTech.Crm.Web.Components
 
 @inject IEspecialidadService EspecialidadService
 
@@ -17,7 +18,12 @@
         </a>
     </div>
 
-    @if (lista is null)
+    <FiltroTabla TItem="EspecialidadDto"
+                 PlaceholderBusqueda="Buscar por nombre..."
+                 MostrarFiltroEstado="true"
+                 OnFiltroChanged="OnFiltroChanged" />
+
+    @if (cargando)
     {
         <p>Cargando especialidades...</p>
     }
@@ -27,21 +33,6 @@
     }
     else
     {
-        <div class="ui-toolbar">
-            <div class="ui-search">
-                <i class="bi bi-search"></i>
-                <input class="form-control"
-                       placeholder="Buscar por nombre..."
-                       @bind="busqueda"
-                       @bind:event="oninput" />
-            </div>
-            <select class="form-select" @bind="estadoSeleccionado">
-                <option value="">Todos</option>
-                <option value="true">Activos</option>
-                <option value="false">Inactivos</option>
-            </select>
-        </div>
-
         <div class="ui-card">
             <table class="ui-table">
                 <thead>
@@ -54,7 +45,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in listaFiltrada!)
+                    @foreach (var item in lista)
                     {
                         <tr>
                             <td class="fw-semibold">@item.Nombre</td>
@@ -72,13 +63,17 @@
                                     </a>
                                     @if (item.Activo)
                                     {
-                                        <button class="btn btn-sm btn-success" @onclick="() => Desactivar(item.Id)" title="Desactivar">
+                                        <button class="btn btn-sm btn-success"
+                                                @onclick="() => Desactivar(item.Id)"
+                                                title="Desactivar">
                                             <i class="bi bi-toggle-on"></i>
                                         </button>
                                     }
                                     else
                                     {
-                                        <button class="btn btn-sm btn-secondary" @onclick="() => Activar(item.Id)" title="Activar">
+                                        <button class="btn btn-sm btn-secondary"
+                                                @onclick="() => Activar(item.Id)"
+                                                title="Activar">
                                             <i class="bi bi-toggle-off"></i>
                                         </button>
                                     }
@@ -94,48 +89,31 @@
 </div>
 
 @code {
-    private List<EspecialidadDto>? lista;
-    private IEnumerable<EspecialidadDto>? listaFiltrada;
-
-    private string? _busqueda;
-    private string? _estadoSeleccionado;
-
-    private string? busqueda
-    {
-        get => _busqueda;
-        set { _busqueda = value; AplicarFiltros(); }
-    }
-
-    private string? estadoSeleccionado
-    {
-        get => _estadoSeleccionado;
-        set { _estadoSeleccionado = value; AplicarFiltros(); }
-    }
+    private List<EspecialidadDto> lista = new();
+    private bool cargando = true;
+    private string? busqueda;
+    private bool? soloActivos;
 
     protected override async Task OnInitializedAsync() => await Cargar();
 
     private async Task Cargar()
     {
-        lista = await EspecialidadService.ObtenerTodosAsync();
-        AplicarFiltros();
+        cargando = true;
+        StateHasChanged();
+        lista = await EspecialidadService.ObtenerTodosAsync(busqueda, soloActivos);
+        cargando = false;
     }
 
-    private void AplicarFiltros()
+    private async Task OnFiltroChanged(Dictionary<string, string?> valores)
     {
-        if (lista is null) return;
-        var query = lista.AsQueryable();
-
-        if (!string.IsNullOrWhiteSpace(busqueda))
-            query = query.Where(e => e.Nombre.ToLower().Contains(busqueda.Trim().ToLower()));
-
-        if (!string.IsNullOrWhiteSpace(estadoSeleccionado))
-            query = query.Where(e => e.Activo == bool.Parse(estadoSeleccionado));
-
-        listaFiltrada = query.ToList();
+        busqueda = valores.GetValueOrDefault("busqueda");
+        var estado = valores.GetValueOrDefault("estado");
+        soloActivos = string.IsNullOrWhiteSpace(estado) ? null : bool.Parse(estado);
+        await Cargar();
     }
 
     private async Task Desactivar(int id) => await CambiarEstado(id, EspecialidadService.DesactivarAsync);
-    private async Task Activar(int id) => await CambiarEstado(id, EspecialidadService.ActivarAsync);
+    private async Task Activar(int id)    => await CambiarEstado(id, EspecialidadService.ActivarAsync);
 
     private async Task CambiarEstado(int id, Func<int, Task> accion)
     {

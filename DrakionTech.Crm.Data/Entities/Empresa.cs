@@ -10,6 +10,7 @@
 
         public string Direccion { get; set; } = null!;
         public string? Correo { get; set; }
+        public bool Activa { get; set; } = true;
 
         public int PaisId { get; set; }
         public Pais Pais { get; set; } = null!;
