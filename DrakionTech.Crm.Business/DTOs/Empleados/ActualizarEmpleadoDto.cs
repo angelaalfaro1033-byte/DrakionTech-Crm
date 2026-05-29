@@ -21,14 +21,8 @@ namespace DrakionTech.Crm.Business.DTOs.Empleado
         [EmailAddress]
         public string Email { get; set; } = null!;
 
-        [Required(ErrorMessage = MensajesError.RolObligatorio)]
-        public string RolNombre { get; set; } = null!;
-
         [Range(1, int.MaxValue, ErrorMessage = MensajesError.RolSeleccionar)]
         public int RolUsuarioId { get; set; }
-
-        [Required(ErrorMessage = MensajesError.EspecialidadObligatoria)]
-        public string Especialidad { get; set; } = null!;
 
         [Range(1, int.MaxValue, ErrorMessage = MensajesError.EspecialidadSeleccionar)]
         public int EspecialidadId { get; set; }
