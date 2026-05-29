@@ -28,8 +28,8 @@ namespace DrakionTech.Crm.Business.Services
                     Nombre = hoja.Cells[i, 3].Text.Trim(),
                     Apellido = hoja.Cells[i, 4].Text.Trim(),
                     Email = hoja.Cells[i, 5].Text.Trim(),
-                    Cargo = hoja.Cells[i, 6].Text.Trim(),
-                    Rol = hoja.Cells[i, 7].Text.Trim(),
+                    Rol = hoja.Cells[i, 6].Text.Trim(),
+                    Especialidad = hoja.Cells[i, 7].Text.Trim(),
                     Salario = decimal.TryParse(hoja.Cells[i, 8].Text.Trim(), out var s) ? s : 0
                 });
             }

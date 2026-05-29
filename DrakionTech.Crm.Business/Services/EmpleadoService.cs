@@ -2,6 +2,7 @@
 using DrakionTech.Crm.Business.DTOs.Empleado;
 using DrakionTech.Crm.Business.Interfaces;
 using DrakionTech.Crm.Data.Entities;
+using DrakionTech.Crm.Data.Repositories;
 using DrakionTech.Crm.Data.Repositories.Interfaces;
 
 namespace DrakionTech.Crm.Business.Services
@@ -9,10 +10,14 @@ namespace DrakionTech.Crm.Business.Services
     public class EmpleadoService : IEmpleadoService
     {
         private readonly IEmpleadoRepository _repository;
+        private readonly IEspecialidadRepository _especialidadRepository;
 
-        public EmpleadoService(IEmpleadoRepository repository)
+        public EmpleadoService(
+            IEmpleadoRepository repository,
+            IEspecialidadRepository especialidadRepository)
         {
             _repository = repository;
+            _especialidadRepository = especialidadRepository;
         }
 
         public async Task<List<EmpleadoListDto>> ObtenerTodosAsync(string? busqueda = null, bool? soloActivos = null)
@@ -28,7 +33,7 @@ namespace DrakionTech.Crm.Business.Services
                     (e.Nombre != null && e.Nombre.ToLower().Contains(term)) ||
                     (e.Apellido != null && e.Apellido.ToLower().Contains(term)) ||
                     (e.Email != null && e.Email.ToLower().Contains(term)) ||
-                    (e.Cargo != null && e.Cargo.ToLower().Contains(term)));
+                    (e.EspecialidadNavigation != null && e.EspecialidadNavigation.Nombre.ToLower().Contains(term)));
             }
 
             if (soloActivos.HasValue)
@@ -60,20 +65,25 @@ namespace DrakionTech.Crm.Business.Services
             if (empleadoExistente != null)
                 errores.Add(MensajesError.EmailEmpleadoDuplicado);
 
+            var compatible = await _especialidadRepository
+                .ExisteEspecialidadEnRolAsync(dto.EspecialidadId, dto.RolUsuarioId);
+            if (!compatible)
+                errores.Add(MensajesError.EspecialidadIncompatible);
+
             if (errores.Any())
                 throw new Exception(string.Join(" | ", errores));
 
             var empleado = new Empleado
             {
+                TipoDocumento = dto.TipoDocumento,
+                NumeroDocumento = dto.NumeroDocumento,
                 Nombre = dto.Nombre,
                 Apellido = dto.Apellido,
                 Email = dto.Email,
-                Cargo = dto.Cargo,
-                Rol = dto.Rol,
+                RolUsuarioId = dto.RolUsuarioId,
+                EspecialidadId = dto.EspecialidadId,
                 Activo = true,
                 FechaCreacion = DateTime.UtcNow,
-                TipoDocumento = dto.TipoDocumento,
-                NumeroDocumento = dto.NumeroDocumento,
                 Salario = dto.Salario.HasValue
                     ? new EmpleadoSalario { Salario = dto.Salario.Value }
                     : null,
@@ -87,11 +97,16 @@ namespace DrakionTech.Crm.Business.Services
             var empleado = await _repository.ObtenerPorIdAsync(dto.Id)
                 ?? throw new Exception(MensajesError.EmpleadoNoEncontrado);
 
+            var compatible = await _especialidadRepository
+                .ExisteEspecialidadEnRolAsync(dto.EspecialidadId, dto.RolUsuarioId);
+            if (!compatible)
+                throw new Exception(MensajesError.EspecialidadIncompatible);
+
             empleado.Nombre = dto.Nombre;
             empleado.Apellido = dto.Apellido;
             empleado.Email = dto.Email;
-            empleado.Cargo = dto.Cargo;
-            empleado.Rol = dto.Rol;
+            empleado.RolUsuarioId = dto.RolUsuarioId;
+            empleado.EspecialidadId = dto.EspecialidadId;
             empleado.FechaModificacion = DateTime.UtcNow;
             empleado.TipoDocumento = dto.TipoDocumento;
             empleado.NumeroDocumento = dto.NumeroDocumento;
@@ -138,8 +153,10 @@ namespace DrakionTech.Crm.Business.Services
             Nombre = e.Nombre,
             Apellido = e.Apellido,
             Email = e.Email,
-            Cargo = e.Cargo,
-            Rol = e.Rol,
+            RolUsuarioId = e.RolUsuarioId,
+            RolNombre = e.RolUsuario?.Nombre,
+            EspecialidadId = e.EspecialidadId,
+            Especialidad = e.EspecialidadNavigation?.Nombre,
             Activo = e.Activo,
             TipoDocumento = e.TipoDocumento,
             NumeroDocumento = e.NumeroDocumento,

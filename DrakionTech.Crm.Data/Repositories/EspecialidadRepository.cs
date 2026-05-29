@@ -19,5 +19,10 @@ namespace DrakionTech.Crm.Data.Repositories
                 .Include(e => e.RolUsuario)
                 .ToListAsync();
         }
+        public async Task<bool> ExisteEspecialidadEnRolAsync(int especialidadId, int rolUsuarioId)
+        {
+            return await _context.Especialidades
+                .AnyAsync(e => e.Id == especialidadId && e.RolUsuarioId == rolUsuarioId);
+        }
     }
 }

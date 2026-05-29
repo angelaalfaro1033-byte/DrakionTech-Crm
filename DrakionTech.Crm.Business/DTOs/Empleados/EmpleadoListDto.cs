@@ -8,8 +8,10 @@ namespace DrakionTech.Crm.Business.DTOs.Empleado
         public string Nombre { get; set; } = null!;
         public string Apellido { get; set; } = null!;
         public string Email { get; set; } = null!;
-        public string Cargo { get; set; } = null!;
-        public string Rol { get; set; } = null!;
+        public int? RolUsuarioId { get; set; }
+        public int? EspecialidadId { get; set; }
+        public string? RolNombre { get; set; }
+        public string? Especialidad { get; set; }
         public bool Activo { get; set; }
         public TipoDocumento TipoDocumento { get; set; }
         public string? NumeroDocumento { get; set; }

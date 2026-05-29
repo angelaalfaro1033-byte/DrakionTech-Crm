@@ -36,6 +36,9 @@
         public const string EspecialidadNombreLongitud = "El nombre debe tener entre 2 y 100 caracteres";
         public const string EspecialidadDescripcionLongitud = "La descripción no puede superar 300 caracteres";
         public const string EspecialidadRolObligatorio = "Debes seleccionar un rol";
+        public const string EspecialidadObligatoria = "La especialidad es obligatoria";
+        public const string EspecialidadSeleccionar = "Debes seleccionar una especialidad válida";
+        public const string EspecialidadIncompatible = "La especialidad seleccionada no pertenece al rol indicado";
 
         //Actividad
         public const string TipoActividadObligatorio = "El tipo de actividad es obligatorio";
