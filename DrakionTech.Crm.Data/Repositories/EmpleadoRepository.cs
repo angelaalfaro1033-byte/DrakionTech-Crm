@@ -18,13 +18,17 @@ namespace DrakionTech.Crm.Data.Repositories
         {
             return await _context.Empleados
                 .Include(e => e.Salario)
-                .ToListAsync();
+                .Include(e => e.RolUsuario)
+                .Include(e => e.EspecialidadNavigation)
+                .ToListAsync(); 
         }
 
         public async Task<Empleado?> ObtenerPorIdAsync(int id)
         {
             return await _context.Empleados
                 .Include(e => e.Salario)
+                .Include(e => e.RolUsuario)
+                .Include(e => e.EspecialidadNavigation)
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
 
@@ -43,15 +47,15 @@ namespace DrakionTech.Crm.Data.Repositories
             if (existing == null)
                 throw new Exception("Empleado no encontrado");
 
+            existing.TipoDocumento = empleado.TipoDocumento;
+            existing.NumeroDocumento = empleado.NumeroDocumento;
             existing.Nombre = empleado.Nombre;
             existing.Apellido = empleado.Apellido;
             existing.Email = empleado.Email;
-            existing.Cargo = empleado.Cargo;
-            existing.Rol = empleado.Rol;
-            existing.Activo = empleado.Activo;
+            existing.RolUsuarioId = empleado.RolUsuarioId;
+            existing.EspecialidadId = empleado.EspecialidadId;
+                existing.Activo = empleado.Activo;
             existing.FechaModificacion = empleado.FechaModificacion;
-            existing.TipoDocumento = empleado.TipoDocumento;
-            existing.NumeroDocumento = empleado.NumeroDocumento;
             existing.PasswordHash = empleado.PasswordHash;
             existing.IsActive = empleado.IsActive;
             existing.ActivationToken = empleado.ActivationToken;
@@ -75,6 +79,8 @@ namespace DrakionTech.Crm.Data.Repositories
         {
             return await _context.Empleados
                 .Include(e => e.Salario)
+                .Include(e => e.RolUsuario)
+                .Include(e => e.EspecialidadNavigation)
                 .FirstOrDefaultAsync(e => e.Email == email);
         }
 
@@ -82,6 +88,8 @@ namespace DrakionTech.Crm.Data.Repositories
         {
             return await _context.Empleados
                 .Include(e => e.Salario)
+                .Include(e => e.RolUsuario)
+                .Include(e => e.EspecialidadNavigation)
                 .FirstOrDefaultAsync(e => e.NumeroDocumento == numeroDocumento);
         }
     }

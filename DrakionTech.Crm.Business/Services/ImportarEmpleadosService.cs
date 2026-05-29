@@ -14,17 +14,23 @@ namespace DrakionTech.Crm.Business.Services
         private readonly IExcelEmpleadoParser _parser;
         private readonly IEmailService _emailService;
         private readonly IConfiguration _config;
+        private readonly IRolUsuarioService _rolService;
+        private readonly IEspecialidadService _especialidadService;
 
         public ImportarEmpleadosService(
             IEmpleadoRepository repository,
             IExcelEmpleadoParser parser,
             IEmailService emailService,
-            IConfiguration config)
+            IConfiguration config,
+            IRolUsuarioService rolService,
+            IEspecialidadService especialidadService)
         {
             _repository = repository;
             _parser = parser;
             _emailService = emailService;
             _config = config;
+            _rolService = rolService;
+            _especialidadService = especialidadService;
         }
 
         public async Task<ImportarEmpleadosResultDto> ImportarAsync(Stream stream)
@@ -44,6 +50,10 @@ namespace DrakionTech.Crm.Business.Services
                         continue;
                     }
 
+                    var rol = await _rolService.CrearYObtenerAsync(fila.Rol);
+
+                    var especialidad = await _especialidadService.CrearYObtenerAsync(fila.Especialidad, rol.Id);
+
                     if (existente is null)
                     {
                         var token = Guid.NewGuid().ToString();
@@ -52,8 +62,8 @@ namespace DrakionTech.Crm.Business.Services
                             Nombre = fila.Nombre,
                             Apellido = fila.Apellido,
                             Email = fila.Email,
-                            Cargo = fila.Cargo,
-                            Rol = fila.Rol,
+                            RolUsuarioId = rol.Id,
+                            EspecialidadId = especialidad.Id,
                             TipoDocumento = tipoDoc,
                             NumeroDocumento = fila.NumeroDocumento,
                             Activo = true,
@@ -81,8 +91,8 @@ namespace DrakionTech.Crm.Business.Services
                     {
                         existente.Nombre = fila.Nombre;
                         existente.Apellido = fila.Apellido;
-                        existente.Cargo = fila.Cargo;
-                        existente.Rol = fila.Rol;
+                        existente.RolUsuarioId = rol.Id;
+                        existente.EspecialidadId = especialidad.Id;
                         existente.TipoDocumento = tipoDoc;
                         existente.NumeroDocumento = fila.NumeroDocumento;
                         existente.FechaModificacion = DateTime.UtcNow;

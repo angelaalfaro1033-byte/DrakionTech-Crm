@@ -26,13 +26,11 @@ namespace DrakionTech.Crm.Business.DTOs.Empleado
         [EmailAddress(ErrorMessage = MensajesError.EmailInvalido)]
         public string Email { get; set; } = null!;
 
-        [Required(ErrorMessage = MensajesError.RolObligatorio)]
-        public string Rol { get; set; } = null!;
-        public int? RolUsuarioId { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = MensajesError.RolSeleccionar)]
+        public int RolUsuarioId { get; set; }
 
-        [Required(ErrorMessage = MensajesError.CargoObligatorio)]
-        public string Cargo { get; set; } = null!;
-        public int? EspecialidadId { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = MensajesError.EspecialidadSeleccionar)]
+        public int EspecialidadId { get; set; }
 
         public decimal? Salario { get; set; }
     }

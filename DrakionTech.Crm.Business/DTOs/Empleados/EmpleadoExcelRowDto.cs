@@ -7,8 +7,8 @@
         public string Nombre { get; set; } = null!;
         public string Apellido { get; set; } = null!;
         public string Email { get; set; } = null!;
-        public string Cargo { get; set; } = null!;
         public string Rol { get; set; } = null!;
+        public string Especialidad { get; set; } = null!;
         public decimal Salario { get; set; }
     }
 }

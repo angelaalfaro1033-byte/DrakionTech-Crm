@@ -595,15 +595,13 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Cargo")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
+
+                    b.Property<int?>("EspecialidadId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("FechaCreacion")
                         .HasColumnType("datetime2");
@@ -626,10 +624,8 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Rol")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<int?>("RolUsuarioId")
+                        .HasColumnType("int");
 
                     b.Property<string>("TipoDocumento")
                         .IsRequired()
@@ -640,6 +636,14 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.HasIndex("Email")
                         .IsUnique();
+
+                    b.HasIndex("EspecialidadId");
+
+                    b.HasIndex("NumeroDocumento")
+                        .IsUnique()
+                        .HasFilter("[NumeroDocumento] IS NOT NULL");
+
+                    b.HasIndex("RolUsuarioId");
 
                     b.ToTable("Empleados", (string)null);
                 });
@@ -1843,6 +1847,23 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Navigation("Empresa");
 
                     b.Navigation("RolContacto");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Empleado", b =>
+                {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Especialidad", "EspecialidadNavigation")
+                        .WithMany()
+                        .HasForeignKey("EspecialidadId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.RolUsuario", "RolUsuario")
+                        .WithMany()
+                        .HasForeignKey("RolUsuarioId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("EspecialidadNavigation");
+
+                    b.Navigation("RolUsuario");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.EmpleadoSalario", b =>

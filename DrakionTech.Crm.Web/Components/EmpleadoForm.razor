@@ -60,10 +60,10 @@
                              ObtenerTexto="r => r.Nombre"
                              ObtenerId="r => r.Id"
                              Placeholder="Buscar o crear rol..."
-                             ValorSeleccionadoTexto="@Model.Rol"
+                             ValorSeleccionadoTexto="@rolSeleccionadoTexto"
                              OnSeleccionar="OnRolSeleccionado"
                              OnCrear="OnRolCreado" />
-            <ValidationMessage For="@(() => Model.Rol)" class="validation-message" />
+            <ValidationMessage For="@(() => Model.RolUsuarioId)" class="validation-message" />
         </div>
 
         <div class="col-md-6">
@@ -72,11 +72,11 @@
                              Items="especialidadesFiltradas"
                              ObtenerTexto="e => e.Nombre"
                              ObtenerId="e => e.Id"
-                             Placeholder="@(Model.RolUsuarioId is null ? "Selecciona un rol primero" : "Buscar o crear especialidad...")"
-                             ValorSeleccionadoTexto="@Model.Cargo"
+                             Placeholder="@(Model.RolUsuarioId == 0 ? "Selecciona un rol primero" : "Buscar o crear especialidad...")"
+                             ValorSeleccionadoTexto="@especialidadSeleccionadaTexto"
                              OnSeleccionar="OnEspecialidadSeleccionada"
                              OnCrear="OnEspecialidadCreada" />
-            <ValidationMessage For="@(() => Model.Cargo)" class="validation-message" />
+            <ValidationMessage For="@(() => Model.EspecialidadId)" class="validation-message" />
         </div>
 
         <div class="col-md-6">
@@ -106,29 +106,25 @@
     private List<RolUsuarioDto> roles = [];
     private List<EspecialidadDto> todasEspecialidades = [];
     private List<EspecialidadDto> especialidadesFiltradas = [];
+    private string? rolSeleccionadoTexto;
+    private string? especialidadSeleccionadaTexto;
 
     protected override async Task OnInitializedAsync()
     {
         roles = await RolService.ObtenerTodosAsync();
         todasEspecialidades = await EspecialidadService.ObtenerTodosAsync();
 
-        if (!string.IsNullOrEmpty(Model.Rol) && Model.RolUsuarioId is null)
+        if (Model.RolUsuarioId > 0)
         {
-            var rol = roles.FirstOrDefault(r => r.Nombre == Model.Rol);
-            if (rol is not null)
+            var rol = roles.FirstOrDefault(r => r.Id == Model.RolUsuarioId);
+            rolSeleccionadoTexto = rol?.Nombre;
+            FiltrarEspecialidades(Model.RolUsuarioId);
+
+            if (Model.EspecialidadId > 0)
             {
-                Model.RolUsuarioId = rol.Id;
-                FiltrarEspecialidades(rol.Id);
-                if (!string.IsNullOrEmpty(Model.Cargo) && Model.EspecialidadId is null)
-                {
-                    var esp = especialidadesFiltradas.FirstOrDefault(e => e.Nombre == Model.Cargo);
-                    if (esp is not null) Model.EspecialidadId = esp.Id;
-                }
+                var esp = especialidadesFiltradas.FirstOrDefault(e => e.Id == Model.EspecialidadId);
+                especialidadSeleccionadaTexto = esp?.Nombre;
             }
-        }
-        else if (Model.RolUsuarioId is not null)
-        {
-            FiltrarEspecialidades(Model.RolUsuarioId.Value);
         }
     }
 
@@ -136,18 +132,18 @@
     {
         if (rol is null)
         {
-            Model.RolUsuarioId = null;
-            Model.Rol = string.Empty;
+            Model.RolUsuarioId = 0;
+            rolSeleccionadoTexto = string.Empty;
             especialidadesFiltradas = [];
         }
         else
         {
             Model.RolUsuarioId = rol.Id;
-            Model.Rol = rol.Nombre;
+            rolSeleccionadoTexto = rol.Nombre;
             FiltrarEspecialidades(rol.Id);
         }
-        Model.EspecialidadId = null;
-        Model.Cargo = string.Empty;
+        Model.EspecialidadId = 0;
+        especialidadSeleccionadaTexto = string.Empty;
     }
 
     private async Task OnRolCreado(string nombre)
@@ -157,37 +153,37 @@
             roles.Add(nuevo);
 
         Model.RolUsuarioId = nuevo.Id;
-        Model.Rol = nuevo.Nombre;
+        rolSeleccionadoTexto = nuevo.Nombre;
         FiltrarEspecialidades(nuevo.Id);
-        Model.EspecialidadId = null;
-        Model.Cargo = string.Empty;
+        Model.EspecialidadId = 0;
+        especialidadSeleccionadaTexto = string.Empty;
     }
 
     private async Task OnEspecialidadSeleccionada(EspecialidadDto? esp)
     {
         if (esp is null)
         {
-            Model.EspecialidadId = null;
-            Model.Cargo = string.Empty;
+            Model.EspecialidadId = 0;
+            especialidadSeleccionadaTexto = string.Empty;
         }
         else
         {
             Model.EspecialidadId = esp.Id;
-            Model.Cargo = esp.Nombre;
+            especialidadSeleccionadaTexto = esp.Nombre;
         }
     }
 
     private async Task OnEspecialidadCreada(string nombre)
     {
-        if (Model.RolUsuarioId is null) return;
+        if (Model.RolUsuarioId == 0) return;
 
-        var nueva = await EspecialidadService.CrearYObtenerAsync(nombre, Model.RolUsuarioId.Value);
+        var nueva = await EspecialidadService.CrearYObtenerAsync(nombre, Model.RolUsuarioId);
         if (!todasEspecialidades.Any(e => e.Id == nueva.Id))
             todasEspecialidades.Add(nueva);
 
-        FiltrarEspecialidades(Model.RolUsuarioId.Value);
+        FiltrarEspecialidades(Model.RolUsuarioId);
         Model.EspecialidadId = nueva.Id;
-        Model.Cargo = nueva.Nombre;
+        especialidadSeleccionadaTexto = nueva.Nombre;
     }
 
     private void FiltrarEspecialidades(int rolId)

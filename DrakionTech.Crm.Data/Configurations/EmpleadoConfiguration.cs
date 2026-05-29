@@ -9,8 +9,19 @@ namespace DrakionTech.Crm.Data.Configurations
         public void Configure(EntityTypeBuilder<Empleado> entity)
         {
             entity.ToTable("Empleados");
-
             entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.TipoDocumento)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasMaxLength(50);
+
+            entity.Property(e => e.NumeroDocumento)
+                .HasMaxLength(20);
+
+            entity.HasIndex(e => e.NumeroDocumento)
+                .IsUnique()
+                .HasFilter("[NumeroDocumento] IS NOT NULL");
 
             entity.Property(e => e.Nombre)
                 .IsRequired()
@@ -27,21 +38,18 @@ namespace DrakionTech.Crm.Data.Configurations
             entity.HasIndex(e => e.Email)
                 .IsUnique();
 
-            entity.Property(e => e.Cargo)
-                .HasMaxLength(100);
-
-            entity.Property(e => e.Rol)
-                .HasMaxLength(100);
-
             entity.Property(e => e.Activo)
                 .HasDefaultValue(true);
-            entity.Property(e => e.TipoDocumento)
-                .IsRequired()
-                .HasConversion<string>()
-                .HasMaxLength(50);
 
-            entity.Property(e => e.NumeroDocumento)
-                .HasMaxLength(20);
+            entity.HasOne(e => e.RolUsuario)
+                .WithMany()
+                .HasForeignKey(e => e.RolUsuarioId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasOne(e => e.EspecialidadNavigation)
+                .WithMany()
+                .HasForeignKey(e => e.EspecialidadId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

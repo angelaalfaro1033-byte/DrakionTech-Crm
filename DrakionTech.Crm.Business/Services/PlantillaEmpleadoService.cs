@@ -7,9 +7,9 @@ namespace DrakionTech.Crm.Business.Services
     public class PlantillaEmpleadoService : IPlantillaEmpleadoService
     {
         private static readonly string[] Encabezados =
-        [
+[
             "TipoDocumento", "NumeroDocumento", "Nombre",
-            "Apellido", "Email", "Cargo", "Rol", "Salario"
+            "Apellido", "Email", "Rol", "Especialidad", "Salario"
         ];
 
         public byte[] GenerarPlantillaExcel()
@@ -32,7 +32,7 @@ namespace DrakionTech.Crm.Business.Services
             var ejemplo = new string[]
             {
                 primerTipo, "1234567890", "Juan",
-                "Pérez", "juan.perez@empresa.com", "Desarrollador", "Empleado", "3500000"
+                "Pérez", "juan.perez@empresa.com", "Desarrollador", "JS", "3500000"
             };
 
             for (int col = 0; col < ejemplo.Length; col++)

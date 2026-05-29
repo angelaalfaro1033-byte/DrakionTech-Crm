@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DrakionTech.Crm.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260514182451_AgregarDocumentoYSalarioEmpleado")]
-    partial class AgregarDocumentoYSalarioEmpleado
+    [Migration("20260528222036_EliminarCamposTextoEmpleado")]
+    partial class EliminarCamposTextoEmpleado
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,6 +32,9 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("ActividadPreviaId")
+                        .HasColumnType("int");
 
                     b.Property<int?>("ContactoId")
                         .HasColumnType("int");
@@ -79,6 +82,8 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ActividadPreviaId");
+
                     b.HasIndex("ContactoId");
 
                     b.HasIndex("EmpresaId");
@@ -121,6 +126,40 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.HasIndex("UsuarioInternoId");
 
                     b.ToTable("ActividadUsuarios");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Area", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activa")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Descripcion")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ResponsableId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResponsableId");
+
+                    b.ToTable("Areas");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Ciudad", b =>
@@ -559,15 +598,13 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Cargo")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
+
+                    b.Property<int?>("EspecialidadId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("FechaCreacion")
                         .HasColumnType("datetime2");
@@ -590,10 +627,8 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Rol")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<int?>("RolUsuarioId")
+                        .HasColumnType("int");
 
                     b.Property<string>("TipoDocumento")
                         .IsRequired()
@@ -604,6 +639,14 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.HasIndex("Email")
                         .IsUnique();
+
+                    b.HasIndex("EspecialidadId");
+
+                    b.HasIndex("NumeroDocumento")
+                        .IsUnique()
+                        .HasFilter("[NumeroDocumento] IS NOT NULL");
+
+                    b.HasIndex("RolUsuarioId");
 
                     b.ToTable("Empleados", (string)null);
                 });
@@ -643,6 +686,11 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<int>("CiudadId")
                         .HasColumnType("int");
@@ -830,12 +878,6 @@ namespace DrakionTech.Crm.Data.Migrations
                             Id = 2,
                             Activo = true,
                             Nombre = "Completada"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Activo = true,
-                            Nombre = "Cancelada"
                         });
                 });
 
@@ -1541,6 +1583,9 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int?>("AreaId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -1572,6 +1617,8 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AreaId");
 
                     b.HasIndex("Email")
                         .IsUnique();
@@ -1685,6 +1732,11 @@ namespace DrakionTech.Crm.Data.Migrations
 
             modelBuilder.Entity("Actividad", b =>
                 {
+                    b.HasOne("Actividad", "ActividadPrevia")
+                        .WithMany("ActividadesRelacionadas")
+                        .HasForeignKey("ActividadPreviaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("DrakionTech.Crm.Data.Entities.Contacto", "Contacto")
                         .WithMany()
                         .HasForeignKey("ContactoId")
@@ -1722,6 +1774,8 @@ namespace DrakionTech.Crm.Data.Migrations
                         .WithMany("ActividadesResponsable")
                         .HasForeignKey("UsuarioInternoId");
 
+                    b.Navigation("ActividadPrevia");
+
                     b.Navigation("Contacto");
 
                     b.Navigation("Empresa");
@@ -1758,6 +1812,16 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Navigation("Usuario");
                 });
 
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Area", b =>
+                {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "Responsable")
+                        .WithMany()
+                        .HasForeignKey("ResponsableId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Responsable");
+                });
+
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Ciudad", b =>
                 {
                     b.HasOne("DrakionTech.Crm.Data.Entities.Pais", "Pais")
@@ -1786,6 +1850,23 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Navigation("Empresa");
 
                     b.Navigation("RolContacto");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Empleado", b =>
+                {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Especialidad", "EspecialidadNavigation")
+                        .WithMany()
+                        .HasForeignKey("EspecialidadId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.RolUsuario", "RolUsuario")
+                        .WithMany()
+                        .HasForeignKey("RolUsuarioId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("EspecialidadNavigation");
+
+                    b.Navigation("RolUsuario");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.EmpleadoSalario", b =>
@@ -1907,18 +1988,32 @@ namespace DrakionTech.Crm.Data.Migrations
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Usuario", b =>
                 {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Area", "Area")
+                        .WithMany("Usuarios")
+                        .HasForeignKey("AreaId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("DrakionTech.Crm.Data.Entities.RolUsuario", "Rol")
                         .WithMany()
                         .HasForeignKey("RolId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.Navigation("Area");
+
                     b.Navigation("Rol");
                 });
 
             modelBuilder.Entity("Actividad", b =>
                 {
+                    b.Navigation("ActividadesRelacionadas");
+
                     b.Navigation("UsuariosAsignados");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Area", b =>
+                {
+                    b.Navigation("Usuarios");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Empleado", b =>
