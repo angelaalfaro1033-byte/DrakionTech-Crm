@@ -6,6 +6,7 @@ using DrakionTech.Crm.Business.DTOs.Empresa;
 using DrakionTech.Crm.Business.DTOs.Oportunidad;
 using DrakionTech.Crm.Business.DTOs.PrefijoTelefonico;
 using DrakionTech.Crm.Business.DTOs.Propuesta;
+using DrakionTech.Crm.Business.DTOs.Proyecto;
 using DrakionTech.Crm.Business.DTOs.Ubicacion;
 using DrakionTech.Crm.Data.Entities;
 using DrakionTech.Crm.Data.Entities.Enums;
@@ -91,16 +92,23 @@ namespace DrakionTech.Crm.Business.Mapping
                         ? s.ActividadPrevia.TipoActividad.Nombre
                         : null));
 
-            CreateMap<TipoActividad, TipoActividadDto>();
+            //Proyecto
+            CreateMap<Proyecto, ProyectoDto>()
+                .ForMember(d => d.AreaNombre, o => o.MapFrom(s => s.Area.Nombre))
+                .ForMember(d => d.ResponsableNombre,
+                           o => o.MapFrom(s => s.Responsable.Nombre + " " + s.Responsable.Apellido));
 
+            CreateMap<CrearProyectoDto, Proyecto>();
+            CreateMap<ActualizarProyectoDto, Proyecto>()
+                .ForMember(d => d.Id, o => o.Ignore());
+
+            CreateMap<TipoActividad, TipoActividadDto>();
             CreateMap<CrearActividadDto, Actividad>()
                 .ForMember(d => d.Inicio, o => o.MapFrom(s => s.Fecha))
                 .ForMember(d => d.Fin, o => o.MapFrom(s => s.FechaFin));
-
             CreateMap<ActualizarActividadDto, Actividad>()
                 .ForMember(d => d.Inicio, o => o.MapFrom(s => s.Fecha))
                 .ForMember(d => d.Fin, o => o.MapFrom(s => s.FechaFin));
-
             // PROPUESTA
             CreateMap<CrearPropuestaDto, Propuesta>();
             CreateMap<Propuesta, PropuestaDto>();
