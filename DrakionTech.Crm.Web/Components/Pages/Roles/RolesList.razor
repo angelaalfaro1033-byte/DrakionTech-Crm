@@ -3,6 +3,8 @@
 @using DrakionTech.Crm.Business.DTOs.RolUsuario
 @using DrakionTech.Crm.Business.Interfaces
 @using DrakionTech.Crm.Web.Components
+@using DrakionTech.Crm.Web.Shared
+@inherits PaginacionBase
 
 @inject IRolUsuarioService RolUsuarioService
 
@@ -81,6 +83,9 @@
                     }
                 </tbody>
             </table>
+            <Paginacion PaginaActual="paginaActual"
+                        TotalPaginas="totalPaginas"
+                        OnPaginaChanged="IrAPagina" />
         </div>
     }
 
@@ -98,15 +103,33 @@
     {
         cargando = true;
         StateHasChanged();
-        roles = (await RolUsuarioService.ObtenerTodosAsync(busqueda, soloActivos)).ToList();
+
+        var resultado = await RolUsuarioService.ObtenerTodosAsync(
+            busqueda,
+            soloActivos,
+            paginaActual,
+            tamañoPagina);
+
+        roles = resultado.Items;
+
+        totalRegistros = resultado.TotalRegistros;
+        totalPaginas = resultado.TotalPaginas;
+
         cargando = false;
     }
 
     private async Task OnFiltroChanged(Dictionary<string, string?> valores)
     {
         busqueda = valores.GetValueOrDefault("busqueda");
+
         var estado = valores.GetValueOrDefault("estado");
-        soloActivos = string.IsNullOrWhiteSpace(estado) ? null : bool.Parse(estado);
+
+        soloActivos = string.IsNullOrWhiteSpace(estado)
+            ? null
+            : bool.Parse(estado);
+
+        paginaActual = 1;
+
         await Cargar();
     }
 
@@ -117,5 +140,10 @@
     {
         await accion(id);
         await Cargar();
+    }
+
+    private async Task IrAPagina(int pagina)
+    {
+        await CambiarPaginaAsync(pagina, Cargar);
     }
 }

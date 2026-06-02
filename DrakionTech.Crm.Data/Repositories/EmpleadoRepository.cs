@@ -14,6 +14,15 @@ namespace DrakionTech.Crm.Data.Repositories
             _context = context;
         }
 
+        public IQueryable<Empleado> Query()
+        {
+            return _context.Empleados
+                .Include(e => e.Salario)
+                .Include(e => e.RolUsuario)
+                .Include(e => e.EspecialidadNavigation)
+                .AsQueryable();
+        }
+
         public async Task<List<Empleado>> ObtenerTodosAsync()
         {
             return await _context.Empleados
@@ -92,5 +101,6 @@ namespace DrakionTech.Crm.Data.Repositories
                 .Include(e => e.EspecialidadNavigation)
                 .FirstOrDefaultAsync(e => e.NumeroDocumento == numeroDocumento);
         }
+
     }
 }

@@ -111,7 +111,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        roles = await RolService.ObtenerTodosAsync();
+        roles = await RolService.ObtenerTodosSinPaginacionAsync();
         todasEspecialidades = await EspecialidadService.ObtenerTodosAsync();
 
         if (Model.RolUsuarioId > 0)

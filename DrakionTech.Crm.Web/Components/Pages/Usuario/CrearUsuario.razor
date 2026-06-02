@@ -29,7 +29,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        roles = await RolUsuarioService.ObtenerTodosAsync();
+        roles = await RolUsuarioService.ObtenerTodosSinPaginacionAsync();
     }
 
     private async Task Guardar()

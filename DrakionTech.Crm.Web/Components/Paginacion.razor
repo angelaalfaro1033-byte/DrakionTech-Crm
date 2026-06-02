@@ -1,0 +1,80 @@
+﻿<div class="crm-pagination d-flex gap-1 align-items-center mt-3">
+
+    <button class="btn crm-pagination-btn btn-secondary"
+            disabled="@(PaginaActual == 1)"
+            @onclick="() => CambiarPagina(PaginaActual - 1)">
+        «
+    </button>
+
+    @if (Inicio > 1)
+    {
+        <button class="btn crm-pagination-btn btn-outline-primary"
+                @onclick="() => CambiarPagina(1)">
+            1
+        </button>
+
+        @if (Inicio > 2)
+        {
+            <span class="px-2">...</span>
+        }
+    }
+
+    @foreach (var pagina in PaginasVisibles)
+    {
+        <button class="btn crm-pagination-btn @(pagina == PaginaActual
+                                                ? "btn-primary"
+                                                : "btn-outline-primary")"
+            @onclick="() => CambiarPagina(pagina)">
+        @pagina
+    </button>
+        }
+
+    @if (Fin < TotalPaginas)
+    {
+        @if (Fin < TotalPaginas - 1)
+        {
+            <span class="px-2">...</span>
+        }
+
+        <button class="btn crm-pagination-btn btn-outline-primary"
+                @onclick="() => CambiarPagina(TotalPaginas)">
+            @TotalPaginas
+        </button>
+    }
+
+    <button class="btn crm-pagination-btn btn-secondary"
+            disabled="@(PaginaActual == TotalPaginas)"
+            @onclick="() => CambiarPagina(PaginaActual + 1)">
+        »
+    </button>
+
+</div>
+
+@code {
+
+    [Parameter]
+    public int PaginaActual { get; set; }
+
+    [Parameter]
+    public int TotalPaginas { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnPaginaChanged { get; set; }
+
+    private int Inicio =>
+        Math.Max(1, PaginaActual - 1);
+
+    private int Fin =>
+        Math.Min(TotalPaginas, PaginaActual + 1);
+
+    private IEnumerable<int> PaginasVisibles =>
+        Enumerable.Range(Inicio, Fin - Inicio + 1);
+
+    private async Task CambiarPagina(int pagina)
+    {
+        if (pagina < 1 || pagina > TotalPaginas)
+            return;
+
+        await OnPaginaChanged.InvokeAsync(pagina);
+    }
+}

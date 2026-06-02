@@ -4,6 +4,7 @@ using DrakionTech.Crm.Business.Interfaces;
 using DrakionTech.Crm.Data.Entities;
 using DrakionTech.Crm.Data.Repositories;
 using DrakionTech.Crm.Data.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace DrakionTech.Crm.Business.Services
 {
@@ -20,26 +21,83 @@ namespace DrakionTech.Crm.Business.Services
             _especialidadRepository = especialidadRepository;
         }
 
-        public async Task<List<EmpleadoListDto>> ObtenerTodosAsync(string? busqueda = null, bool? soloActivos = null)
+        public async Task<ResultadoPaginacion<EmpleadoListDto>> ObtenerTodosAsync(
+            string? busqueda = null,
+            bool? soloActivos = null,
+            int pagina = 1,
+            int tamañoPagina = 10)
         {
-            var empleados = await _repository.ObtenerTodosAsync();
-
-            var query = empleados.AsQueryable();
+            var query = _repository.Query();
 
             if (!string.IsNullOrWhiteSpace(busqueda))
             {
                 var term = busqueda.Trim().ToLower();
+
                 query = query.Where(e =>
                     (e.Nombre != null && e.Nombre.ToLower().Contains(term)) ||
                     (e.Apellido != null && e.Apellido.ToLower().Contains(term)) ||
                     (e.Email != null && e.Email.ToLower().Contains(term)) ||
-                    (e.EspecialidadNavigation != null && e.EspecialidadNavigation.Nombre.ToLower().Contains(term)));
+                    (e.EspecialidadNavigation != null &&
+                     e.EspecialidadNavigation.Nombre.ToLower().Contains(term)));
             }
 
             if (soloActivos.HasValue)
+            {
                 query = query.Where(e => e.Activo == soloActivos.Value);
+            }
 
-            return query.Select(MapToDto).ToList();
+            var totalRegistros = await query.CountAsync();
+
+            var items = await query
+                .OrderBy(e => e.Nombre)
+                .Skip((pagina - 1) * tamañoPagina)
+                .Take(tamañoPagina)
+                .Select(e => new EmpleadoListDto
+                {
+                    Id = e.Id,
+                    Nombre = e.Nombre,
+                    Apellido = e.Apellido,
+                    Email = e.Email,
+                    RolUsuarioId = e.RolUsuarioId,
+                    RolNombre = e.RolUsuario != null ? e.RolUsuario.Nombre : null,
+                    EspecialidadId = e.EspecialidadId,
+                    Especialidad = e.EspecialidadNavigation != null
+                        ? e.EspecialidadNavigation.Nombre
+                        : null,
+                    Activo = e.Activo,
+                    TipoDocumento = e.TipoDocumento,
+                    NumeroDocumento = e.NumeroDocumento,
+                    Salario = e.Salario != null
+                        ? e.Salario.Salario
+                        : null
+                })
+                .ToListAsync();
+
+            return new ResultadoPaginacion<EmpleadoListDto>
+            {
+                Items = items,
+                TotalRegistros = totalRegistros,
+                Pagina = pagina,
+                TamañoPagina = tamañoPagina
+            };
+        }
+
+        public async Task<List<EmpleadoListDto>> ObtenerTodosSinPaginacionAsync()
+        {
+            return await _repository.Query()
+                .Where(e => e.Activo)
+                .OrderBy(e => e.Nombre)
+                .Select(e => new EmpleadoListDto
+                {
+                    Id = e.Id,
+                    Nombre = e.Nombre,
+                    Apellido = e.Apellido,
+                    Email = e.Email,
+                    Especialidad = e.EspecialidadNavigation != null
+                        ? e.EspecialidadNavigation.Nombre
+                        : null
+                })
+                .ToListAsync();
         }
 
         public async Task<EmpleadoListDto> ObtenerPorIdAsync(int id)
