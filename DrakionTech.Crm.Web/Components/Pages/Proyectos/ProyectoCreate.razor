@@ -1,0 +1,113 @@
+﻿@page "/proyectos/crear"
+@using DrakionTech.Crm.Business.DTOs.Proyecto
+@using DrakionTech.Crm.Business.DTOs.Area
+@using DrakionTech.Crm.Business.DTOs.Usuario
+@using DrakionTech.Crm.Business.Interfaces
+@using DrakionTech.Crm.Data.Entities.Enums
+@inject IProyectoService ProyectoService
+@inject IAreaService AreaService
+@inject IUsuarioService UsuarioService
+@inject NavigationManager Nav
+
+<div class="page-header">
+    <div>
+        <h3 class="page-title">Nuevo Proyecto</h3>
+        <p class="page-subtitle">Completa la información del proyecto</p>
+    </div>
+</div>
+
+<EditForm Model="_modelo" OnValidSubmit="GuardarAsync">
+    <DataAnnotationsValidator />
+
+    <div class="form-section">
+        <p class="section-title">Información general</p>
+        <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <InputText class="form-control" @bind-Value="_modelo.Nombre" />
+            <ValidationMessage For="() => _modelo.Nombre" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Descripción</label>
+            <InputTextArea class="form-control" @bind-Value="_modelo.Descripcion" rows="3" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Estado</label>
+            <InputSelect class="form-select" @bind-Value="_modelo.Estado">
+                @foreach (var e in Enum.GetValues<EstadoProyecto>())
+                {
+                    <option value="@e">@e</option>
+                }
+            </InputSelect>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <p class="section-title">Asignación</p>
+        <div class="grid-2col">
+            <div class="mb-3">
+                <label class="form-label">Área</label>
+                <InputSelect class="form-select" @bind-Value="_modelo.AreaId">
+                    <option value="0">-- Selecciona un área --</option>
+                    @foreach (var a in _areas)
+                    {
+                        <option value="@a.Id">@a.Nombre</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => _modelo.AreaId" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Responsable</label>
+                <InputSelect class="form-select" @bind-Value="_modelo.ResponsableId">
+                    <option value="">-- Selecciona un responsable --</option>
+                    @foreach (var u in _usuarios)
+                    {
+                        <option value="@u.Id">@u.Nombre @u.Apellido</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => _modelo.ResponsableId" />
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <p class="section-title">Fechas</p>
+        <div class="grid-2col">
+            <div class="mb-3">
+                <label class="form-label">Fecha Inicio</label>
+                <InputDate class="form-control" @bind-Value="_modelo.FechaInicio" />
+                <ValidationMessage For="() => _modelo.FechaInicio" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Fecha Fin <span class="text-muted">(opcional)</span></label>
+                <InputDate class="form-control" @bind-Value="_modelo.FechaFin" />
+            </div>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button type="button" class="btn btn-secondary"
+                @onclick='() => Nav.NavigateTo("/proyectos")'>
+            Cancelar
+        </button>
+    </div>
+</EditForm>
+
+@code {
+    private CrearProyectoDto _modelo = new();
+    private IEnumerable<AreaListDto> _areas = new List<AreaListDto>();
+    private List<UsuarioListDto> _usuarios = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _areas = await AreaService.ObtenerTodasAsync(soloActivas: true);
+        var todos = await UsuarioService.ObtenerTodosAsync();
+        _usuarios = todos.Where(u => u.IsActive).ToList();
+    }
+
+    private async Task GuardarAsync()
+    {
+        await ProyectoService.CrearAsync(_modelo);
+        Nav.NavigateTo("/proyectos");
+    }
+}

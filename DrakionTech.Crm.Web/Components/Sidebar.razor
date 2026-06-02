@@ -61,6 +61,15 @@
                     }
                 </a>
             </li>
+            <li class="@GetNavClass("/proyectos")">
+                <a href="/proyectos" title="Proyectos">
+                    <i class="bi bi-kanban"></i>
+                    @if (!collapsed)
+                    {
+                        <span>Proyectos</span>
+                    }
+                </a>
+            </li>
             <li class="nav-group-header @(personasOpen ? "open" : "")">
                 <button class="group-toggle" @onclick="TogglePersonas" title="Personas">
                     <i class="bi bi-people"></i>

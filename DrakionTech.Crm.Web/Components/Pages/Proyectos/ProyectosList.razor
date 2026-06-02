@@ -1,0 +1,120 @@
+﻿@page "/proyectos"
+@using DrakionTech.Crm.Business.DTOs.Proyecto
+@using DrakionTech.Crm.Business.Interfaces
+@using DrakionTech.Crm.Data.Entities.Enums
+@using DrakionTech.Crm.Web.Components
+@inject IProyectoService ProyectoService
+@inject NavigationManager Nav
+
+<div class="page-header">
+    <div>
+        <h3 class="page-title">Proyectos</h3>
+        <p class="page-subtitle">Gestión de proyectos asociados a áreas</p>
+    </div>
+    <button class="btn btn-primary" @onclick='() => Nav.NavigateTo("/proyectos/crear")'>
+        + Nuevo Proyecto
+    </button>
+</div>
+
+<FiltroTabla TItem="ProyectoDto"
+             PlaceholderBusqueda="Buscar proyecto..."
+             MostrarFiltroEstado="false"
+             OnFiltroChanged="AplicarFiltro" />
+
+@if (_cargando)
+{
+    <div class="ui-card" style="position:relative; min-height:120px;">
+        <div class="card-loading">
+            <div class="spinner small"></div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="ui-card">
+        <table class="ui-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Área</th>
+                    <th>Responsable</th>
+                    <th>Estado</th>
+                    <th>Fecha Inicio</th>
+                    <th>Fecha Fin</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in _proyectosFiltrados)
+                {
+                    <tr>
+                        <td>@p.Nombre</td>
+                        <td>@p.AreaNombre</td>
+                        <td>@p.ResponsableNombre</td>
+                        <td>
+                            <span class="badge @ObtenerBadge(p.Estado)">@p.EstadoTexto</span>
+                        </td>
+                        <td>@p.FechaInicio.ToShortDateString()</td>
+                        <td>@(p.FechaFin?.ToShortDateString() ?? "-")</td>
+                        <td>
+                            <div class="ui-actions">
+                                <a href="/proyectos/editar/@p.Id" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="#" title="Eliminar" @onclick="() => EliminarAsync(p.Id)"
+                                   @onclick:preventDefault>
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<ProyectoDto> _proyectos = new();
+    private List<ProyectoDto> _proyectosFiltrados = new();
+    private bool _cargando = true;
+
+    protected override async Task OnInitializedAsync() => await CargarAsync();
+
+    private async Task CargarAsync()
+    {
+        _cargando = true;
+        _proyectos = await ProyectoService.ObtenerTodosAsync();
+        _proyectosFiltrados = _proyectos;
+        _cargando = false;
+    }
+
+    private void AplicarFiltro(Dictionary<string, string?> filtros)
+    {
+        var busqueda = filtros.GetValueOrDefault("busqueda") ?? string.Empty;
+
+        _proyectosFiltrados = _proyectos
+            .Where(p => string.IsNullOrWhiteSpace(busqueda) ||
+                        p.Nombre.Contains(busqueda, StringComparison.OrdinalIgnoreCase) ||
+                        p.AreaNombre.Contains(busqueda, StringComparison.OrdinalIgnoreCase) ||
+                        p.ResponsableNombre.Contains(busqueda, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        StateHasChanged();
+    }
+
+    private async Task EliminarAsync(int id)
+    {
+        await ProyectoService.EliminarAsync(id);
+        await CargarAsync();
+    }
+
+    private string ObtenerBadge(EstadoProyecto estado) => estado switch
+    {
+        EstadoProyecto.Planificado => "badge-secondary",
+        EstadoProyecto.EnCurso    => "badge-primary",
+        EstadoProyecto.Completado => "badge-success",
+        EstadoProyecto.Cancelado  => "badge-danger",
+        _ => ""
+    };
+}
