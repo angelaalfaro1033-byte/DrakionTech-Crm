@@ -16,7 +16,36 @@ namespace DrakionTech.Crm.Business.Services
             _db = db;
         }
 
-        public async Task<List<RolUsuarioDto>> ObtenerTodosAsync(string? busqueda = null, bool? soloActivos = null)
+        public async Task<ResultadoPaginacion<RolUsuarioDto>> ObtenerTodosAsync(
+        string? busqueda = null,
+        bool? soloActivos = null,
+        int pagina = 1,
+        int tamañoPagina = 10)
+            {
+                var query = _db.RolesUsuario.AsQueryable();
+
+                if (!string.IsNullOrWhiteSpace(busqueda))
+                {
+                    var term = busqueda.Trim().ToLower();
+
+                    query = query.Where(r =>
+                        r.Nombre.ToLower().Contains(term));
+                }
+
+                if (soloActivos.HasValue)
+                    query = query.Where(r => r.Activo == soloActivos.Value);
+
+                return query
+                    .OrderBy(r => r.Nombre)
+                    .Select(r => new RolUsuarioDto
+                    {
+                        Id = r.Id,
+                        Nombre = r.Nombre,
+                        Activo = r.Activo
+                    })
+                    .Paginar(pagina, tamañoPagina);
+            }
+        public async Task<List<RolUsuarioDto>> ObtenerTodosSinPaginacionAsync(string? busqueda = null, bool? soloActivos = null)
         {
             var query = _db.RolesUsuario.AsQueryable();
 

@@ -1,10 +1,12 @@
-﻿using DrakionTech.Crm.Business.DTOs.RolUsuario;
+﻿using DrakionTech.Crm.Business.Common;
+using DrakionTech.Crm.Business.DTOs.RolUsuario;
 
 namespace DrakionTech.Crm.Business.Interfaces
 {
     public interface IRolUsuarioService
     {
-        Task<List<RolUsuarioDto>> ObtenerTodosAsync(string? busqueda = null, bool? soloActivos = null);
+        Task<ResultadoPaginacion<RolUsuarioDto>> ObtenerTodosAsync(string? busqueda = null, bool? soloActivos = null, int pagina = 1, int tamañoPagina = 10);
+        Task<List<RolUsuarioDto>> ObtenerTodosSinPaginacionAsync(string? busqueda = null, bool? soloActivos = null);
         Task<RolUsuarioDto> ObtenerPorIdAsync(int id);
         Task CrearAsync(RolUsuarioDto dto);
         Task EditarAsync(RolUsuarioDto dto);

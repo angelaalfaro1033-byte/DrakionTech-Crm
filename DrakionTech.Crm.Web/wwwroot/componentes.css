@@ -213,3 +213,19 @@
 .header-right form {
     margin: 0;
 }
+
+/* Botones persoinalizados paginación*/
+.crm-pagination .crm-pagination-btn {
+    line-height: 1;
+    min-width: 1rem;
+    height: 2rem;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+    .crm-pagination .crm-pagination-btn:hover {
+        transform: translateY(-1px);
+    }

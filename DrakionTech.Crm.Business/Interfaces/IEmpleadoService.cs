@@ -1,10 +1,12 @@
-﻿using DrakionTech.Crm.Business.DTOs.Empleado;
+﻿using DrakionTech.Crm.Business.Common;
+using DrakionTech.Crm.Business.DTOs.Empleado;
 
 namespace DrakionTech.Crm.Business.Interfaces
 {
     public interface IEmpleadoService
     {
-        Task<List<EmpleadoListDto>> ObtenerTodosAsync(string? busqueda = null, bool? soloActivos = null);
+        Task<ResultadoPaginacion<EmpleadoListDto>> ObtenerTodosAsync(string? busqueda = null, bool? soloActivos = null, int pagina = 1, int tamañoPagina = 10);
+        Task<List<EmpleadoListDto>> ObtenerTodosSinPaginacionAsync();
         Task CrearAsync(CrearEmpleadoDto dto);
         Task EditarAsync(ActualizarEmpleadoDto dto);
         Task DesactivarAsync(int id);
