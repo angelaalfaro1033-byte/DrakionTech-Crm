@@ -124,7 +124,7 @@
 }
 
 .sidebar-nav .nav-item a:hover {
-    background: #f1f5f9;
+    background: #e8eafd;
     color: var(--text-main) !important;
 }
 
@@ -164,7 +164,7 @@
 }
 
 .nav-group-header .group-toggle:hover {
-    background: #f1f5f9;
+    background: #e8eafd;
 }
 
 .group-arrow {
@@ -201,7 +201,7 @@
 }
 
     .nav-sub a:hover {
-        background: #f1f5f9;
+        background: #e8eafd;
         color: var(--text-main) !important;
     }
 

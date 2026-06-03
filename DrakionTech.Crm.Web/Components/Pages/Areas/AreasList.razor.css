@@ -1,7 +1,7 @@
 ﻿.modal-backdrop-custom {
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.35);
+    background: rgba(7, 25, 71, 0.35);
     z-index: 1040;
     animation: fadeIn 0.15s ease;
 }
@@ -17,7 +17,7 @@
     border: 1px solid var(--border-soft);
     width: 100%;
     max-width: 420px;
-    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+    box-shadow: 0 20px 40px rgba(7, 25, 71, 0.12);
     animation: slideUp 0.2s ease;
 }
 

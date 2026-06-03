@@ -44,9 +44,11 @@
     <div class="form-section">
         <p class="section-title">Asignación</p>
         <div class="grid-2col">
+            @* Área *@
             <div class="mb-3">
                 <label class="form-label">Área</label>
-                <InputSelect class="form-select" @bind-Value="_modelo.AreaId">
+                <InputSelect class="form-select" @bind-Value="_modelo.AreaId"
+                             @bind-Value:after="OnAreaCambiada">
                     <option value="0">-- Selecciona un área --</option>
                     @foreach (var a in _areas)
                     {
@@ -55,11 +57,14 @@
                 </InputSelect>
                 <ValidationMessage For="() => _modelo.AreaId" />
             </div>
+
+            @* Responsable *@
             <div class="mb-3">
                 <label class="form-label">Responsable</label>
-                <InputSelect class="form-select" @bind-Value="_modelo.ResponsableId">
-                    <option value="">-- Selecciona un responsable --</option>
-                    @foreach (var u in _usuarios)
+                <InputSelect class="form-select" @bind-Value="_modelo.ResponsableId"
+                             disabled="@(_modelo.AreaId == 0)">
+                    <option value="0">-- Selecciona un responsable --</option>
+                    @foreach (var u in _usuariosFiltrados)
                     {
                         <option value="@u.Id">@u.Nombre @u.Apellido</option>
                     }
@@ -96,18 +101,37 @@
 @code {
     private CrearProyectoDto _modelo = new();
     private IEnumerable<AreaListDto> _areas = new List<AreaListDto>();
-    private List<UsuarioListDto> _usuarios = new();
+    private List<UsuarioListDto> _todosUsuarios = new();
+    private List<UsuarioListDto> _usuariosFiltrados = new();
 
     protected override async Task OnInitializedAsync()
     {
         _areas = await AreaService.ObtenerTodasAsync(soloActivas: true);
         var todos = await UsuarioService.ObtenerTodosAsync();
-        _usuarios = todos.Where(u => u.IsActive).ToList();
+        _todosUsuarios = todos.Where(u => u.IsActive).ToList();
+    }
+
+    private void OnAreaCambiada()
+    {
+        _modelo.ResponsableId = 0;
+
+        _usuariosFiltrados = _modelo.AreaId == 0
+            ? new List<UsuarioListDto>()
+            : _todosUsuarios.Where(u => u.AreaId == _modelo.AreaId).ToList();
     }
 
     private async Task GuardarAsync()
     {
-        await ProyectoService.CrearAsync(_modelo);
-        Nav.NavigateTo("/proyectos");
+        try
+        {
+            await ProyectoService.CrearAsync(_modelo);
+            Nav.NavigateTo("/proyectos");
+        }
+        catch (InvalidOperationException ex)
+        {
+            _error = ex.Message;
+        }
     }
+
+    private string? _error;
 }
