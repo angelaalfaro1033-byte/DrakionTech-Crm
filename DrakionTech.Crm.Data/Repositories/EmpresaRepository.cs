@@ -15,6 +15,14 @@ namespace DrakionTech.Crm.Data.Repositories
             _context = context;
         }
 
+        public IQueryable<Empresa> Query()
+        {
+            return _context.Empresas
+                .Include(e => e.Sector)
+                .Include(e => e.Estado)
+                .AsQueryable();
+        }
+
         // HEADER / DETALLE DE EMPRESA
         public async Task<Empresa?> ObtenerConUbicacionAsync(
             int empresaId,

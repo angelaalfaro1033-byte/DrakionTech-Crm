@@ -1,8 +1,4 @@
-﻿.empleados-container {
-    padding: 24px;
-}
-
-.email-cell {
+﻿.email-cell {
     max-width: 180px;
     overflow: hidden;
     text-overflow: ellipsis;

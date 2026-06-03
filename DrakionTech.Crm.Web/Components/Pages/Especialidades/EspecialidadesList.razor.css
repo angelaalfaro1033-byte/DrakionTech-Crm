@@ -1,8 +1,4 @@
-﻿.especialidades-container {
-    padding: 24px;
-}
-
-.form-actions {
+﻿.form-actions {
     display: flex;
     gap: 8px;
     justify-content: flex-end;

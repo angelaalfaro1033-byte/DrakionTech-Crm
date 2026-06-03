@@ -50,7 +50,7 @@
     {
         try
         {
-            roles = await RolUsuarioService.ObtenerTodosSinPaginacionAsync();
+            roles = await RolUsuarioService.ObtenerTodosAsync();
 
             var u = await UsuarioService.ObtenerPorIdAsync(id);
             usuarioForm = new CrearUsuarioDto

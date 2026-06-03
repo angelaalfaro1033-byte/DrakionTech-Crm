@@ -21,7 +21,7 @@ namespace DrakionTech.Crm.Business.Services
             _especialidadRepository = especialidadRepository;
         }
 
-        public async Task<ResultadoPaginacion<EmpleadoListDto>> ObtenerTodosAsync(
+        public async Task<ResultadoPaginacion<EmpleadoListDto>> ObtenerTodosConPaginacionAsync(
             string? busqueda = null,
             bool? soloActivos = null,
             int pagina = 1,
@@ -46,12 +46,8 @@ namespace DrakionTech.Crm.Business.Services
                 query = query.Where(e => e.Activo == soloActivos.Value);
             }
 
-            var totalRegistros = await query.CountAsync();
-
-            var items = await query
+            return await query
                 .OrderBy(e => e.Nombre)
-                .Skip((pagina - 1) * tamañoPagina)
-                .Take(tamañoPagina)
                 .Select(e => new EmpleadoListDto
                 {
                     Id = e.Id,
@@ -61,28 +57,16 @@ namespace DrakionTech.Crm.Business.Services
                     RolUsuarioId = e.RolUsuarioId,
                     RolNombre = e.RolUsuario != null ? e.RolUsuario.Nombre : null,
                     EspecialidadId = e.EspecialidadId,
-                    Especialidad = e.EspecialidadNavigation != null
-                        ? e.EspecialidadNavigation.Nombre
-                        : null,
+                    Especialidad = e.EspecialidadNavigation != null ? e.EspecialidadNavigation.Nombre : null,
                     Activo = e.Activo,
                     TipoDocumento = e.TipoDocumento,
                     NumeroDocumento = e.NumeroDocumento,
-                    Salario = e.Salario != null
-                        ? e.Salario.Salario
-                        : null
+                    Salario = e.Salario != null ? e.Salario.Salario : null
                 })
-                .ToListAsync();
-
-            return new ResultadoPaginacion<EmpleadoListDto>
-            {
-                Items = items,
-                TotalRegistros = totalRegistros,
-                Pagina = pagina,
-                TamañoPagina = tamañoPagina
-            };
+                .PaginarAsync(pagina, tamañoPagina);
         }
 
-        public async Task<List<EmpleadoListDto>> ObtenerTodosSinPaginacionAsync()
+        public async Task<List<EmpleadoListDto>> ObtenerTodosAsync()
         {
             return await _repository.Query()
                 .Where(e => e.Activo)

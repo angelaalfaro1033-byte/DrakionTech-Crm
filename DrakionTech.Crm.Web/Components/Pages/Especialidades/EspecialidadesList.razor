@@ -3,6 +3,8 @@
 @using DrakionTech.Crm.Business.DTOs.Especialidad
 @using DrakionTech.Crm.Business.Interfaces
 @using DrakionTech.Crm.Web.Components
+@using DrakionTech.Crm.Web.Shared
+@inherits PaginacionBase
 
 @inject IEspecialidadService EspecialidadService
 
@@ -83,6 +85,9 @@
                     }
                 </tbody>
             </table>
+            <Paginacion PaginaActual="paginaActual"
+                        TotalPaginas="totalPaginas"
+                        OnPaginaChanged="IrAPagina" />
         </div>
     }
 
@@ -100,7 +105,16 @@
     {
         cargando = true;
         StateHasChanged();
-        lista = await EspecialidadService.ObtenerTodosAsync(busqueda, soloActivos);
+        var resultado = await EspecialidadService.ObtenerTodosConPaginacionAsync(
+            busqueda,
+            soloActivos,
+            paginaActual,
+            tamañoPagina);
+
+        lista = resultado.Items;
+
+        totalRegistros = resultado.TotalRegistros;
+        totalPaginas = resultado.TotalPaginas;
         cargando = false;
     }
 
@@ -109,6 +123,7 @@
         busqueda = valores.GetValueOrDefault("busqueda");
         var estado = valores.GetValueOrDefault("estado");
         soloActivos = string.IsNullOrWhiteSpace(estado) ? null : bool.Parse(estado);
+        paginaActual = 1;
         await Cargar();
     }
 
@@ -119,5 +134,10 @@
     {
         await accion(id);
         await Cargar();
+    }
+
+    private async Task IrAPagina(int pagina)
+    {
+        await CambiarPaginaAsync(pagina, Cargar);
     }
 }

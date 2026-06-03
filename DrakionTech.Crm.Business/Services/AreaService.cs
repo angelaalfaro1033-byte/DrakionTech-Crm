@@ -1,4 +1,5 @@
-﻿using DrakionTech.Crm.Business.DTOs.Area;
+﻿using DrakionTech.Crm.Business.Common;
+using DrakionTech.Crm.Business.DTOs.Area;
 using DrakionTech.Crm.Business.Interfaces;
 using DrakionTech.Crm.Data.Context;
 using DrakionTech.Crm.Data.Entities;
@@ -14,6 +15,46 @@ public class AreaService : IAreaService
     public AreaService(ApplicationDbContext db)
     {
         _db = db;
+    }
+
+    public async Task<ResultadoPaginacion<AreaListDto>> ObtenerTodasConPaginacionAsync(string? busqueda = null, bool? soloActivas = null, int pagina = 1, int tamañoPagina = 10)
+    {
+        var query = _db.Areas
+            .Include(a => a.Responsable)
+            .AsQueryable();
+
+        if (soloActivas.HasValue)
+            query = query.Where(a => a.Activa == soloActivas.Value);
+
+        if (!string.IsNullOrWhiteSpace(busqueda))
+        {
+            var term = busqueda.Trim().ToLower();
+
+            query = query.Where(a =>
+                a.Nombre.ToLower().Contains(term) ||
+                (a.Descripcion != null && a.Descripcion.ToLower().Contains(term)) ||
+                (a.Responsable != null &&
+                    (a.Responsable.Nombre + " " + a.Responsable.Apellido)
+                        .ToLower()
+                        .Contains(term)));
+        }
+
+        return await query
+            .OrderBy(a => a.Nombre)
+            .Select(a => new AreaListDto
+            {
+                Id = a.Id,
+                Nombre = a.Nombre,
+                Descripcion = a.Descripcion,
+                Activa = a.Activa,
+                ResponsableId = a.ResponsableId,
+                ResponsableNombre = a.Responsable != null
+                    ? $"{a.Responsable.Nombre} {a.Responsable.Apellido}"
+                    : null,
+                FechaCreacion = a.FechaCreacion,
+                TotalUsuarios = a.Usuarios.Count()
+            })
+            .PaginarAsync(pagina, tamañoPagina);
     }
 
     // ─────────────────────────────────────────────

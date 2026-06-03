@@ -104,7 +104,7 @@
         cargando = true;
         StateHasChanged();
 
-        var resultado = await RolUsuarioService.ObtenerTodosAsync(
+        var resultado = await RolUsuarioService.ObtenerTodosConPaginacionAsync(
             busqueda,
             soloActivos,
             paginaActual,

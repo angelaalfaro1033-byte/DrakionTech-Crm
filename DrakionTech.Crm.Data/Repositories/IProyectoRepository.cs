@@ -4,6 +4,7 @@ namespace DrakionTech.Crm.Data.Repositories;
 
 public interface IProyectoRepository
 {
+    IQueryable<Proyecto> Query();
     Task<List<Proyecto>> ObtenerTodosAsync();
     Task<Proyecto?> ObtenerPorIdAsync(int id);
     Task AgregarAsync(Proyecto proyecto);

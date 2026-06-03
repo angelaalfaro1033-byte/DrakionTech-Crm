@@ -317,10 +317,8 @@
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         usuarioId = authState.User.GetUsuarioId();
 
-        await Task.WhenAll(
-            CargarDashboard(),
-            CargarCatalogos()
-        );
+        await CargarDashboard();
+        await CargarCatalogos();
     }
 
     private async Task CargarCatalogos()

@@ -5,6 +5,8 @@
 @using DrakionTech.Crm.Web.Components
 @inject IProyectoService ProyectoService
 @inject NavigationManager Nav
+@using DrakionTech.Crm.Web.Shared
+@inherits PaginacionBase
 
 <div class="page-header">
     <div>
@@ -45,7 +47,7 @@ else
                 </tr>
             </thead>
             <tbody>
-                @foreach (var p in _proyectosFiltrados)
+                @foreach (var p in _proyectos)      
                 {
                     <tr>
                         <td>@p.Nombre</td>
@@ -71,12 +73,15 @@ else
                 }
             </tbody>
         </table>
+        <Paginacion PaginaActual="paginaActual"
+                    TotalPaginas="totalPaginas"
+                    OnPaginaChanged="IrAPagina" />
     </div>
 }
 
 @code {
     private List<ProyectoDto> _proyectos = new();
-    private List<ProyectoDto> _proyectosFiltrados = new();
+    private string? busqueda;
     private bool _cargando = true;
 
     protected override async Task OnInitializedAsync() => await CargarAsync();
@@ -84,23 +89,28 @@ else
     private async Task CargarAsync()
     {
         _cargando = true;
-        _proyectos = await ProyectoService.ObtenerTodosAsync();
-        _proyectosFiltrados = _proyectos;
+
+        var resultado =
+            await ProyectoService.ObtenerTodosConPaginacionAsync(
+                busqueda,
+                paginaActual,
+                tamañoPagina);
+
+        _proyectos = resultado.Items;
+
+        totalRegistros = resultado.TotalRegistros;
+        totalPaginas = resultado.TotalPaginas;
+
         _cargando = false;
     }
 
-    private void AplicarFiltro(Dictionary<string, string?> filtros)
+    private async Task AplicarFiltro(Dictionary<string, string?> filtros)
     {
-        var busqueda = filtros.GetValueOrDefault("busqueda") ?? string.Empty;
+        busqueda = filtros.GetValueOrDefault("busqueda");
 
-        _proyectosFiltrados = _proyectos
-            .Where(p => string.IsNullOrWhiteSpace(busqueda) ||
-                        p.Nombre.Contains(busqueda, StringComparison.OrdinalIgnoreCase) ||
-                        p.AreaNombre.Contains(busqueda, StringComparison.OrdinalIgnoreCase) ||
-                        p.ResponsableNombre.Contains(busqueda, StringComparison.OrdinalIgnoreCase))
-            .ToList();
+        paginaActual = 1;
 
-        StateHasChanged();
+        await CargarAsync();
     }
 
     private async Task EliminarAsync(int id)
@@ -117,4 +127,9 @@ else
         EstadoProyecto.Cancelado  => "badge-danger",
         _ => ""
     };
+
+    private async Task IrAPagina(int pagina)
+    {
+        await CambiarPaginaAsync(pagina, CargarAsync);
+    }
 }
