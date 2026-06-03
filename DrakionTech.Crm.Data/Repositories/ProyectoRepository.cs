@@ -13,6 +13,15 @@ public class ProyectoRepository : IProyectoRepository
         _context = context;
     }
 
+    public IQueryable<Proyecto> Query()
+    {
+        return _context.Proyectos
+            .Include(p => p.Area)
+            .Include(p => p.Responsable)
+            .Include(p => p.Oportunidad)
+            .AsQueryable();
+    }
+
     public async Task<List<Proyecto>> ObtenerTodosAsync()
     {
         return await _context.Proyectos

@@ -4,6 +4,7 @@ using DrakionTech.Crm.Business.Interfaces;
 using DrakionTech.Crm.Business.Services.Email;
 using DrakionTech.Crm.Data.Entities;
 using DrakionTech.Crm.Data.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace DrakionTech.Crm.Business.Services;
@@ -24,12 +25,45 @@ public class UsuarioService : IUsuarioService
         _config = config;
     }
 
+    public async Task<ResultadoPaginacion<UsuarioListDto>>
+    ObtenerTodosConPaginacionAsync(string? busqueda = null, bool? soloActivos = null, int pagina = 1, int tamañoPagina = 10)
+    {
+        var query = _repository.Query();
+
+        if (!string.IsNullOrWhiteSpace(busqueda))
+        {
+            var term = busqueda.Trim().ToLower();
+
+            query = query.Where(u =>
+                (u.Nombre != null && u.Nombre.ToLower().Contains(term)) ||
+                (u.Apellido != null && u.Apellido.ToLower().Contains(term)) ||
+                (u.Email != null && u.Email.ToLower().Contains(term)) ||
+                (u.Rol != null && u.Rol.Nombre.ToLower().Contains(term)));
+        }
+
+        if (soloActivos.HasValue)
+        {
+            query = query.Where(u => u.IsActive == soloActivos.Value);
+        }
+
+        return await query
+            .OrderBy(u => u.Nombre)
+            .Select(u => new UsuarioListDto
+            {
+                Id = u.Id,
+                Nombre = u.Nombre,
+                Apellido = u.Apellido,
+                Email = u.Email,
+                Telefono = u.Telefono,
+                Rol = u.Rol != null ? u.Rol.Nombre : "Sin rol",
+                IsActive = u.IsActive
+            })
+            .PaginarAsync(pagina, tamañoPagina);
+    }
+
     public async Task<List<UsuarioListDto>> ObtenerTodosAsync(string? busqueda = null, bool? soloActivos = null)
     {
-        var usuarios = await _repository.GetAllAsync();
-
-        var query = usuarios.AsQueryable();
-
+        var query = _repository.Query();
         if (!string.IsNullOrWhiteSpace(busqueda))
         {
             var term = busqueda.Trim().ToLower();
@@ -37,13 +71,21 @@ public class UsuarioService : IUsuarioService
                 (u.Nombre != null && u.Nombre.ToLower().Contains(term)) ||
                 (u.Apellido != null && u.Apellido.ToLower().Contains(term)) ||
                 (u.Email != null && u.Email.ToLower().Contains(term)) ||
-                (u.Rol != null && u.Rol.Nombre != null && u.Rol.Nombre.ToLower().Contains(term)));
+                (u.Rol != null && u.Rol.Nombre.ToLower().Contains(term)));
         }
-
         if (soloActivos.HasValue)
             query = query.Where(u => u.IsActive == soloActivos.Value);
 
-        return query.Select(MapToDto).ToList();
+        return await query.Select(u => new UsuarioListDto
+        {
+            Id = u.Id,
+            Nombre = u.Nombre,
+            Apellido = u.Apellido,
+            Email = u.Email,
+            Telefono = u.Telefono,
+            Rol = u.Rol != null ? u.Rol.Nombre : "Sin rol",
+            IsActive = u.IsActive
+        }).ToListAsync();
     }
 
     public async Task<UsuarioListDto> ObtenerPorIdAsync(int id)
@@ -114,8 +156,7 @@ public class UsuarioService : IUsuarioService
 
     public async Task<bool> ActivarCuentaAsync(string token, string password)
     {
-        var usuario = (await _repository.GetAllAsync())
-            .FirstOrDefault(u => u.ActivationToken == token);
+        var usuario = await _repository.GetByTokenAsync(token);
 
         if (usuario == null) return false;
         if (usuario.ActivationTokenExpiration < DateTime.UtcNow) return false;
@@ -156,10 +197,7 @@ public class UsuarioService : IUsuarioService
     }
 
     public async Task<bool> ExisteAlgunUsuarioAsync()
-    {
-        var usuarios = await _repository.GetAllAsync();
-        return usuarios.Count > 0;
-    }
+        => await _repository.Query().AnyAsync();
 
     public async Task<IEnumerable<UsuarioListDto>> ObtenerPorAreaAsync(int areaId)
     {

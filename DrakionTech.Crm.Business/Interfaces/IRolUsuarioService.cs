@@ -5,8 +5,8 @@ namespace DrakionTech.Crm.Business.Interfaces
 {
     public interface IRolUsuarioService
     {
-        Task<ResultadoPaginacion<RolUsuarioDto>> ObtenerTodosAsync(string? busqueda = null, bool? soloActivos = null, int pagina = 1, int tamañoPagina = 10);
-        Task<List<RolUsuarioDto>> ObtenerTodosSinPaginacionAsync(string? busqueda = null, bool? soloActivos = null);
+        Task<ResultadoPaginacion<RolUsuarioDto>> ObtenerTodosConPaginacionAsync(string? busqueda = null, bool? soloActivos = null, int pagina = 1, int tamañoPagina = 10);
+        Task<List<RolUsuarioDto>> ObtenerTodosAsync(string? busqueda = null, bool? soloActivos = null);
         Task<RolUsuarioDto> ObtenerPorIdAsync(int id);
         Task CrearAsync(RolUsuarioDto dto);
         Task EditarAsync(RolUsuarioDto dto);

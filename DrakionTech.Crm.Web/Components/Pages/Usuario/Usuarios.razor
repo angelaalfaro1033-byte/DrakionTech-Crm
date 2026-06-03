@@ -4,6 +4,8 @@
 @using DrakionTech.Crm.Business.DTOs.Usuario
 @using DrakionTech.Crm.Web.Components
 @inject IUsuarioService UsuarioService
+@using DrakionTech.Crm.Web.Shared
+@inherits PaginacionBase
 
 <div class="empleados-container">
 
@@ -90,6 +92,9 @@
                     }
                 </tbody>
             </table>
+            <Paginacion PaginaActual="paginaActual"
+                        TotalPaginas="totalPaginas"
+                        OnPaginaChanged="IrAPagina" />
         </div>
     }
 
@@ -107,7 +112,16 @@
     {
         cargando = true;
         StateHasChanged();
-        usuarios = await UsuarioService.ObtenerTodosAsync(busqueda, soloActivos);
+        var resultado = await UsuarioService.ObtenerTodosConPaginacionAsync(
+            busqueda,
+            soloActivos,
+            paginaActual,
+            tamañoPagina);
+
+        usuarios = resultado.Items;
+
+        totalRegistros = resultado.TotalRegistros;
+        totalPaginas = resultado.TotalPaginas;
         cargando = false;
     }
 
@@ -116,6 +130,7 @@
         busqueda = valores.GetValueOrDefault("busqueda");
         var estado = valores.GetValueOrDefault("estado");
         soloActivos = string.IsNullOrWhiteSpace(estado) ? null : bool.Parse(estado);
+        paginaActual = 1;
         await Cargar();
     }
 
@@ -129,5 +144,10 @@
     {
         await UsuarioService.ActivarAsync(id);
         await Cargar();
+    }
+
+    private async Task IrAPagina(int pagina)
+    {
+        await CambiarPaginaAsync(pagina, Cargar);
     }
 }

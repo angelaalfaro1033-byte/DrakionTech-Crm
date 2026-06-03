@@ -3,6 +3,8 @@
 @using DrakionTech.Crm.Web.Components
 @inject IAreaService AreaService
 @inject NavigationManager Nav
+@using DrakionTech.Crm.Web.Shared
+@inherits PaginacionBase
 
 <PageTitle>Áreas – DrakionTech CRM</PageTitle>
 
@@ -113,6 +115,9 @@
                 }
             </tbody>
         </table>
+        <Paginacion PaginaActual="paginaActual"
+                    TotalPaginas="totalPaginas"
+                    OnPaginaChanged="IrAPagina" />
     }
 
 </div>
@@ -130,7 +135,17 @@
     {
         cargando = true;
         StateHasChanged();
-        areas = (await AreaService.ObtenerTodasAsync(busqueda, soloActivas)).ToList();
+        var resultado = await AreaService.ObtenerTodasConPaginacionAsync(
+            busqueda,
+            soloActivas,
+            paginaActual,
+            tamañoPagina);
+
+        areas = resultado.Items;
+
+        totalRegistros = resultado.TotalRegistros;
+        totalPaginas = resultado.TotalPaginas;
+
         cargando = false;
     }
 
@@ -139,6 +154,7 @@
         busqueda = valores.GetValueOrDefault("busqueda");
         var estado = valores.GetValueOrDefault("estado");
         soloActivas = string.IsNullOrWhiteSpace(estado) ? null : bool.Parse(estado);
+        paginaActual = 1;
         await CargarAsync();
     }
 
@@ -153,5 +169,10 @@
         {
             errorAccion = ex.Message;
         }
+    }
+
+    private async Task IrAPagina(int pagina)
+    {
+        await CambiarPaginaAsync(pagina, CargarAsync);
     }
 }

@@ -15,6 +15,11 @@ namespace DrakionTech.Crm.Data.Repositories
             _dbSet = context.Set<TEntity>();
         }
 
+        public virtual IQueryable<TEntity> Query()
+        {
+            return _dbSet.AsQueryable();
+        }
+
         public virtual async Task<TEntity?> ObtenerPorIdAsync(
             int id,
             CancellationToken ct = default)

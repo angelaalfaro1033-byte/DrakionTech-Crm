@@ -110,7 +110,7 @@
     {
         cargando = true;
         StateHasChanged();
-        var resultado = await EmpleadoService.ObtenerTodosAsync(
+        var resultado = await EmpleadoService.ObtenerTodosConPaginacionAsync(
             busqueda,
             soloActivos,
             paginaActual,

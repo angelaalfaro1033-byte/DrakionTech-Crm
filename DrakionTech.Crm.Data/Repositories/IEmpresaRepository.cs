@@ -4,6 +4,8 @@ namespace DrakionTech.Crm.Data.Repositories
 {
     public interface IEmpresaRepository : IGenericRepository<Empresa>
     {
+        IQueryable<Empresa> Query();
+
         // Header / detalle simple
         Task<Empresa?> ObtenerConUbicacionAsync(
             int empresaId,

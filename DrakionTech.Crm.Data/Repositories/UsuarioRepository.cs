@@ -14,6 +14,13 @@ public class UsuarioRepository : IUsuarioRepository
         _context = context;
     }
 
+    public IQueryable<Usuario> Query()
+    {
+        return _context.Usuarios
+            .Include(u => u.Rol)
+            .AsQueryable();
+    }
+
     public async Task<List<Usuario>> GetAllAsync()
         => await _context.Usuarios.Include(u => u.Rol).ToListAsync();
 
@@ -46,4 +53,8 @@ public class UsuarioRepository : IUsuarioRepository
 
         await _context.SaveChangesAsync();
     }
+
+    public async Task<Usuario?> GetByTokenAsync(string token)
+    => await _context.Usuarios
+        .FirstOrDefaultAsync(u => u.ActivationToken == token);
 }

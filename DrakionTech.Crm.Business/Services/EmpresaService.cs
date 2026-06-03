@@ -5,6 +5,7 @@ using DrakionTech.Crm.Business.Exceptions;
 using DrakionTech.Crm.Business.Interfaces;
 using DrakionTech.Crm.Data.Entities;
 using DrakionTech.Crm.Data.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace DrakionTech.Crm.Business.Services
 {
@@ -25,6 +26,36 @@ namespace DrakionTech.Crm.Business.Services
             _sectorRepository = sectorRepository;
             _estadoRepository = estadoRepository;
             _mapper = mapper;
+        }
+
+        public async Task<ResultadoPaginacion<EmpresaDto>> ObtenerTodasConPaginacionAsync(string? busqueda = null, bool? soloActivas = null, int pagina = 1, int tamañoPagina = 10, CancellationToken ct = default)
+        {
+            var query = _empresaRepository.Query();
+
+            if (!string.IsNullOrWhiteSpace(busqueda))
+            {
+                var term = busqueda.Trim().ToLower();
+
+                query = query.Where(e =>
+                    e.Nombre.ToLower().Contains(term) ||
+                    e.Nit.ToLower().Contains(term) ||
+                    e.Correo.ToLower().Contains(term));
+            }
+
+            if (soloActivas.HasValue)
+                query = query.Where(e => e.Activa == soloActivas.Value);
+
+            var paginado = await query
+                .OrderBy(e => e.Nombre)
+                .PaginarAsync(pagina, tamañoPagina, ct);
+
+            return new ResultadoPaginacion<EmpresaDto>
+            {
+                Items = _mapper.Map<List<EmpresaDto>>(paginado.Items),
+                TotalRegistros = paginado.TotalRegistros,
+                Pagina = paginado.Pagina,
+                TamañoPagina = paginado.TamañoPagina
+            };
         }
 
         public async Task<int> CrearAsync(CrearEmpresaDto dto, CancellationToken ct = default)
@@ -52,25 +83,24 @@ namespace DrakionTech.Crm.Business.Services
             return _mapper.Map<EmpresaDto>(empresa);
         }
 
-        public async Task<IEnumerable<EmpresaDto>> ObtenerTodasAsync(string? busqueda = null, bool? soloActivas = null, CancellationToken ct = default)
+        public async Task<IEnumerable<EmpresaDto>> ObtenerTodasAsync(
+            string? busqueda = null, bool? soloActivas = null, CancellationToken ct = default)
         {
-            var empresas = await _empresaRepository.ObtenerTodasConRelacionesAsync(ct);
-
-            var query = empresas.AsQueryable();
+            var query = _empresaRepository.Query();
 
             if (!string.IsNullOrWhiteSpace(busqueda))
             {
                 var term = busqueda.Trim().ToLower();
                 query = query.Where(e =>
-                    (e.Nombre != null && e.Nombre.ToLower().Contains(term)) ||
-                    (e.Nit != null && e.Nit.ToLower().Contains(term)) ||
-                    (e.Correo != null && e.Correo.ToLower().Contains(term)));
+                    e.Nombre.ToLower().Contains(term) ||
+                    e.Nit.ToLower().Contains(term) ||
+                    e.Correo.ToLower().Contains(term));
             }
 
             if (soloActivas.HasValue)
                 query = query.Where(e => e.Activa == soloActivas.Value);
 
-            return _mapper.Map<IEnumerable<EmpresaDto>>(query.ToList());
+            return _mapper.Map<IEnumerable<EmpresaDto>>(await query.ToListAsync(ct));
         }
 
         public async Task ActivarAsync(int empresaId, CancellationToken ct = default)

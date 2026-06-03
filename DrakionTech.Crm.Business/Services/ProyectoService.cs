@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using DrakionTech.Crm.Business.Common;
 using DrakionTech.Crm.Business.DTOs.Proyecto;
 using DrakionTech.Crm.Business.Interfaces;
 using DrakionTech.Crm.Data.Entities;
 using DrakionTech.Crm.Data.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace DrakionTech.Crm.Business.Services;
 
@@ -21,6 +23,37 @@ public class ProyectoService : IProyectoService
     {
         var proyectos = await _repository.ObtenerTodosAsync();
         return _mapper.Map<List<ProyectoDto>>(proyectos);
+    }
+
+    public async Task<ResultadoPaginacion<ProyectoDto>> ObtenerTodosConPaginacionAsync(
+    string? busqueda = null,
+    int pagina = 1,
+    int tamañoPagina = 10)
+    {
+        var query = _repository.Query();
+
+        if (!string.IsNullOrWhiteSpace(busqueda))
+        {
+            var term = busqueda.Trim().ToLower();
+
+            query = query.Where(p =>
+                p.Nombre.ToLower().Contains(term) ||
+                p.Area.Nombre.ToLower().Contains(term) ||
+                p.Responsable.Nombre.ToLower().Contains(term) ||
+                p.Responsable.Apellido.ToLower().Contains(term));
+        }
+
+        var paginado = await query
+            .OrderBy(p => p.Nombre)
+            .PaginarAsync(pagina, tamañoPagina);
+
+        return new ResultadoPaginacion<ProyectoDto>
+        {
+            Items = _mapper.Map<List<ProyectoDto>>(paginado.Items),
+            TotalRegistros = paginado.TotalRegistros,
+            Pagina = paginado.Pagina,
+            TamañoPagina = paginado.TamañoPagina
+        };
     }
 
     public async Task<ProyectoDto?> ObtenerPorIdAsync(int id)

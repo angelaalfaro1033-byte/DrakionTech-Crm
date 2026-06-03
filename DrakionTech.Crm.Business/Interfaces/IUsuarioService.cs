@@ -1,9 +1,11 @@
-﻿using DrakionTech.Crm.Business.DTOs.Usuario;
+﻿using DrakionTech.Crm.Business.Common;
+using DrakionTech.Crm.Business.DTOs.Usuario;
 
 namespace DrakionTech.Crm.Business.Interfaces;
 
 public interface IUsuarioService
 {
+    Task<ResultadoPaginacion<UsuarioListDto>> ObtenerTodosConPaginacionAsync(string? busqueda = null, bool? soloActivos = null, int pagina = 1, int tamañopagina = 10);
     Task<List<UsuarioListDto>> ObtenerTodosAsync(string? busqueda = null, bool? soloActivos = null);
     Task<UsuarioListDto> ObtenerPorIdAsync(int id);
     Task CrearAsync(CrearUsuarioDto dto);

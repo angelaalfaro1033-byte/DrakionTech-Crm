@@ -5,6 +5,8 @@
 @using DrakionTech.Crm.Web.Components
 @inject IEmpresaService EmpresaService
 @inject IJSRuntime JS
+@using DrakionTech.Crm.Web.Shared
+@inherits PaginacionBase
 
 <div class="empresas-container">
 
@@ -96,6 +98,9 @@
                     }
                 </tbody>
             </table>
+            <Paginacion PaginaActual="paginaActual"
+                        TotalPaginas="totalPaginas"
+                        OnPaginaChanged="IrAPagina" />
         </div>
     }
 
@@ -119,7 +124,16 @@
     {
         cargando = true;
         StateHasChanged();
-        empresas = (await EmpresaService.ObtenerTodasAsync(busqueda, soloActivas)).ToList();
+        var resultado = await EmpresaService.ObtenerTodasConPaginacionAsync(
+            busqueda,
+            soloActivas,
+            paginaActual,
+            tamañoPagina);
+
+        empresas = resultado.Items;
+
+        totalRegistros = resultado.TotalRegistros;
+        totalPaginas = resultado.TotalPaginas;
         cargando = false;
     }
 
@@ -128,6 +142,7 @@
         busqueda = valores.GetValueOrDefault("busqueda");
         var estado = valores.GetValueOrDefault("estado");
         soloActivas = string.IsNullOrWhiteSpace(estado) ? null : bool.Parse(estado);
+        paginaActual = 1;
         await Cargar();
     }
 
@@ -141,5 +156,10 @@
     {
         await EmpresaService.DesactivarAsync(id);
         await Cargar();
+    }
+
+    private async Task IrAPagina(int pagina)
+    {
+        await CambiarPaginaAsync(pagina, Cargar);
     }
 }

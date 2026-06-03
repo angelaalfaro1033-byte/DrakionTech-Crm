@@ -75,7 +75,7 @@
     {
         try
         {
-            roles = await RolUsuarioService.ObtenerTodosSinPaginacionAsync();
+            roles = await RolUsuarioService.ObtenerTodosAsync();
             especialidad = await EspecialidadService.ObtenerPorIdAsync(id);
         }
         catch (Exception ex) { error = ex.Message; }

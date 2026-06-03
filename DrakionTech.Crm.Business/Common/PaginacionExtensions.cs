@@ -1,20 +1,23 @@
-﻿namespace DrakionTech.Crm.Business.Common
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace DrakionTech.Crm.Business.Common
 {
     public static class PaginacionExtensions
     {
-        public static ResultadoPaginacion<T> Paginar<T>(
+        public static async Task<ResultadoPaginacion<T>> PaginarAsync<T>(
             this IQueryable<T> query,
             int pagina,
-            int tamañoPagina = 10)
+            int tamañoPagina = 10,
+            CancellationToken ct = default)
         {
             if (pagina < 1) pagina = 1;
             if (tamañoPagina < 1) tamañoPagina = 10;
 
-            var total = query.Count();
-            var items = query
+            var total = await query.CountAsync(ct);
+            var items = await query
                 .Skip((pagina - 1) * tamañoPagina)
                 .Take(tamañoPagina)
-                .ToList();
+                .ToListAsync(ct);
 
             return new ResultadoPaginacion<T>
             {
