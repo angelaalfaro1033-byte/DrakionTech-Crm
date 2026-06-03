@@ -1,5 +1,4 @@
-﻿/* Cosas principales de el crm*/
-.app-layout {
+﻿.app-layout {
     display: flex;
     min-height: 100vh;
 }
@@ -54,7 +53,7 @@
     }
 
     .logout-btn:hover {
-        background: #e5e7eb;
-        color: #374151;
-        border-color: #d1d5db;
+        background: #e8eafd;
+        color: var(--primary);
+        border-color: var(--primary);
     }

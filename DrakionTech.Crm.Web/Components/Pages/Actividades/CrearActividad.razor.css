@@ -10,43 +10,38 @@
     background-color: #ffffff;
     padding: 2rem;
     border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 8px 24px rgba(7, 25, 71, 0.08);
 }
 
-/* Títulos */
 .actividad-form-title {
     margin-bottom: 0.25rem;
     font-weight: 700;
-    color: #1f2937;
+    color: #071947;
 }
 
 .actividad-form-subtitle {
     margin-bottom: 1.75rem;
     font-size: 0.9rem;
-    color: #6b7280;
+    color: var(--text-muted);
 }
 
-/* Labels */
 .actividad-form-card .form-label {
     font-weight: 600;
     font-size: 0.85rem;
-    color: #374151;
+    color: #071947;
 }
 
-/* Inputs y selects */
 .actividad-form-card .form-control,
 .actividad-form-card textarea {
     border-radius: 10px;
     padding: 0.55rem 0.75rem;
 }
 
-/* Texto de ayuda */
 .actividad-form-card .form-text {
     font-size: 0.75rem;
-    color: #6b7280;
+    color: var(--text-muted);
 }
 
-/* Botones */
 .actividad-form-card button,
 .actividad-form-card a.btn {
     min-width: 140px;
@@ -54,7 +49,6 @@
     border-radius: 10px;
 }
 
-/* Separación final */
 .actividad-form-card button {
     margin-top: 0.5rem;
 }
@@ -63,9 +57,9 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
-    color: #2563eb;
+    background: #e8eafd;
+    border: 1px solid #2A3EF4;
+    color: #2A3EF4;
     font-size: 13px;
     font-weight: 500;
     padding: 10px 14px;

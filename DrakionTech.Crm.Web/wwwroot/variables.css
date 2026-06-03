@@ -24,13 +24,14 @@
 }
 
 :root {
-    --primary: #2563eb;
-    --primary-soft: #e0e7ff;
-    --bg-app: #f8fafc;
+    --primary: #2A3EF4;
+    --primary-soft: #e8eafd;
+    --primary-dark: #071947;
+    --bg-app: #E4E5F2;
     --bg-card: #ffffff;
-    --text-main: #0f172a;
-    --text-muted: #64748b;
-    --border-soft: #e5e7eb;
+    --text-main: #071947;
+    --text-muted: #4a5270;
+    --border-soft: #d0d3e8;
     --radius-sm: 8px;
     --radius-md: 10px;
     --radius-lg: 14px;

@@ -23,9 +23,14 @@ a, .btn-link {
 
 .btn-primary {
     color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    background-color: #2A3EF4;
+    border-color: #071947;
 }
+
+    .btn-primary:hover {
+        background-color: #071947;
+        border-color: #071947;
+    }
 
 .btn:focus,
 .btn:active:focus,

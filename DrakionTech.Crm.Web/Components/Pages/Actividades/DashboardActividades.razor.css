@@ -5,7 +5,6 @@
     gap: 20px;
 }
 
-/* Resumen */
 .dashboard-resumen {
     display: flex;
     gap: 16px;
@@ -22,10 +21,8 @@
     background: var(--bg-card);
 }
 
-
-/* Tiempo relativo */
 .tiempo-vencida {
-    color: #dc2626;
+    color: #FF004F;
     font-size: 13px;
 }
 
@@ -35,11 +32,20 @@
 }
 
 .tiempo-pendiente {
-    color: #6b7280;
+    color: #FF004F;
     font-size: 13px;
 }
 
-/* Empty state */
+.tiempo-completada {
+    color: #2A3EF4;
+    font-size: 13px;
+}
+
+.tiempo-programada {
+    color: #FF004F;
+    font-size: 13px;
+}
+
 .dashboard-empty {
     text-align: center;
     padding: 40px;
@@ -47,7 +53,6 @@
     font-size: 14px;
 }
 
-/* Badges de estado */
 .badge-estado {
     font-size: 12px;
     padding: 4px 10px;
@@ -55,51 +60,39 @@
     font-weight: 500;
 }
 
-.badge-pendiente {
-    background: #fee2e2;
-    color: #dc2626;
+.badge-pendiente,
+.badge-programada {
+    background: #fff0f5;
+    color: #FF004F;
 }
 
 .badge-completada {
-    background: #dcfce7;
-    color: #16a34a;
+    background: #e8eafd;
+    color: #2A3EF4;
 }
 
-/* Tiempo relativo */
-.tiempo-pendiente {
-    color: #dc2626;
-    font-size: 13px;
-}
-
-.tiempo-completada {
-    color: #16a34a;
-    font-size: 13px;
-}
-
-/* Cards resumen */
 .resumen-card.pendiente {
-    background: #fff1f2;
-    border-color: #fecdd3;
+    background: #fff0f5;
+    border-color: #FF004F44;
 }
 
 .resumen-card.completada {
-    background: #f0fdf4;
-    border-color: #bbf7d0;
+    background: #e8eafd;
+    border-color: #2A3EF4;
 }
 
 .resumen-card.pendiente .resumen-numero {
-    color: #dc2626;
+    color: #FF004F;
 }
 
 .resumen-card.completada .resumen-numero {
-    color: #16a34a;
+    color: #2A3EF4;
 }
 
-/* Botón completar */
 .btn-completar {
     background: none;
     border: none;
-    color: #16a34a;
+    color: #2A3EF4;
     font-size: 16px;
     cursor: pointer;
     padding: 0 4px;
@@ -107,28 +100,18 @@
 }
 
     .btn-completar:hover {
-        color: #15803d;
+        color: #071947;
     }
 
     .btn-completar:disabled {
-        color: #86efac;
+        color: #a5b0f8;
         cursor: wait;
-   }
-
-.badge-programada {
-    background: #fee2e2;
-    color: #dc2626;
-}
-
-.tiempo-programada {
-    color: #dc2626;
-    font-size: 13px;
-}
+    }
 
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(7, 25, 71, 0.4);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -140,7 +123,7 @@
     border-radius: var(--radius-lg);
     padding: 2rem;
     width: 420px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 20px 60px rgba(7, 25, 71, 0.15);
 }
 
     .modal-box h5 {
