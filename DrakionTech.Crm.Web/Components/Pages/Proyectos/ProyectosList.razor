@@ -122,7 +122,7 @@ else
     private string ObtenerBadge(EstadoProyecto estado) => estado switch
     {
         EstadoProyecto.Planificado => "badge-secondary",
-        EstadoProyecto.EnCurso    => "badge-primary",
+        EstadoProyecto.Ejecutándose    => "badge-primary",
         EstadoProyecto.Completado => "badge-success",
         EstadoProyecto.Cancelado  => "badge-danger",
         _ => ""

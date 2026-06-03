@@ -3,7 +3,7 @@
 public enum EstadoProyecto
 {
     Planificado,
-    EnCurso,
+    Ejecutándose,
     Completado,
     Cancelado
 }

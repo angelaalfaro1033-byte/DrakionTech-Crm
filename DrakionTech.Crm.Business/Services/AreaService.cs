@@ -112,15 +112,10 @@ public class AreaService : IAreaService
         return MapToDto(area);
     }
 
-    // ─────────────────────────────────────────────
-    // CREAR
-    // ─────────────────────────────────────────────
     public async Task<AreaDto> CrearAsync(CrearAreaDto dto)
     {
-        // Validación insensitive de nombre duplicado
         await ValidarNombreUnicoAsync(dto.Nombre, excludeId: null);
 
-        // Validar responsable (si se indica)
         if (dto.ResponsableId.HasValue)
             await ValidarResponsableExisteAsync(dto.ResponsableId.Value);
 
@@ -134,14 +129,22 @@ public class AreaService : IAreaService
         };
 
         _db.Areas.Add(area);
-        await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync(); // aquí ya tiene Id
+
+        // Actualizar AreaId del responsable
+        if (dto.ResponsableId.HasValue)
+        {
+            var usuario = await _db.Usuarios.FindAsync(dto.ResponsableId.Value);
+            if (usuario is not null)
+            {
+                usuario.AreaId = area.Id;
+                await _db.SaveChangesAsync();
+            }
+        }
 
         return (await ObtenerPorIdAsync(area.Id))!;
     }
 
-    // ─────────────────────────────────────────────
-    // ACTUALIZAR
-    // ─────────────────────────────────────────────
     public async Task<AreaDto> ActualizarAsync(int id, ActualizarAreaDto dto)
     {
         var area = await _db.Areas.FindAsync(id)
@@ -152,20 +155,33 @@ public class AreaService : IAreaService
         if (dto.ResponsableId.HasValue)
             await ValidarResponsableExisteAsync(dto.ResponsableId.Value);
 
+        // Si cambia el responsable, limpiar AreaId del anterior
+        if (area.ResponsableId.HasValue && area.ResponsableId != dto.ResponsableId)
+        {
+            var anterior = await _db.Usuarios.FindAsync(area.ResponsableId.Value);
+            if (anterior is not null)
+                anterior.AreaId = null;
+        }
+
         area.Nombre = dto.Nombre.Trim();
         area.Descripcion = dto.Descripcion?.Trim();
         area.Activa = dto.Activa;
         area.ResponsableId = dto.ResponsableId;
         area.FechaModificacion = DateTime.UtcNow;
 
+        // Asignar AreaId al nuevo responsable
+        if (dto.ResponsableId.HasValue)
+        {
+            var usuario = await _db.Usuarios.FindAsync(dto.ResponsableId.Value);
+            if (usuario is not null)
+                usuario.AreaId = id;
+        }
+
         await _db.SaveChangesAsync();
 
         return (await ObtenerPorIdAsync(id))!;
     }
 
-    // ─────────────────────────────────────────────
-    // ELIMINAR
-    // ─────────────────────────────────────────────
     public async Task CambiarEstadoAsync(int id, bool activa)
     {
         var area = await _db.Areas.FindAsync(id)
@@ -177,9 +193,6 @@ public class AreaService : IAreaService
         await _db.SaveChangesAsync();
     }
 
-    // ─────────────────────────────────────────────
-    // HELPERS PÚBLICOS
-    // ─────────────────────────────────────────────
     public async Task<bool> NombreExisteAsync(string nombre, int? excluirId = null)
     {
         var normalizado = nombre.Trim().ToLower();
@@ -187,10 +200,6 @@ public class AreaService : IAreaService
             a.Nombre.ToLower() == normalizado &&
             (!excluirId.HasValue || a.Id != excluirId.Value));
     }
-
-    // ─────────────────────────────────────────────
-    // HELPERS PRIVADOS
-    // ─────────────────────────────────────────────
     private async Task ValidarNombreUnicoAsync(string nombre, int? excludeId)
     {
         if (await NombreExisteAsync(nombre, excludeId))

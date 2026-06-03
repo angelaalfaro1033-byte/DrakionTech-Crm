@@ -11,7 +11,7 @@ public class ProyectoDto
     public string EstadoTexto => Estado switch
     {
         EstadoProyecto.Planificado => "Planificado",
-        EstadoProyecto.EnCurso => "En curso",
+        EstadoProyecto.Ejecutándose => "Ejecutándose",
         EstadoProyecto.Completado => "Completado",
         EstadoProyecto.Cancelado => "Cancelado",
         _ => Estado.ToString()

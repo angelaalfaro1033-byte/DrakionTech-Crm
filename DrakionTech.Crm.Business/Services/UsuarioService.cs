@@ -178,7 +178,8 @@ public class UsuarioService : IUsuarioService
         Email = u.Email,
         Telefono = u.Telefono,
         Rol = u.Rol?.Nombre ?? "Sin rol",
-        IsActive = u.IsActive
+        IsActive = u.IsActive,
+         AreaId = u.AreaId
     };
 
     public async Task EditarAsync(ActualizarUsuarioDto dto)
