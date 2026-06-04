@@ -1,4 +1,6 @@
-﻿namespace DrakionTech.Crm.Business.DTOs.Oportunidad
+﻿using DrakionTech.Crm.Data.Entities.Enums;
+
+namespace DrakionTech.Crm.Business.DTOs.Oportunidad
 {
     public class OportunidadDto
     {
@@ -13,12 +15,15 @@
         public string NombreProyecto { get; set; } = null!;
         public decimal ValorEstimado { get; set; }
 
-        public int Etapa { get; set; }
         public string EtapaNombre { get; set; } = string.Empty;
 
         public DateTime? FechaEstimadaCierre { get; set; }
         public string? Descripcion { get; set; }
 
         public DateTime FechaCreacion { get; set; }
+
+        public int? ProyectoId { get; set; }
+        public string EtapaTexto { get; set; } = string.Empty;
+        public EtapaOportunidad Etapa { get; set; }
     }
 }

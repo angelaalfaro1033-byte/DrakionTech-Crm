@@ -3,7 +3,12 @@
 @attribute [Authorize]
 @inject IOportunidadService OportunidadService
 @inject NavigationManager Navigation
+@using DrakionTech.Crm.Business.DTOs.Area
+@using DrakionTech.Crm.Business.DTOs.Usuario
+@using DrakionTech.Crm.Data.Entities.Enums
 
+@inject IAreaService AreaService
+@inject IUsuarioService UsuarioService
 <div class="etapa-container">
     <div class="etapa-info-card">
         <h3>Cambiar etapa de oportunidad</h3>
@@ -38,34 +43,86 @@
             </div>
 
             <div class="etapa-form-card">
-                <EditForm Model="@modelo"
-                          OnValidSubmit="Guardar"
-                          FormName="CambiarEtapaForm">
+                @if (_error is not null)
+                {
+                    <div class="alert alert-danger">@_error</div>
+                }
 
-                    <DataAnnotationsValidator />
-                    <ValidationSummary />
+                @{
+                    var siguiente = OportunidadService.ObtenerSiguienteEtapa(oportunidad.Etapa);
+                }
 
-                    <div class="mb-3">
-                        <label class="form-label">Nueva etapa</label>
-                        <InputSelect class="form-control" @bind-Value="modelo.NuevaEtapa">
-                            @foreach (var etapa in etapas)
-                            {
-                                <option value="@etapa.Valor">
-                                    @etapa.Nombre
-                                </option>
-                            }
-                        </InputSelect>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">
-                        Guardar cambio
+                @if (siguiente is not null)
+                {
+                    <button class="btn btn-primary" @onclick="AvanzarEtapa">
+                        Avanzar a: @etapas.FirstOrDefault(e => e.Valor == (int)siguiente)?.Nombre
                     </button>
+                }
+                else
+                {
+                    <span class="badge bg-success">
+                        Oportunidad Firmada
+                    </span>
+                }
 
-                    <a class="btn btn-secondary ms-2"
-                       href="/empresas/@EmpresaId/oportunidades">
-                        Cancelar
-                    </a>
-                </EditForm>
+                <a class="btn btn-secondary ms-2"
+                   href="/empresas/@EmpresaId/oportunidades">
+                    Cancelar
+                </a>
+
+                @if (_mostrarModalFirmado)
+                {
+                    <div class="modal-backdrop-custom"></div>
+
+                    <div class="modal-custom">
+                        <div class="modal-custom-header">
+                            Asignar proyecto
+                        </div>
+
+                        <div class="modal-custom-body">
+                            <p>
+                                La oportunidad pasará a <strong>Firmado</strong>.
+                                Asigna el área y responsable del proyecto.
+                            </p>
+
+                            <div class="mb-3">
+                                <label class="form-label">Área</label>
+                                <InputSelect class="form-select"
+                                             @bind-Value="_areaIdModal"
+                                             @bind-Value:after="OnAreaModalCambiada">
+                                    <option value="0">-- Selecciona un área --</option>
+                                    @foreach (var a in _areas)
+                                    {
+                                        <option value="@a.Id">@a.Nombre</option>
+                                    }
+                                </InputSelect>
+
+                                <InputSelect class="form-select"
+                                             @bind-Value="_responsableIdModal"
+                                             disabled="@(_areaIdModal == 0)">
+                                    <option value="0">-- Selecciona un responsable --</option>
+                                    @foreach (var u in _usuariosFiltrados)
+                                    {
+                                        <option value="@u.Id">@u.Nombre @u.Apellido</option>
+                                    }
+                                </InputSelect>
+                              
+                            </div>
+                        </div>
+
+                        <div class="modal-custom-footer">
+                            <button class="btn btn-secondary"
+                                    @onclick="() => _mostrarModalFirmado = false">
+                                Cancelar
+                            </button>
+
+                            <button class="btn btn-primary"
+                                    @onclick="ConfirmarFirmado">
+                                Confirmar
+                            </button>
+                        </div>
+                    </div>
+                }
             </div>
         }
     </div>
@@ -76,37 +133,82 @@
 
     private OportunidadDto? oportunidad;
     private IEnumerable<OpcionEnumDto> etapas = [];
-    private string etapaActualTexto = string.Empty;
+    private string? _error;
 
-    private CambiarEtapaModel modelo = new();
+    private bool _mostrarModalFirmado;
+    private int _areaIdModal;
+    private int _responsableIdModal;
+    private IEnumerable<AreaListDto> _areas = new List<AreaListDto>();
+    private List<UsuarioListDto> _usuariosFiltrados = new();
+    private List<UsuarioListDto> _todosUsuarios = new();
 
     protected override async Task OnInitializedAsync()
     {
         etapas = OportunidadService.ObtenerEtapas();
-
         oportunidad = await OportunidadService.ObtenerPorIdAsync(OportunidadId);
-
-        modelo.NuevaEtapa = oportunidad.Etapa;
-
-        etapaActualTexto = etapas
-            .First(e => e.Valor == oportunidad.Etapa)
-            .Nombre;
+        _areas = await AreaService.ObtenerTodasAsync(soloActivas: true);
+        var todos = await UsuarioService.ObtenerTodosAsync();
+        _todosUsuarios = todos.Where(u => u.IsActive).ToList();
     }
 
-    private async Task Guardar()
+    private void OnAreaModalCambiada()
     {
-        await OportunidadService.CambiarEtapaAsync(
-            OportunidadId,
-            (EtapaOportunidad)modelo.NuevaEtapa
-        );
+        _responsableIdModal = 0;
+        _usuariosFiltrados = _areaIdModal == 0
+            ? new List<UsuarioListDto>()
+            : _todosUsuarios.Where(u => u.AreaId.HasValue && u.AreaId.Value == _areaIdModal).ToList();
+    }
+    private async Task AvanzarEtapa()
+    {
+        if (oportunidad is null)
+            return;
 
-        Navigation.NavigateTo(
-            $"/empresas/{EmpresaId}/oportunidades"
-        );
+        var siguiente =
+            OportunidadService.ObtenerSiguienteEtapa(oportunidad.Etapa);
+
+        if (siguiente is null)
+            return;
+
+        if (siguiente == EtapaOportunidad.Firmado)
+        {
+            _mostrarModalFirmado = true;
+            return;
+        }
+
+        await EjecutarCambioAsync(
+            siguiente.Value,
+            null,
+            null);
     }
 
-    private class CambiarEtapaModel
+    private async Task ConfirmarFirmado()
     {
-        public int NuevaEtapa { get; set; }
+        if (_areaIdModal == 0 || _responsableIdModal == 0)
+        {
+            _error = "Debes seleccionar un área y un responsable.";
+            return;
+        }
+
+        await EjecutarCambioAsync(EtapaOportunidad.Firmado, _areaIdModal, _responsableIdModal);
+        _mostrarModalFirmado = false;
+    }
+
+    private async Task EjecutarCambioAsync(EtapaOportunidad etapa, int? areaId, int? responsableId)
+    {
+        try
+        {
+            await OportunidadService.CambiarEtapaAsync(new CambiarEtapaDto
+                {
+                    OportunidadId = OportunidadId,
+                    NuevaEtapa = etapa,
+                    AreaId = areaId,
+                    ResponsableId = responsableId
+                });
+            Navigation.NavigateTo($"/empresas/{EmpresaId}/oportunidades");
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
     }
 }

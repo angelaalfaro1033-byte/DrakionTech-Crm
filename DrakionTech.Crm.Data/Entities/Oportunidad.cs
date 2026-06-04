@@ -32,7 +32,7 @@ namespace DrakionTech.Crm.Data.Entities
 
         public ICollection<Propuesta> Propuestas { get; set; } = new List<Propuesta>();
         public ICollection<HistorialCambioOportunidad> HistorialCambios { get; set; } = new List<HistorialCambioOportunidad>();
-
+        public ICollection<Proyecto> Proyectos { get; set; } = new List<Proyecto>();
         public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
     }
 }
