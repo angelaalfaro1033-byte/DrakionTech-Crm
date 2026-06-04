@@ -1,9 +1,11 @@
-﻿/* Contenedor específico */
-.empresa-contactos {
-    margin-top: 1rem;
+﻿.contactos-email {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
 }
 
-/* Ajustes propios de contactos */
-.contactos-table td:nth-child(2) {
-    white-space: nowrap;
+.oport-badge--rol {
+    background: #F1EFE8;
+    color: #444441;
 }

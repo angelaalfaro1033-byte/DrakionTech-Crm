@@ -31,15 +31,14 @@ else
         }
         else
         {
-            <div class="empresa-table">
-                <table class="table table-hover align-middle">
+            <div class="ui-card">
+                <table class="ui-table">
                     <thead>
                         <tr>
                             <th>Proyecto</th>
                             <th>Valor estimado</th>
                             <th>Etapa</th>
-                            <th>Fecha creación</th>
-                            <th>Acciones</th>
+                            <th>Creación</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -48,33 +47,27 @@ else
                         {
                             <tr>
                                 <td>@o.NombreProyecto</td>
-
+                                <td>@o.ValorEstimado.ToString("C0", new System.Globalization.CultureInfo("es-CO"))</td>
                                 <td>
-                                    @o.ValorEstimado.ToString("C0",
-                                    new System.Globalization.CultureInfo("es-CO"))
-                        </td>
-
-                        <td>
-                            <span class="badge oportunidades-etapa bg-info">
-                                @o.EtapaNombre
-                            </span>
-                        </td>
-
-                        <td>@o.FechaCreacion.ToString("dd/MM/yyyy")</td>
-
-                        <td>
-                            <a class="btn btn-sm btn-secondary me-1"
-                                href="/empresas/@EmpresaId/oportunidades/editar/@o.Id">
-                                Editar
-                            </a>
-
-                            <a class="btn btn-sm btn-warning me-1"
-                                href="/empresas/@EmpresaId/oportunidades/etapa/@o.Id">
-                                Cambiar etapa
-                            </a>
-                        </td>
-                    </tr>
-                            }
+                                    <span class="oport-badge oport-badge--@o.EtapaNombre.ToLower()">
+                                        @o.EtapaNombre
+                                    </span>
+                                </td>
+                                <td>@o.FechaCreacion.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    <div class="ui-actions">
+                                        <a class="oport-btn oport-btn--default"
+                                           href="/empresas/@EmpresaId/oportunidades/editar/@o.Id">
+                                            <i class="bi bi-pencil"></i> Editar
+                                        </a>
+                                        <a class="oport-btn oport-btn--primary"
+                                           href="/empresas/@EmpresaId/oportunidades/etapa/@o.Id">
+                                            <i class="bi bi-arrow-right-circle"></i> Etapa
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
             </div>

@@ -4,16 +4,14 @@
 }
 else
 {
-    <div class="mb-4">
-        <h3 class="mb-0">@Empresa.Nombre</h3>
-        <small class="text-muted">
+    <div class="empresa-header">
+        <h3 class="empresa-nombre">@Empresa.Nombre</h3>
+        <small class="empresa-meta">
             @Empresa.Nit · @Empresa.PaisNombre
         </small>
     </div>
-
     <EmpresaDetalleTabs EmpresaId="@Empresa.Id" />
-
-    <div class="mt-3">
+    <div class="empresa-content">
         @ChildContent
     </div>
 }

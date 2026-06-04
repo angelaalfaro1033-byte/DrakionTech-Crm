@@ -1,0 +1,19 @@
+﻿.empresa-header {
+    margin-bottom: 1.5rem;
+}
+
+.empresa-nombre {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 2px;
+}
+
+.empresa-meta {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.empresa-content {
+    margin-top: 1.25rem;
+}
