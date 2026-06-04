@@ -19,6 +19,7 @@ namespace DrakionTech.Crm.Data.Repositories
             return await _context.Oportunidades
                 .Include(o => o.Empresa)
                 .Include(o => o.ContactoPrincipal)
+                .Include(o => o.Proyectos)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(o => o.Id == id, ct);
         }

@@ -1,30 +1,19 @@
 ﻿@inject NavigationManager Navigation
 @attribute [Authorize]
-<div class="empresa-tabs">
-    <ul class="nav nav-tabs mb-3">
 
-        <li class="nav-item">
-            <a class="nav-link @IsActive("contactos")"
-               href="@($"/empresas/{EmpresaId}/contactos")">
-                Contactos
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link @IsActive("oportunidades")"
-               href="@($"/empresas/{EmpresaId}/oportunidades")">
-                Oportunidades
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link @IsActive("actividades")"
-               href="@($"/empresas/{EmpresaId}/actividades")">
-                Actividades
-            </a>
-        </li>
-
-    </ul>
+<div class="etabs">
+    <a class="etabs-item @IsActive("contactos")"
+       href="@($"/empresas/{EmpresaId}/contactos")">
+        Contactos
+    </a>
+    <a class="etabs-item @IsActive("oportunidades")"
+       href="@($"/empresas/{EmpresaId}/oportunidades")">
+        Oportunidades
+    </a>
+    <a class="etabs-item @IsActive("actividades")"
+       href="@($"/empresas/{EmpresaId}/actividades")">
+        Actividades
+    </a>
 </div>
 
 @code {

@@ -56,7 +56,8 @@ public class UsuarioService : IUsuarioService
                 Email = u.Email,
                 Telefono = u.Telefono,
                 Rol = u.Rol != null ? u.Rol.Nombre : "Sin rol",
-                IsActive = u.IsActive
+                IsActive = u.IsActive,
+                AreaId = u.AreaId
             })
             .PaginarAsync(pagina, tamañoPagina);
     }
@@ -84,7 +85,8 @@ public class UsuarioService : IUsuarioService
             Email = u.Email,
             Telefono = u.Telefono,
             Rol = u.Rol != null ? u.Rol.Nombre : "Sin rol",
-            IsActive = u.IsActive
+            IsActive = u.IsActive,
+            AreaId = u.AreaId
         }).ToListAsync();
     }
 
@@ -179,7 +181,7 @@ public class UsuarioService : IUsuarioService
         Telefono = u.Telefono,
         Rol = u.Rol?.Nombre ?? "Sin rol",
         IsActive = u.IsActive,
-         AreaId = u.AreaId
+        AreaId = u.AreaId
     };
 
     public async Task EditarAsync(ActualizarUsuarioDto dto)

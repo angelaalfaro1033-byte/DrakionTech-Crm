@@ -117,7 +117,7 @@
 
         _usuariosFiltrados = _modelo.AreaId == 0
             ? new List<UsuarioListDto>()
-            : _todosUsuarios.Where(u => u.AreaId == _modelo.AreaId).ToList();
+            : _todosUsuarios.Where(u => u.AreaId.HasValue && u.AreaId.Value == _modelo.AreaId).ToList();
     }
 
     private async Task GuardarAsync()
