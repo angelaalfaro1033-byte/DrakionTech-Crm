@@ -7,37 +7,26 @@ namespace DrakionTech.Crm.Data.Entities
     {
         public int Id { get; set; }
 
-        [Required]
-        [MaxLength(150)]
+        [Required, MaxLength(150)]
         public string Nombre { get; set; } = null!;
 
-        [Required]
-        [MaxLength(150)]
+        [Required, MaxLength(150)]
         public string Apellido { get; set; } = null!;
 
         public string? Email { get; set; }
-
         public string? Telefono { get; set; }
+        public string? Cargo { get; set; }  // ← agregar
 
         public int RolContactoId { get; set; }
         public RolContacto RolContacto { get; set; } = null!;
 
-        /// <summary>
-        /// Fecha en la que el contacto se vinculó con la empresa
-        /// </summary>
-        public DateTime? FechaVinculacion { get; set; }
+        public bool EsPrincipal { get; set; }  // ← agregar
 
-        /// <summary>
-        /// Fechas especiales del contacto (cumpleaños, etc.)
-        /// </summary>
+        public DateTime? FechaVinculacion { get; set; }
         public DateTime? FechaEspecial { get; set; }
 
-        // FK
         public int EmpresaId { get; set; }
-
-        // Navegación
         public Empresa? Empresa { get; set; }
-
         public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
     }
 }

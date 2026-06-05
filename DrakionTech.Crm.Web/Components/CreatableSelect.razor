@@ -53,6 +53,7 @@
 </div>
 
 @code {
+    [Parameter] public bool Disabled { get; set; }
     [Parameter] public List<TItem> Items { get; set; } = [];
     [Parameter] public Func<TItem, string> ObtenerTexto { get; set; } = _ => "";
     [Parameter] public Func<TItem, int> ObtenerId { get; set; } = _ => 0;
@@ -113,12 +114,13 @@
         await OnCrear.InvokeAsync(texto);
     }
 
-    private void Limpiar()
+    private async Task Limpiar()
     {
         busqueda = "";
         abierto = false;
         editando = false;
-        OnSeleccionar.InvokeAsync(default!);
+
+        await OnSeleccionar.InvokeAsync(default);
     }
 
     private bool ExisteExacto() => Items.Any(i =>

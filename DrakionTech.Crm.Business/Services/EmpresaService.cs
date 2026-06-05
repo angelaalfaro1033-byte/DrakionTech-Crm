@@ -6,26 +6,24 @@ using DrakionTech.Crm.Business.Interfaces;
 using DrakionTech.Crm.Data.Entities;
 using DrakionTech.Crm.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
+using DrakionTech.Crm.Data.Context;
 
 namespace DrakionTech.Crm.Business.Services
 {
     public class EmpresaService : IEmpresaService
     {
         private readonly IEmpresaRepository _empresaRepository;
-        private readonly ISectorRepository _sectorRepository;
-        private readonly IEstadoRepository _estadoRepository;
         private readonly IMapper _mapper;
+        private readonly ApplicationDbContext _db;
 
         public EmpresaService(
             IEmpresaRepository empresaRepository,
-            ISectorRepository sectorRepository,
-            IEstadoRepository estadoRepository,
-            IMapper mapper)
+            IMapper mapper,
+            ApplicationDbContext db)
         {
             _empresaRepository = empresaRepository;
-            _sectorRepository = sectorRepository;
-            _estadoRepository = estadoRepository;
             _mapper = mapper;
+            _db = db;
         }
 
         public async Task<ResultadoPaginacion<EmpresaDto>> ObtenerTodasConPaginacionAsync(string? busqueda = null, bool? soloActivas = null, int pagina = 1, int tamañoPagina = 10, CancellationToken ct = default)
@@ -38,7 +36,7 @@ namespace DrakionTech.Crm.Business.Services
 
                 query = query.Where(e =>
                     e.Nombre.ToLower().Contains(term) ||
-                    e.Nit.ToLower().Contains(term) ||
+                    e.NumeroDocumento.ToLower().Contains(term) ||
                     e.Correo.ToLower().Contains(term));
             }
 
@@ -60,20 +58,123 @@ namespace DrakionTech.Crm.Business.Services
 
         public async Task<int> CrearAsync(CrearEmpresaDto dto, CancellationToken ct = default)
         {
-            await ValidarCatalogosAsync(dto, ct);
-            NormalizarEmpresa(dto);
-            var empresa = _mapper.Map<Empresa>(dto);
+            var empresa = new Empresa
+            {
+                TipoCliente = dto.TipoCliente,
+                TipoDocumento = dto.TipoDocumento,
+                NumeroDocumento = dto.NumeroDocumento,
+                Nombre = dto.Nombre,
+                Direccion = dto.Direccion,
+                PaisId = dto.PaisId,
+                CiudadId = dto.CiudadId,
+                Telefono = dto.Telefono,
+                PrefijoTelefonicoId = dto.PrefijoTelefonicoId,
+                PrefijoTelefonicoCodigo = dto.PrefijoTelefonicoCodigo,
+                Correo = dto.Correo,
+                RepresentanteLegal = dto.RepresentanteLegal,
+                FechaCreacionEmpresa = dto.FechaCreacionEmpresa,
+                FechaRegistroCrm = dto.FechaRegistroCrm,
+                SectorEmpresaId = dto.SectorEmpresaId,
+                SubsectorEmpresaId = dto.SubsectorEmpresaId,
+                Tamaño = dto.Tamaño,
+                Descripcion = dto.Descripcion,
+                Seguimiento = dto.Seguimiento,
+                HaTrabajadoAntes = dto.HaTrabajadoAntes,
+                Activa = false,
+                FechaCreacion = DateTime.UtcNow
+            };
+
+            foreach (var c in dto.Correos.Where(c => c.Correo != dto.Correo))
+                empresa.Correos.Add(new EmpresaCorreo { Correo = c.Correo, EsPrincipal = false });
+
+            if (dto.ContactoPrincipal is { Nombre: not null } cp)
+            {
+                empresa.Contactos.Add(new Contacto
+                {
+                    Nombre = cp.Nombre,
+                    Apellido = cp.Apellido ?? string.Empty,
+                    Cargo = cp.Cargo,
+                    Email = cp.Email,
+                    Telefono = cp.Telefono,
+                    RolContactoId = cp.RolContactoId ?? 1,
+                    EsPrincipal = true,
+                    FechaCreacion = DateTime.UtcNow
+                });
+            }
+
+            empresa.Activa = false;
+
             await _empresaRepository.AgregarAsync(empresa, ct);
             return empresa.Id;
         }
 
         public async Task ActualizarAsync(int empresaId, ActualizarEmpresaDto dto, CancellationToken ct = default)
         {
-            await ValidarCatalogosAsync(dto, ct);
-            var empresa = await _empresaRepository.ObtenerPorIdAsync(empresaId, ct)
+            var empresa = await _db.Empresas
+                .Include(e => e.Correos)
+                .Include(e => e.Contactos)
+                .FirstOrDefaultAsync(e => e.Id == empresaId, ct)
                 ?? throw new EntidadNoEncontradaException("Empresa", empresaId);
-            _mapper.Map(dto, empresa);
-            await _empresaRepository.ActualizarAsync(empresa, ct);
+
+            empresa.TipoCliente = dto.TipoCliente;
+            empresa.TipoDocumento = dto.TipoDocumento;
+            empresa.NumeroDocumento = dto.NumeroDocumento;
+            empresa.Nombre = dto.Nombre;
+            empresa.Direccion = dto.Direccion;
+            empresa.PaisId = dto.PaisId;
+            empresa.CiudadId = dto.CiudadId;
+            empresa.Telefono = dto.Telefono;
+            empresa.PrefijoTelefonicoId = dto.PrefijoTelefonicoId;
+            empresa.PrefijoTelefonicoCodigo = dto.PrefijoTelefonicoCodigo;
+            empresa.Correo = dto.Correo;
+            empresa.RepresentanteLegal = dto.RepresentanteLegal;
+            empresa.FechaCreacionEmpresa = dto.FechaCreacionEmpresa;
+            empresa.FechaRegistroCrm = dto.FechaRegistroCrm;
+            empresa.SectorEmpresaId = dto.SectorEmpresaId;
+            empresa.SubsectorEmpresaId = dto.SubsectorEmpresaId;
+            empresa.Tamaño = dto.Tamaño;
+            empresa.Descripcion = dto.Descripcion;
+            empresa.Seguimiento = dto.Seguimiento;
+
+            // Sincronizar correos adicionales
+            _db.EmpresaCorreos.RemoveRange(empresa.Correos);
+            empresa.Correos = new List<EmpresaCorreo>
+    {
+        new() { Correo = dto.Correo!, EsPrincipal = true }
+    };
+            foreach (var c in dto.Correos.Where(c => c.Correo != dto.Correo))
+                empresa.Correos.Add(new EmpresaCorreo { Correo = c.Correo, EsPrincipal = false });
+
+            // Actualizar contacto principal
+            var principal = empresa.Contactos.FirstOrDefault(c => c.EsPrincipal);
+            if (dto.ContactoPrincipal is { Nombre: not null } cp)
+            {
+                if (principal is null)
+                {
+                    empresa.Contactos.Add(new Contacto
+                    {
+                        Nombre = cp.Nombre,
+                        Apellido = cp.Apellido ?? "",
+                        Cargo = cp.Cargo,
+                        Email = cp.Email,
+                        Telefono = cp.Telefono,
+                        RolContactoId = cp.RolContactoId ?? 1,
+                        EsPrincipal = true,
+                        FechaCreacion = DateTime.UtcNow
+                    });
+                }
+                else
+                {
+                    principal.Nombre = cp.Nombre;
+                    principal.Apellido = cp.Apellido ?? "";
+                    principal.Cargo = cp.Cargo;
+                    principal.Email = cp.Email;
+                    principal.Telefono = cp.Telefono;
+                    if (cp.RolContactoId.HasValue) principal.RolContactoId = cp.RolContactoId.Value;
+                }
+            }
+
+            await _db.SaveChangesAsync(ct);
         }
 
         public async Task<EmpresaDto> ObtenerPorIdAsync(int empresaId, CancellationToken ct = default)
@@ -93,7 +194,7 @@ namespace DrakionTech.Crm.Business.Services
                 var term = busqueda.Trim().ToLower();
                 query = query.Where(e =>
                     e.Nombre.ToLower().Contains(term) ||
-                    e.Nit.ToLower().Contains(term) ||
+                    e.NumeroDocumento.ToLower().Contains(term) ||
                     e.Correo.ToLower().Contains(term));
             }
 
@@ -119,51 +220,5 @@ namespace DrakionTech.Crm.Business.Services
             await _empresaRepository.ActualizarAsync(empresa, ct);
         }
 
-        private async Task ValidarCatalogosAsync(IEmpresaCatalogoDto dto, CancellationToken ct)
-        {
-            await ValidarCatalogoAsync(dto.SectorId, dto.SectorOtro, "sector", _sectorRepository.ExisteAsync, ct);
-            await ValidarCatalogoAsync(dto.EstadoId, dto.EstadoOtro, "estado", _estadoRepository.ExisteAsync, ct);
-        }
-
-        private static async Task ValidarCatalogoAsync(
-            int? id, string? otro, string nombreCampo,
-            Func<int, CancellationToken, Task<bool>> existsFunc,
-            CancellationToken ct)
-        {
-            if (id == null && string.IsNullOrWhiteSpace(otro))
-                throw new ReglaNegocioException($"Debe seleccionar un {nombreCampo} o ingresar otro.");
-
-            if (id != null && !string.IsNullOrWhiteSpace(otro))
-                throw new ReglaNegocioException($"No puede seleccionar un {nombreCampo} y escribir otro al mismo tiempo.");
-
-            if (id != null)
-            {
-                var existe = await existsFunc(id.Value, ct);
-                if (!existe)
-                    throw new ReglaNegocioException($"El {nombreCampo} seleccionado no existe.");
-            }
-        }
-
-        private static void NormalizarEmpresa(IEmpresaCatalogoDto dto)
-        {
-            if (dto is CrearEmpresaDto crear)
-            {
-                crear.Nombre = TextNormalizer.ToTitleCase(crear.Nombre);
-                crear.Direccion = TextNormalizer.ToTitleCase(crear.Direccion);
-                crear.Correo = TextNormalizer.NormalizeEmail(crear.Correo);
-                crear.Nit = TextNormalizer.NormalizeNit(crear.Nit);
-                crear.RepresentanteLegal = TextNormalizer.ToTitleCase(crear.RepresentanteLegal);
-                crear.Telefono = TextNormalizer.ToUpper(crear.Telefono);
-            }
-
-            if (dto is ActualizarEmpresaDto actualizar)
-            {
-                actualizar.Nombre = TextNormalizer.ToTitleCase(actualizar.Nombre);
-                actualizar.Direccion = TextNormalizer.ToTitleCase(actualizar.Direccion);
-                actualizar.Correo = TextNormalizer.NormalizeEmail(actualizar.Correo);
-                actualizar.RepresentanteLegal = TextNormalizer.ToTitleCase(actualizar.RepresentanteLegal);
-                actualizar.Telefono = TextNormalizer.ToUpper(actualizar.Telefono);
-            }
-        }
     }
 }

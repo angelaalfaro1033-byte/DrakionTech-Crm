@@ -59,6 +59,9 @@ public class OportunidadService : IOportunidadService
         oportunidad.Etapa = EtapaOportunidad.LlamadaInicial;
 
         await _oportunidadRepository.AgregarAsync(oportunidad, ct);
+
+        await SincronizarEstadoEmpresaAsync(dto.EmpresaId, ct);
+
         return oportunidad.Id;
     }
 
@@ -68,7 +71,10 @@ public class OportunidadService : IOportunidadService
             ?? throw new EntidadNoEncontradaException("Oportunidad", oportunidadId);
 
         _mapper.Map(dto, oportunidad);
+
         await _oportunidadRepository.ActualizarAsync(oportunidad, ct);
+
+        await SincronizarEstadoEmpresaAsync(oportunidad.EmpresaId, ct);
     }
 
     public async Task<OportunidadDto> ObtenerPorIdAsync(int oportunidadId, CancellationToken ct = default)
@@ -131,6 +137,8 @@ public class OportunidadService : IOportunidadService
         oportunidad.Etapa = dto.NuevaEtapa;
 
         await _context.SaveChangesAsync(ct);
+
+        await SincronizarEstadoEmpresaAsync(oportunidad.EmpresaId, ct);
     }
 
     public EtapaOportunidad? ObtenerSiguienteEtapa(EtapaOportunidad actual)
@@ -183,5 +191,25 @@ public class OportunidadService : IOportunidadService
         var attr = field?.GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.DisplayAttribute), false)
             .FirstOrDefault() as System.ComponentModel.DataAnnotations.DisplayAttribute;
         return attr?.Name ?? etapa.ToString();
+    }
+
+    private async Task SincronizarEstadoEmpresaAsync(int empresaId, CancellationToken ct)
+    {
+        var tieneOportunidadVigente = await _context.Oportunidades
+            .AnyAsync(o => o.EmpresaId == empresaId
+                        && o.Etapa != EtapaOportunidad.Firmado, ct);
+
+        var tieneProyectoVigente = await _context.Proyectos
+            .AnyAsync(p => p.Oportunidad!.EmpresaId == empresaId
+                        && p.Estado != EstadoProyecto.Cancelado
+                        && p.Estado != EstadoProyecto.Completado, ct);
+
+        var empresa = await _context.Empresas
+            .FirstOrDefaultAsync(e => e.Id == empresaId, ct);
+
+        if (empresa is null) return;
+
+        empresa.Activa = tieneOportunidadVigente || tieneProyectoVigente;
+        await _context.SaveChangesAsync(ct);
     }
 }
