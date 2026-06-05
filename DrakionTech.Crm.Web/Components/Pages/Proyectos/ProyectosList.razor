@@ -38,33 +38,50 @@ else
             <thead>
                 <tr>
                     <th>Nombre</th>
+                    <th>Empresa</th>
                     <th>Área</th>
                     <th>Responsable</th>
+                    <th>Etapa</th>
                     <th>Estado</th>
                     <th>Fecha Inicio</th>
-                    <th>Fecha Fin</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var p in _proyectos)      
+                @foreach (var p in _proyectos)
                 {
                     <tr>
                         <td>@p.Nombre</td>
+                        <td>@(p.EmpresaNombre ?? "-")</td>
                         <td>@p.AreaNombre</td>
                         <td>@p.ResponsableNombre</td>
                         <td>
-                            <span class="badge @ObtenerBadge(p.Estado)">@p.EstadoTexto</span>
+                            <span class="badge badge-secondary">
+                                @p.EtapaTexto
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge @ObtenerBadge(p.Estado)">
+                                @p.EstadoTexto
+                            </span>
                         </td>
                         <td>@p.FechaInicio.ToShortDateString()</td>
-                        <td>@(p.FechaFin?.ToShortDateString() ?? "-")</td>
                         <td>
                             <div class="ui-actions">
+                                <button class="btn btn-sm btn-outline-primary"
+                                        @onclick="() => AbrirModal(p)"
+                                        title="Cambiar etapa">
+                                    Cambiar etapa
+                                </button>
+
                                 <a href="/proyectos/editar/@p.Id" title="Editar">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <a href="#" title="Eliminar" @onclick="() => EliminarAsync(p.Id)"
-                                   @onclick:preventDefault>
+
+                                <a href="#"
+                                   title="Eliminar"
+                                   @onclick="() => EliminarAsync(p.Id)"
+                                @onclick:preventDefault>
                                     <i class="bi bi-trash"></i>
                                 </a>
                             </div>
@@ -73,9 +90,91 @@ else
                 }
             </tbody>
         </table>
+
         <Paginacion PaginaActual="paginaActual"
                     TotalPaginas="totalPaginas"
                     OnPaginaChanged="IrAPagina" />
+    </div>
+}
+
+@if (_mostrarModal && _proyectoSeleccionado is not null)
+{
+    var siguiente = ProyectoService.ObtenerSiguienteEtapa(_proyectoSeleccionado.EtapaFlujo);
+
+    <div class="modal-backdrop-custom"></div>
+
+    <div class="modal-custom">
+        <div class="modal-custom-header">
+            Cambiar etapa del proyecto
+        </div>
+
+        <div class="modal-custom-body">
+
+            @if (_errorModal is not null)
+            {
+                <div class="alert alert-danger">
+                    @_errorModal
+                </div>
+            }
+
+            <p>
+                Etapa actual:
+                <strong>@_proyectoSeleccionado.EtapaTexto</strong>
+            </p>
+
+            @if (siguiente is not null)
+            {
+                <p class="modal-etapa-siguiente">
+                    Siguiente etapa:
+                    <strong>@ObtenerDescripcionEtapa(siguiente.Value)</strong>
+                </p>
+
+                <div class="mb-3">
+                    <label class="form-label">% IVA</label>
+                    <input type="number"
+                           class="form-control"
+                           @bind="_ivaNueva" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Valor calculado</label>
+                    <input type="number"
+                           class="form-control"
+                           @bind="_valorCalculado" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Observaciones</label>
+                    <textarea class="form-control"
+                              rows="3"
+                              @bind="_observacionesModal">
+                            </textarea>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-success">
+                    El proyecto ya está en la etapa final:
+                    <strong>Cierre del proyecto</strong>.
+                </div>
+            }
+
+        </div>
+
+        <div class="modal-custom-footer">
+            <button class="btn btn-secondary"
+                    @onclick="CerrarModal">
+                Cancelar
+            </button>
+
+            @if (siguiente is not null)
+            {
+                <button class="btn btn-primary"
+                        @onclick="ConfirmarCambioEtapa">
+                    Confirmar
+                </button>
+            }
+        </div>
     </div>
 }
 
@@ -121,10 +220,8 @@ else
 
     private string ObtenerBadge(EstadoProyecto estado) => estado switch
     {
-        EstadoProyecto.Planificado => "badge-secondary",
-        EstadoProyecto.Ejecutándose    => "badge-primary",
-        EstadoProyecto.Completado => "badge-success",
-        EstadoProyecto.Cancelado  => "badge-danger",
+        EstadoProyecto.Activo => "badge-success",
+        EstadoProyecto.Inactivo => "badge-secondary",
         _ => ""
     };
 
@@ -132,4 +229,71 @@ else
     {
         await CambiarPaginaAsync(pagina, CargarAsync);
     }
+    private bool _mostrarModal;
+    private ProyectoDto? _proyectoSeleccionado;
+    private decimal? _ivaNueva;
+    private decimal? _valorCalculado;
+    private string? _observacionesModal;
+    private string? _errorModal;
+
+    private void AbrirModal(ProyectoDto p)
+    {
+        _proyectoSeleccionado = p;
+        _ivaNueva = null;
+        _valorCalculado = null;
+        _observacionesModal = null;
+        _errorModal = null;
+        _mostrarModal = true;
+    }
+
+    private void CerrarModal()
+    {
+        _mostrarModal = false;
+        _proyectoSeleccionado = null;
+    }
+
+    private async Task ConfirmarCambioEtapa()
+    {
+        if (_proyectoSeleccionado is null) return;
+
+        var siguiente = ProyectoService.ObtenerSiguienteEtapa(_proyectoSeleccionado.EtapaFlujo);
+        if (siguiente is null) return;
+
+        try
+        {
+            await ProyectoService.CambiarEtapaAsync(new CambiarEtapaProyectoDto
+                {
+                    ProyectoId = _proyectoSeleccionado.Id,
+                    NuevaEtapa = siguiente.Value,
+                    PorcentajeIva = _ivaNueva,
+                    ValorCalculado = _valorCalculado,
+                    Observaciones = _observacionesModal
+                });
+
+            CerrarModal();
+            await CargarAsync();
+        }
+        catch (Exception ex)
+        {
+            _errorModal = ex.Message;
+        }
+    }
+
+    private string ObtenerDescripcionEtapa(EtapaFlujoProyecto e) => e switch
+    {
+        EtapaFlujoProyecto.FirmaContrato => "Firma de contrato",
+        EtapaFlujoProyecto.PagoProyecto => "Pago del proyecto",
+        EtapaFlujoProyecto.ConformacionEquipo => "Conformación del equipo",
+        EtapaFlujoProyecto.ReunionInicial => "Reunión inicial",
+        EtapaFlujoProyecto.InformacionGeneral => "Información general",
+        EtapaFlujoProyecto.EjecucionProyecto => "Ejecución del proyecto",
+        EtapaFlujoProyecto.SeguimientoFases => "Seguimiento de fases",
+        EtapaFlujoProyecto.ActasEntregaFase => "Actas de entrega de fase",
+        EtapaFlujoProyecto.ReunionCierre => "Reunión de cierre",
+        EtapaFlujoProyecto.ActaFinal => "Acta final",
+        EtapaFlujoProyecto.Otrosi => "Otrosí",
+        EtapaFlujoProyecto.Calificacion => "Calificación",
+        EtapaFlujoProyecto.CierreProyecto => "Cierre del proyecto",
+        _ => e.ToString()
+    };
 }

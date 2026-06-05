@@ -5,6 +5,7 @@ using DrakionTech.Crm.Business.Interfaces;
 using DrakionTech.Crm.Data;
 using DrakionTech.Crm.Data.Context;
 using DrakionTech.Crm.Data.Entities;
+using DrakionTech.Crm.Data.Entities.Enums;
 using DrakionTech.Crm.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -98,5 +99,35 @@ public class ProyectoService : IProyectoService
         if (!perteneceAlArea)
             throw new InvalidOperationException(
                 "El responsable seleccionado no pertenece al área asociada al proyecto.");
+    }
+
+    public async Task CambiarEtapaAsync(CambiarEtapaProyectoDto dto)
+    {
+        var proyecto = await _repository.ObtenerPorIdAsync(dto.ProyectoId)
+            ?? throw new KeyNotFoundException($"Proyecto {dto.ProyectoId} no encontrado.");
+
+        var historial = new HistorialEtapaProyecto
+        {
+            ProyectoId = dto.ProyectoId,
+            EtapaAnterior = proyecto.EtapaFlujo,
+            EtapaNueva = dto.NuevaEtapa,
+            PorcentajeIva = dto.PorcentajeIva,
+            ValorCalculado = dto.ValorCalculado,
+            Observaciones = dto.Observaciones,
+            FechaCambio = DateTime.UtcNow
+        };
+
+        proyecto.EtapaFlujo = dto.NuevaEtapa;
+
+        _context.HistorialesEtapaProyecto.Add(historial);
+        await _repository.ActualizarAsync(proyecto);
+    }
+
+    public EtapaFlujoProyecto? ObtenerSiguienteEtapa(EtapaFlujoProyecto actual)
+    {
+        int siguiente = (int)actual + 1;
+        int max = (int)EtapaFlujoProyecto.CierreProyecto;
+        if (siguiente > max) return null;
+        return (EtapaFlujoProyecto)siguiente;
     }
 }

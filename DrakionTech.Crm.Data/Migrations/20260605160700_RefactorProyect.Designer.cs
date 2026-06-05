@@ -4,6 +4,7 @@ using DrakionTech.Crm.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DrakionTech.Crm.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260605160700_RefactorProyect")]
+    partial class RefactorProyect
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -940,42 +943,6 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.HasIndex("OportunidadId");
 
                     b.ToTable("HistorialCambiosOportunidad", (string)null);
-                });
-
-            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.HistorialEtapaProyecto", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("EtapaAnterior")
-                        .HasColumnType("int");
-
-                    b.Property<int>("EtapaNueva")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("FechaCambio")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Observaciones")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("PorcentajeIva")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("ProyectoId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal?>("ValorCalculado")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProyectoId");
-
-                    b.ToTable("HistorialesEtapaProyecto");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Oportunidad", b =>
@@ -2071,17 +2038,6 @@ namespace DrakionTech.Crm.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Oportunidad");
-                });
-
-            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.HistorialEtapaProyecto", b =>
-                {
-                    b.HasOne("DrakionTech.Crm.Data.Entities.Proyecto", "Proyecto")
-                        .WithMany()
-                        .HasForeignKey("ProyectoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Proyecto");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Oportunidad", b =>
