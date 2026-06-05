@@ -30,10 +30,15 @@ namespace DrakionTech.Crm.Business.Mapping
                     opt => opt.MapFrom(src => src.Pais != null ? src.Pais.Nombre : string.Empty))
                 .ForMember(dest => dest.CiudadNombre,
                     opt => opt.MapFrom(src => src.Ciudad != null ? src.Ciudad.Nombre : string.Empty))
-                .ForMember(dest => dest.SectorNombre,
-                    opt => opt.MapFrom(src => src.Sector != null ? src.Sector.Nombre : string.Empty))
-                .ForMember(dest => dest.EstadoNombre,
-                    opt => opt.MapFrom(src => src.Estado != null ? src.Estado.Nombre : string.Empty));
+                .ForMember(dest => dest.SectorEmpresaNombre,
+                    opt => opt.MapFrom(src => src.SectorEmpresa != null ? src.SectorEmpresa.Nombre : null))
+                .ForMember(dest => dest.SubsectorEmpresaNombre,
+                    opt => opt.MapFrom(src => src.SubsectorEmpresa != null ? src.SubsectorEmpresa.Nombre : null))
+                .ForMember(dest => dest.Correos,
+                    opt => opt.MapFrom(src => src.Correos
+                        .Where(c => !c.EsPrincipal)
+                        .Select(c => new EmpresaCorreoDto { Id = c.Id, Correo = c.Correo, EsPrincipal = false })
+                        .ToList()));
 
             // CONTACTO
             CreateMap<CrearContactoDto, Contacto>()
@@ -141,8 +146,6 @@ namespace DrakionTech.Crm.Business.Mapping
             CreateMap<Ciudad, CiudadDto>();
 
             // TABLAS CATALOGO
-            CreateMap<Sector, CatalogoDto>();
-            CreateMap<Estado, CatalogoDto>();
             CreateMap<Pais, CatalogoDto>();
             CreateMap<Ciudad, CatalogoDto>();
 

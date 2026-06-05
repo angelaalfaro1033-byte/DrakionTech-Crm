@@ -4,69 +4,88 @@
 @inject IEmpresaService EmpresaService
 @inject IPaisService PaisService
 @inject ICiudadService CiudadService
-@inject ISectorService SectorService
-@inject IEstadoService EstadoService
+@inject ISectorEmpresaService SectorEmpresaService
 @inject IPrefijoTelefonicoService PrefijoTelefonicoService
+@inject IContactoService ContactoService
 @inject NavigationManager Navigation
+@using DrakionTech.Crm.Data.Entities.Enums
+@using DrakionTech.Crm.Business.DTOs.SectorEmpresa
 
 <div class="form-card">
-
-    <!-- Header -->
     <div class="form-header">
         <h1>Crear empresa</h1>
         <p>Registra una nueva empresa en el sistema</p>
     </div>
 
-    <EditForm Model="@modelo"
-              OnValidSubmit="HandleValidSubmit"
-              FormName="EmpresaCreateForm">
-
+    <EditForm Model="@modelo" OnValidSubmit="HandleValidSubmit" FormName="EmpresaCreateForm">
         <DataAnnotationsValidator />
         <ValidationSummary class="validation-summary" />
 
-        <!-- Información general -->
+        <!-- SECCIÓN 1: Tipo de cliente y documento -->
+        <div class="form-section">
+            <h3>Identificación</h3>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label required">Tipo de cliente</label>
+                    <InputSelect class="form-select" @bind-Value="modelo.TipoCliente"
+                                 @bind-Value:after="OnTipoClienteChanged">
+                        <option value="@TipoCliente.Juridico">Persona Jurídica</option>
+                        <option value="@TipoCliente.Natural">Persona Natural</option>
+                    </InputSelect>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label required">Tipo de documento</label>
+                    @if (modelo.TipoCliente == TipoCliente.Juridico)
+                    {
+                        <input class="form-control" value="NIT" readonly />
+                    }
+                    else
+                    {
+                        <InputSelect class="form-select" @bind-Value="modelo.TipoDocumento">
+                            @foreach (var td in tiposDocumentoNatural)
+                            {
+                                <option value="@td">@td.ToString()</option>
+                            }
+                        </InputSelect>
+                    }
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label required">
+                        @(modelo.TipoCliente == TipoCliente.Juridico ? "NIT" : "Número de documento")
+                    </label>
+                    <InputText class="form-control" @bind-Value="modelo.NumeroDocumento" />
+                    <ValidationMessage For="() => modelo.NumeroDocumento" class="validation-message" />
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 2: Información general -->
         <div class="form-section">
             <h3>Información general</h3>
-
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label required">Nombre</label>
+                    <label class="form-label required">
+                        @(modelo.TipoCliente == TipoCliente.Juridico ? "Razón social" : "Nombre completo")
+                    </label>
                     <InputText class="form-control" @bind-Value="modelo.Nombre" />
                     <ValidationMessage For="() => modelo.Nombre" class="validation-message" />
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label required">NIT</label>
-                    <InputText class="form-control" @bind-Value="modelo.Nit" />
-                    <ValidationMessage For="() => modelo.Nit" class="validation-message" />
+                    <label class="form-label">Representante legal</label>
+                    <InputText class="form-control" @bind-Value="modelo.RepresentanteLegal" />
                 </div>
 
                 <div class="col-md-12">
                     <label class="form-label">Dirección</label>
                     <InputText class="form-control" @bind-Value="modelo.Direccion" />
-                    <ValidationMessage For="() => modelo.Direccion" class="validation-message" />
                 </div>
 
-                <div class="col-md-6">
-                    <label class="form-label">Correo electrónico</label>
-                    <InputText class="form-control"
-                               type="email"
-                               placeholder="empresa@dominio.com"
-                               @bind-Value="modelo.Correo" />
-                    <ValidationMessage For="() => modelo.Correo" />
-                </div>
-            </div>
-        </div>
-
-        <!-- Ubicación y estado -->
-        <div class="form-section">
-            <h3>Ubicación y estado</h3>
-
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label">País</label>
-                    <InputSelect class="form-select"
-                                 @bind-Value="modelo.PaisId"
+                <div class="col-md-4">
+                    <label class="form-label required">País</label>
+                    <InputSelect class="form-select" @bind-Value="modelo.PaisId"
                                  @bind-Value:after="OnPaisChanged">
                         @foreach (var pais in paises)
                         {
@@ -76,10 +95,9 @@
                     <ValidationMessage For="() => modelo.PaisId" />
                 </div>
 
-                <div class="col-md-6">
-                    <label class="form-label">Ciudad</label>
-                    <InputSelect class="form-select"
-                                 @bind-Value="modelo.CiudadId">
+                <div class="col-md-4">
+                    <label class="form-label required">Ciudad</label>
+                    <InputSelect class="form-select" @bind-Value="modelo.CiudadId">
                         @foreach (var ciudad in ciudades)
                         {
                             <option value="@ciudad.Id">@ciudad.Nombre</option>
@@ -88,176 +106,320 @@
                     <ValidationMessage For="() => modelo.CiudadId" />
                 </div>
 
-                <div class="col-md-6">
-                    <label class="form-label">Sector</label>
-
-                    <InputSelect class="form-select"
-                                 @bind-Value="modelo.SectorId"
-                                 disabled="@(!string.IsNullOrWhiteSpace(modelo.SectorOtro))">
-                        <option value="">-- Seleccione un sector --</option>
-                        @foreach (var sector in sectores)
-                        {
-                            <option value="@sector.Id">@sector.Nombre</option>
-                        }
-                    </InputSelect>
-
-                    <InputText class="form-control mt-2"
-                               placeholder="Otro sector"
-                               disabled="@(modelo.SectorId != null)"
-                               @bind-Value="modelo.SectorOtro" />
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Estado</label>
-
-                    <InputSelect class="form-select" 
-                                @bind-Value="modelo.EstadoId"
-                                 disabled="@(!string.IsNullOrWhiteSpace(modelo.EstadoOtro))">
-                        <option value="">-- Seleccione un estado --</option>
-                        @foreach (var estado in estados)
-                        {
-                            <option value="@estado.Id">@estado.Nombre</option>
-                        }
-                    </InputSelect>
-
-                    <InputText class="form-control mt-2"
-                               placeholder="Otro estado"
-                               disabled="@(modelo.EstadoId != null)"
-                               @bind-Value="modelo.EstadoOtro" />
-                </div>
-            </div>
-        </div>
-
-        <!-- Contacto -->
-        <div class="form-section">
-            <h3>Contacto</h3>
-
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label">Representante legal</label>
-                    <InputText class="form-control" @bind-Value="modelo.RepresentanteLegal" />
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Teléfono</label>
-
+                <div class="col-md-4">
+                    <label class="form-label required">Teléfono</label>
                     <div class="input-group">
-                        <input class="form-control"
-                               style="max-width: 90px;"
-                               value="@modelo.PrefijoTelefonicoCodigo"
-                               readonly />
-
-                        <InputText class="form-control"
-                                   placeholder="Número de teléfono"
+                        <input class="form-control" style="max-width:90px"
+                               value="@modelo.PrefijoTelefonicoCodigo" readonly />
+                        <InputText class="form-control" placeholder="Número"
                                    @bind-Value="modelo.Telefono" />
                     </div>
+                    <ValidationMessage For="() => modelo.Telefono" />
                 </div>
             </div>
         </div>
 
-        <!-- Fechas -->
+        <!-- SECCIÓN 3: Correos electrónicos -->
         <div class="form-section">
-            <h3>Fechas</h3>
+            <h3>Correos electrónicos</h3>
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label class="form-label required">Correo principal</label>
+                    <InputText class="form-control" type="email"
+                               placeholder="empresa@dominio.com"
+                               @bind-Value="modelo.Correo" />
+                    <ValidationMessage For="() => modelo.Correo" />
+                </div>
+            </div>
 
+            @for (int i = 0; i < modelo.Correos.Count; i++)
+            {
+                var idx = i;
+                <div class="row g-2 mt-2 align-items-center">
+                    <div class="col-md-8">
+                        <InputText class="form-control" type="email"
+                                   placeholder="Correo adicional"
+                                   @bind-Value="modelo.Correos[idx].Correo" />
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                @onclick="() => EliminarCorreo(idx)">
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+            }
+
+            <button type="button" class="btn btn-sm btn-outline-secondary mt-2"
+                    @onclick="AgregarCorreo">
+                + Agregar correo
+            </button>
+        </div>
+
+        <!-- SECCIÓN 4: Contacto principal -->
+        <div class="form-section">
+            <h3>Contacto principal</h3>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label required">Nombre</label>
+                    <InputText class="form-control"
+                               @bind-Value="modelo.ContactoPrincipal!.Nombre" />
+                    <ValidationMessage For="() => modelo.ContactoPrincipal!.Nombre" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label required">Apellido</label>
+                    <InputText class="form-control"
+                               @bind-Value="modelo.ContactoPrincipal!.Apellido" />
+                    <ValidationMessage For="() => modelo.ContactoPrincipal!.Apellido" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Cargo</label>
+                    <InputText class="form-control"
+                               @bind-Value="modelo.ContactoPrincipal!.Cargo" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Correo del contacto</label>
+                    <InputText class="form-control" type="email"
+                               @bind-Value="modelo.ContactoPrincipal!.Email" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Teléfono del contacto</label>
+                    <InputText class="form-control"
+                               @bind-Value="modelo.ContactoPrincipal!.Telefono" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Rol</label>
+                    <InputSelect class="form-select"
+                                 @bind-Value="modelo.ContactoPrincipal!.RolContactoId">
+                        <option value="">-- Seleccione --</option>
+                        @foreach (var rol in rolesContacto)
+                        {
+                            <option value="@rol.Id">@rol.Nombre</option>
+                        }
+                    </InputSelect>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 5: Clasificación -->
+        <div class="form-section">
+            <h3>Clasificación</h3>
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label">Fecha de vinculación</label>
-                    <DateInput TValue="DateTime"
-                               Placeholder="DD-MM-AAAA"
-                               @bind-Value="modelo.FechaVinculacion" />
-                    <ValidationMessage For="() => modelo.FechaVinculacion" class="validation-message" />
+                    <label class="form-label required">Tamaño de empresa</label>
+                    <InputSelect class="form-select" @bind-Value="modelo.Tamaño">
+                        <option value="">-- Seleccione --</option>
+                        @foreach (TamañoEmpresa t in Enum.GetValues(typeof(TamañoEmpresa)))
+                        {
+                            <option value="@t">@t.ToString()</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => modelo.Tamaño" />
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Fecha especial (opcional)</label>
+                    <label class="form-label required">Sector</label>
+                    <CreatableSelect TItem="SectorEmpresaDto"
+                                     Items="sectoresEmpresa"
+                                     ObtenerTexto="s => s.Nombre"
+                                     ObtenerId="s => s.Id"
+                                     Placeholder="Buscar o crear sector..."
+                                     ValorSeleccionadoTexto="@sectorSeleccionadoTexto"
+                                     OnSeleccionar="OnSectorSeleccionado"
+                                     OnCrear="OnSectorCreado" />
+                    <ValidationMessage For="() => modelo.SectorEmpresaId" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Subsector</label>
+                    <CreatableSelect TItem="SubsectorEmpresaDto"
+                                     Items="subsectoresFiltrados"
+                                     ObtenerTexto="s => s.Nombre"
+                                     ObtenerId="s => s.Id"
+                                     Placeholder="@(modelo.SectorEmpresaId == null ? "Selecciona un sector primero" : "Buscar o crear subsector...")"
+                                     ValorSeleccionadoTexto="@subsectorSeleccionadoTexto"
+                                     OnSeleccionar="OnSubsectorSeleccionado"
+                                     OnCrear="OnSubsectorCreado"
+                                     Disabled="@(modelo.SectorEmpresaId == null)" />
+                </div>
+
+                <div class="col-md-12">
+                    <label class="form-label">Descripción</label>
+                    <InputTextArea class="form-control" rows="3"
+                                   @bind-Value="modelo.Descripcion"
+                                   placeholder="Describe brevemente la empresa..." />
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 6: Fechas -->
+        <div class="form-section">
+            <h3>Fechas</h3>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Fecha de creación de empresa</label>
                     <DateInput TValue="DateTime?"
                                Placeholder="DD-MM-AAAA"
                                Nullable="true"
-                               @bind-Value="modelo.FechaEspecial" />
+                               @bind-Value="modelo.FechaCreacionEmpresa" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label required">Fecha de registro en CRM</label>
+                    <DateInput TValue="DateTime"
+                               Placeholder="DD-MM-AAAA"
+                               @bind-Value="modelo.FechaRegistroCrm" />
                 </div>
             </div>
         </div>
 
-        <!-- Checkbox -->
+        <!-- SECCIÓN 7: Seguimiento -->
         <div class="form-section">
-            <div class="form-check">
-                <InputCheckbox class="form-check-input" @bind-Value="modelo.HaTrabajadoAntes" />
-                <label class="form-check-label">
-                    ¿Ha trabajado antes con nosotros?
-                </label>
+            <h3>Seguimiento</h3>
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <InputTextArea class="form-control" rows="3"
+                                   @bind-Value="modelo.Seguimiento"
+                                   placeholder="Notas de seguimiento..." />
+                </div>
             </div>
         </div>
 
         <!-- Acciones -->
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary">
-                Guardar empresa
-            </button>
-
-            <button type="button"
-                    class="btn btn-outline-secondary ms-2"
-                    @onclick="Cancelar">
+            <button type="submit" class="btn btn-primary">Guardar empresa</button>
+            <button type="button" class="btn btn-outline-secondary ms-2" @onclick="Cancelar">
                 Cancelar
             </button>
         </div>
-
     </EditForm>
 </div>
 
 @code {
     private CrearEmpresaDto modelo = new()
     {
-        FechaVinculacion = DateTime.Today
+        FechaRegistroCrm = DateTime.Today,
+        ContactoPrincipal = new()
     };
-
-    private List<CatalogoDto> sectores = new();
-    private List<CatalogoDto> estados = new();
 
     private List<PaisDto> paises = new();
     private List<CiudadDto> ciudades = new();
+    private List<SectorEmpresaDto> sectoresEmpresa = new();
+    private List<SubsectorEmpresaDto> subsectoresFiltrados = new();
+    private List<CatalogoDto> rolesContacto = new();
+
+    private string sectorSeleccionadoTexto = string.Empty;
+    private string subsectorSeleccionadoTexto = string.Empty;
+
+    private static readonly TipoDocumento[] tiposDocumentoNatural =
+        { TipoDocumento.CC, TipoDocumento.CE, TipoDocumento.PA, TipoDocumento.RC, TipoDocumento.TI };
 
     protected override async Task OnInitializedAsync()
     {
-        sectores = (await SectorService.ObtenerTodosAsync()).ToList();
-        estados = (await EstadoService.ObtenerTodosAsync()).ToList();
         paises = (await PaisService.ObtenerTodosAsync()).ToList();
-
-        if (!paises.Any())
-            throw new InvalidOperationException("No existen países configurados.");
+        if (!paises.Any()) throw new InvalidOperationException("No existen países configurados.");
 
         modelo.PaisId = paises.First().Id;
-
         await CargarCiudades(modelo.PaisId);
         modelo.CiudadId = ciudades.First().Id;
-
         await CargarPrefijo(modelo.PaisId);
+
+        sectoresEmpresa = (await SectorEmpresaService.ObtenerTodosAsync()).ToList();
+        rolesContacto = (await ContactoService.ObtenerRolesContactoAsync())
+            .Select(r => new CatalogoDto { Id = r.Id, Nombre = r.Nombre }).ToList();
+    }
+
+    private void OnTipoClienteChanged()
+    {
+        modelo.TipoDocumento = modelo.TipoCliente == TipoCliente.Juridico
+            ? TipoDocumento.NIT
+            : TipoDocumento.CC;
     }
 
     private async Task OnPaisChanged()
     {
         await CargarCiudades(modelo.PaisId);
         modelo.CiudadId = ciudades.First().Id;
-
         await CargarPrefijo(modelo.PaisId);
     }
 
     private async Task CargarCiudades(int paisId)
     {
-        ciudades = (await CiudadService
-            .ObtenerPorPaisAsync(paisId))
-            .ToList();
-
+        ciudades = (await CiudadService.ObtenerPorPaisAsync(paisId)).ToList();
         if (!ciudades.Any())
-            throw new InvalidOperationException(
-                "El país seleccionado no tiene ciudades configuradas."
-            );
+            throw new InvalidOperationException("El país no tiene ciudades configuradas.");
     }
 
     private async Task CargarPrefijo(int paisId)
+        => modelo.PrefijoTelefonicoCodigo =
+            await PrefijoTelefonicoService.ObtenerCodigoPorPaisAsync(paisId);
+
+    // Sector
+    private async Task OnSectorSeleccionado(SectorEmpresaDto? sector)
     {
-        var codigo = await PrefijoTelefonicoService.ObtenerCodigoPorPaisAsync(paisId);
-        modelo.PrefijoTelefonicoCodigo = codigo;
+        if (sector is null)
+        {
+            modelo.SectorEmpresaId = null;
+            modelo.SubsectorEmpresaId = null;
+
+            sectorSeleccionadoTexto = string.Empty;
+            subsectorSeleccionadoTexto = string.Empty;
+
+            subsectoresFiltrados.Clear();
+
+            return;
+        }
+
+        modelo.SectorEmpresaId = sector.Id;
+        sectorSeleccionadoTexto = sector.Nombre;
+
+        await CargarSubsectores(sector.Id);
+
+        modelo.SubsectorEmpresaId = null;
+        subsectorSeleccionadoTexto = string.Empty;
     }
+
+    private async Task OnSectorCreado(string nombre)
+    {
+        var nuevo = await SectorEmpresaService.CrearYObtenerAsync(nombre);
+        if (!sectoresEmpresa.Any(s => s.Id == nuevo.Id))
+            sectoresEmpresa.Add(nuevo);
+        await OnSectorSeleccionado(nuevo);
+    }
+
+    private async Task CargarSubsectores(int sectorId)
+        => subsectoresFiltrados =
+            (await SectorEmpresaService.ObtenerSubsectoresPorSectorAsync(sectorId)).ToList();
+
+    // Subsector
+    private void OnSubsectorSeleccionado(SubsectorEmpresaDto? sub)
+    {
+        if (sub is null)
+        {
+            modelo.SubsectorEmpresaId = null;
+            subsectorSeleccionadoTexto = string.Empty;
+            return;
+        }
+
+        modelo.SubsectorEmpresaId = sub.Id;
+        subsectorSeleccionadoTexto = sub.Nombre;
+    }
+
+    private async Task OnSubsectorCreado(string nombre)
+    {
+        if (modelo.SectorEmpresaId is null) return;
+        var nuevo = await SectorEmpresaService
+            .CrearSubsectorYObtenerAsync(nombre, modelo.SectorEmpresaId.Value);
+        if (!subsectoresFiltrados.Any(s => s.Id == nuevo.Id))
+            subsectoresFiltrados.Add(nuevo);
+        OnSubsectorSeleccionado(nuevo);
+    }
+
+    // Correos
+    private void AgregarCorreo()
+        => modelo.Correos.Add(new EmpresaCorreoDto());
+
+    private void EliminarCorreo(int index)
+        => modelo.Correos.RemoveAt(index);
 
     private async Task HandleValidSubmit()
     {
@@ -265,8 +427,5 @@
         Navigation.NavigateTo("/empresas");
     }
 
-    private void Cancelar()
-    {
-        Navigation.NavigateTo("/empresas");
-    }
+    private void Cancelar() => Navigation.NavigateTo("/empresas");
 }

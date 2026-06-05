@@ -16,6 +16,8 @@
         public int RolContactoId { get; set; }
         public string RolNombre { get; set; } = string.Empty;
 
+        public string? Cargo { get; set; }
+        public bool EsPrincipal { get; set; }
         public DateTime FechaCreacion { get; set; }
     }
 }

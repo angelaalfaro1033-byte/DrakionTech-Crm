@@ -1,4 +1,5 @@
 ﻿using DrakionTech.Crm.Business.Common;
+using DrakionTech.Crm.Data.Entities.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace DrakionTech.Crm.Business.DTOs.Empresa
@@ -7,33 +8,44 @@ namespace DrakionTech.Crm.Business.DTOs.Empresa
     {
         public int Id { get; set; }
 
-        public string Nombre { get; set; } = null!;
-        public string Nit { get; set; } = null!;
-        public string Direccion { get; set; } = null!;
+        public TipoCliente TipoCliente { get; set; }
+        public TipoDocumento TipoDocumento { get; set; }
+        public string NumeroDocumento { get; set; } = null!;
 
-        [EmailAddress(ErrorMessage = MensajesError.EmailInvalidoFormato)]
-        public string? Correo { get; set; }
+        public string Nombre { get; set; } = null!;
+        public string? Direccion { get; set; }
 
         public int PaisId { get; set; }
         public string PaisNombre { get; set; } = string.Empty;
 
         public int CiudadId { get; set; }
         public string CiudadNombre { get; set; } = string.Empty;
-        public bool Activa { get; set; } = true;
-        public int? SectorId { get; set; }
-        public string SectorNombre { get; set; } = string.Empty;
-        public string? SectorOtro { get; set; }
 
-        public int? EstadoId { get; set; }
-        public string EstadoNombre { get; set; } = string.Empty;
-        public string? EstadoOtro { get; set; }
+        public string? Telefono { get; set; }
+        public string? PrefijoTelefonicoCodigo { get; set; }
+        public int? PrefijoTelefonicoId { get; set; }
+
+        [EmailAddress(ErrorMessage = MensajesError.EmailInvalidoFormato)]
+        public string? Correo { get; set; }
 
         public string? RepresentanteLegal { get; set; }
-        public int? PrefijoTelefonicoId { get; set; }
-        public string? PrefijoTelefonicoCodigo { get; set; }
-        public string? Telefono { get; set; }
 
-        public DateTime FechaVinculacion { get; set; }
-        public DateTime? FechaEspecial { get; set; }
+        public DateTime? FechaCreacionEmpresa { get; set; }
+        public DateTime FechaRegistroCrm { get; set; }
+
+        public int? SectorEmpresaId { get; set; }
+        public string? SectorEmpresaNombre { get; set; }
+
+        public int? SubsectorEmpresaId { get; set; }
+        public string? SubsectorEmpresaNombre { get; set; }
+
+        public TamañoEmpresa? Tamaño { get; set; }
+        public string? Descripcion { get; set; }
+        public string? Seguimiento { get; set; }
+
+        public bool Activa { get; set; }
+        public bool HaTrabajadoAntes { get; set; }
+        public DateTime FechaCreacion { get; set; }
+        public List<EmpresaCorreoDto> Correos { get; set; } = new();
     }
 }

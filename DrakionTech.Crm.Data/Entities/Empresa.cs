@@ -1,16 +1,17 @@
-﻿namespace DrakionTech.Crm.Data.Entities
+﻿using DrakionTech.Crm.Data.Entities.Enums;
+
+namespace DrakionTech.Crm.Data.Entities
 {
     public class Empresa
     {
         public int Id { get; set; }
 
+        public TipoCliente TipoCliente { get; set; } = TipoCliente.Juridico;
+        public TipoDocumento TipoDocumento { get; set; } = TipoDocumento.NIT;
+        public string NumeroDocumento { get; set; } = null!;
+
         public string Nombre { get; set; } = null!;
-
-        public string Nit { get; set; } = null!;
-
-        public string Direccion { get; set; } = null!;
-        public string? Correo { get; set; }
-        public bool Activa { get; set; } = true;
+        public string? Direccion { get; set; }
 
         public int PaisId { get; set; }
         public Pais Pais { get; set; } = null!;
@@ -18,27 +19,35 @@
         public int CiudadId { get; set; }
         public Ciudad Ciudad { get; set; } = null!;
 
-        public int? SectorId { get; set; }
-        public Sector? Sector { get; set; }
-        public string? SectorOtro { get; set; }
+        public string? Telefono { get; set; }
+        public int? PrefijoTelefonicoId { get; set; }
+        public string? PrefijoTelefonicoCodigo { get; set; }
 
-        public int? EstadoId { get; set; }
-        public Estado? Estado { get; set; }
-        public string? EstadoOtro { get; set; }
+        public string? Correo { get; set; }
 
         public string? RepresentanteLegal { get; set; }
 
-        public string? Telefono { get; set; }
+        public DateTime? FechaCreacionEmpresa { get; set; }
+        public DateTime FechaRegistroCrm { get; set; } = DateTime.UtcNow;
 
-        public DateTime FechaVinculacion { get; set; }
+        public TamañoEmpresa? Tamaño { get; set; }
 
+        public int? SectorEmpresaId { get; set; }
+        public SectorEmpresa? SectorEmpresa { get; set; }
+
+        public int? SubsectorEmpresaId { get; set; }
+        public SubsectorEmpresa? SubsectorEmpresa { get; set; }
+
+        public string? Descripcion { get; set; }
+        public string? Seguimiento { get; set; }
+
+        public bool Activa { get; set; } = false;
         public bool HaTrabajadoAntes { get; set; }
-
-        public DateTime? FechaEspecial { get; set; }
 
         public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
 
         public ICollection<Contacto> Contactos { get; set; } = new List<Contacto>();
+        public ICollection<EmpresaCorreo> Correos { get; set; } = new List<EmpresaCorreo>();
         public ICollection<Oportunidad> Oportunidades { get; set; } = new List<Oportunidad>();
         public ICollection<Actividad> Actividades { get; set; } = new List<Actividad>();
     }

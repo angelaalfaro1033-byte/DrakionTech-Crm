@@ -8,102 +8,47 @@ namespace DrakionTech.Crm.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Empresa> builder)
         {
-            builder.ToTable("Empresas", t =>
-            {
-                t.HasCheckConstraint(
-                    "CK_Empresas_Sector",
-                    @"(
-                        (SectorId IS NOT NULL AND SectorOtro IS NULL)
-                        OR
-                        (SectorId IS NULL AND LTRIM(RTRIM(SectorOtro)) <> '')
-                    )"
-                );
-
-                t.HasCheckConstraint(
-                    "CK_Empresas_Estado",
-                    @"(
-                        (EstadoId IS NOT NULL AND EstadoOtro IS NULL)
-                        OR
-                        (EstadoId IS NULL AND LTRIM(RTRIM(EstadoOtro)) <> '')
-                    )"
-                );
-            });
-
+            builder.ToTable("Empresas");
             builder.HasKey(e => e.Id);
 
-            builder.Property(e => e.Nombre)
-                .IsRequired()
-                .HasMaxLength(250);
+            // Identificación
+            builder.Property(e => e.TipoCliente).IsRequired();
+            builder.Property(e => e.TipoDocumento).IsRequired();
+            builder.Property(e => e.NumeroDocumento).IsRequired().HasMaxLength(30);
 
-            builder.Property(e => e.Nit)
-                .IsRequired()
-                .HasMaxLength(50);
+            // Datos generales
+            builder.Property(e => e.Nombre).IsRequired().HasMaxLength(200);
+            builder.Property(e => e.Direccion).HasMaxLength(300);
+            builder.Property(e => e.Telefono).HasMaxLength(30);
+            builder.Property(e => e.PrefijoTelefonicoCodigo).HasMaxLength(10);
+            builder.Property(e => e.Correo).HasMaxLength(200);
+            builder.Property(e => e.RepresentanteLegal).HasMaxLength(200);
 
-            builder.HasIndex(e => e.Nit)
-                .IsUnique();
-
-            builder.Property(e => e.Direccion)
-                .IsRequired()
-                .HasMaxLength(300);
-
-            builder.Property(e => e.Correo)
-                .HasMaxLength(150)
-                .IsRequired(false);
-
-            builder.Property(e => e.Activa)
-                .IsRequired()
-                .HasDefaultValue(true);
-
-            builder.HasOne(e => e.Pais)
-                .WithMany()
-                .HasForeignKey(e => e.PaisId)
-                .OnDelete(DeleteBehavior.Restrict)
-                .IsRequired();
-
-            builder.HasOne(e => e.Ciudad)
-                .WithMany()
-                .HasForeignKey(e => e.CiudadId)
-                .OnDelete(DeleteBehavior.Restrict)
-                .IsRequired();
-
-            builder.HasOne(e => e.Sector)
-                .WithMany()
-                .HasForeignKey(e => e.SectorId)
-                .OnDelete(DeleteBehavior.Restrict)
-                .IsRequired(false);
-
-            builder.Property(e => e.SectorOtro)
-                .HasMaxLength(150)
-                .IsRequired(false);
-
-            builder.HasOne(e => e.Estado)
-            .WithMany()
-            .HasForeignKey(e => e.EstadoId)
-            .OnDelete(DeleteBehavior.Restrict)
-            .IsRequired(false);
-
-            builder.Property(e => e.EstadoOtro)
-                .HasMaxLength(150)
-                .IsRequired(false);
-
-            builder.Property(e => e.FechaCreacion)
-                .ValueGeneratedOnAdd();
+            // Clasificación
+            builder.Property(e => e.Tamaño);
+            builder.Property(e => e.Descripcion).HasMaxLength(1000);
+            builder.Property(e => e.Seguimiento).HasMaxLength(2000);
 
             // Relaciones
-            builder.HasMany(e => e.Contactos)
-                .WithOne(c => c.Empresa)
-                .HasForeignKey(c => c.EmpresaId)
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne(e => e.Pais)
+                   .WithMany()
+                   .HasForeignKey(e => e.PaisId)
+                   .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasMany(e => e.Oportunidades)
-                .WithOne(o => o.Empresa)
-                .HasForeignKey(o => o.EmpresaId)
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne(e => e.Ciudad)
+                   .WithMany()
+                   .HasForeignKey(e => e.CiudadId)
+                   .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasMany(e => e.Actividades)
-                .WithOne(a => a.Empresa)
-                .HasForeignKey(a => a.EmpresaId)
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.HasOne(e => e.SectorEmpresa)
+                   .WithMany(s => s.Empresas)
+                   .HasForeignKey(e => e.SectorEmpresaId)
+                   .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasOne(e => e.SubsectorEmpresa)
+                   .WithMany(s => s.Empresas)
+                   .HasForeignKey(e => e.SubsectorEmpresaId)
+                   .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

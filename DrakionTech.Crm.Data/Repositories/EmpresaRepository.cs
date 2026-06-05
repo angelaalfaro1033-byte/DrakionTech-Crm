@@ -18,8 +18,10 @@ namespace DrakionTech.Crm.Data.Repositories
         public IQueryable<Empresa> Query()
         {
             return _context.Empresas
-                .Include(e => e.Sector)
-                .Include(e => e.Estado)
+                .Include(e => e.Pais)
+                .Include(e => e.Ciudad)
+                .Include(e => e.SectorEmpresa)
+                .Include(e => e.SubsectorEmpresa)
                 .AsQueryable();
         }
 
@@ -32,6 +34,8 @@ namespace DrakionTech.Crm.Data.Repositories
                 .AsNoTracking()
                 .Include(e => e.Pais)
                 .Include(e => e.Ciudad)
+                .Include(e => e.Correos)
+                .Include(e => e.Contactos)
                 .FirstOrDefaultAsync(e => e.Id == empresaId, ct);
         }
 
@@ -61,8 +65,8 @@ namespace DrakionTech.Crm.Data.Repositories
                 .AsNoTracking()
                 .Include(e => e.Pais)
                 .Include(e => e.Ciudad)
-                .Include(e => e.Sector)
-                .Include(e => e.Estado)
+                .Include(e => e.SectorEmpresa)
+                .Include(e => e.SubsectorEmpresa)
                 .ToListAsync(ct);
         }
     }

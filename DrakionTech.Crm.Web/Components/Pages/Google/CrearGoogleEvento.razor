@@ -30,7 +30,7 @@
         @foreach (var emp in empresas)
         {
             <option value="@emp.Id">
-                @emp.Nombre (@emp.Nit)
+                @emp.Nombre (@emp.NumeroDocumento)
             </option>
         }
     </select>
@@ -40,7 +40,7 @@
         var emp = empresasDict[empresaSeleccionadaId.Value];
 
         <div class="alert alert-info p-2">
-            Empresa seleccionada: <strong>@emp.Nombre</strong> (@emp.Nit)
+            Empresa seleccionada: <strong>@emp.Nombre</strong> (@emp.NumeroDocumento)
         </div>
     }
 
@@ -246,7 +246,7 @@
     private string? GetEmpresaNit()
     {
         if (empresaSeleccionadaId is int id && empresasDict.TryGetValue(id, out var empresa))
-            return empresa.Nit;
+            return empresa.NumeroDocumento;
 
         return null;
     }
