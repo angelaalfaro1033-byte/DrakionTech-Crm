@@ -174,7 +174,7 @@ public class OportunidadService : IOportunidadService
         {
             Nombre = oportunidad.NombreProyecto,
             Descripcion = oportunidad.Descripcion,
-            Estado = EstadoProyecto.Planificado,
+            Estado = EstadoProyecto.Activo,
             FechaInicio = DateTime.UtcNow,
             FechaFin = oportunidad.FechaEstimadaCierre,
             AreaId = areaId,

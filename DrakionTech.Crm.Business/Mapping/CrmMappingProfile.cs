@@ -12,6 +12,7 @@ using DrakionTech.Crm.Data.Entities;
 using DrakionTech.Crm.Data.Entities.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
+using System.Text.Json;
 
 namespace DrakionTech.Crm.Business.Mapping
 {
@@ -98,22 +99,45 @@ namespace DrakionTech.Crm.Business.Mapping
                         : null));
 
             //Proyecto
+            // PROYECTO
             CreateMap<Proyecto, ProyectoDto>()
-                .ForMember(d => d.AreaNombre, o => o.MapFrom(s => s.Area.Nombre))
+                .ForMember(d => d.AreaNombre,
+                    o => o.MapFrom(s => s.Area.Nombre))
                 .ForMember(d => d.ResponsableNombre,
-                           o => o.MapFrom(s => s.Responsable.Nombre + " " + s.Responsable.Apellido));
+                    o => o.MapFrom(s => s.Responsable.Nombre + " " + s.Responsable.Apellido))
+                .ForMember(d => d.SupervisorNombre,
+                    o => o.MapFrom(s => s.Supervisor != null
+                        ? s.Supervisor.Nombre + " " + s.Supervisor.Apellido
+                        : null))
+                .ForMember(d => d.OportunidadNombre,
+                    o => o.MapFrom(s => s.Oportunidad != null ? s.Oportunidad.NombreProyecto : null))
+                .ForMember(d => d.EmpresaNombre,
+                    o => o.MapFrom(s => s.Oportunidad != null && s.Oportunidad.Empresa != null
+                        ? s.Oportunidad.Empresa.Nombre
+                        : null))
+                .ForMember(d => d.Fases,
+    o => o.MapFrom(s =>
+        string.IsNullOrEmpty(s.FasesJson)
+            ? CrearProyectoDto.GenerarFasesDefault()
+            : JsonSerializer.Deserialize<List<FaseProyectoDto>>(
+                s.FasesJson,
+                new JsonSerializerOptions()
+              )
+    ));
 
-            CreateMap<CrearProyectoDto, Proyecto>();
+            CreateMap<CrearProyectoDto, Proyecto>()
+                .ForMember(d => d.FasesJson,
+                    o => o.MapFrom(s => System.Text.Json.JsonSerializer.Serialize(s.Fases, (System.Text.Json.JsonSerializerOptions?)null)))
+                .ForMember(d => d.FechaCreacion, o => o.Ignore())
+                .ForMember(d => d.FechaUltimaModificacion, o => o.Ignore());
+
             CreateMap<ActualizarProyectoDto, Proyecto>()
-                .ForMember(d => d.Id, o => o.Ignore());
-
-            CreateMap<TipoActividad, TipoActividadDto>();
-            CreateMap<CrearActividadDto, Actividad>()
-                .ForMember(d => d.Inicio, o => o.MapFrom(s => s.Fecha))
-                .ForMember(d => d.Fin, o => o.MapFrom(s => s.FechaFin));
-            CreateMap<ActualizarActividadDto, Actividad>()
-                .ForMember(d => d.Inicio, o => o.MapFrom(s => s.Fecha))
-                .ForMember(d => d.Fin, o => o.MapFrom(s => s.FechaFin));
+                .ForMember(d => d.Id, o => o.Ignore())
+                .ForMember(d => d.FasesJson,
+                    o => o.MapFrom(s => System.Text.Json.JsonSerializer.Serialize(s.Fases, (System.Text.Json.JsonSerializerOptions?)null)))
+                .ForMember(d => d.FechaCreacion, o => o.Ignore())
+                .ForMember(d => d.FechaUltimaModificacion,
+                    o => o.MapFrom(_ => DateTime.UtcNow));
             // PROPUESTA
             CreateMap<CrearPropuestaDto, Propuesta>();
             CreateMap<Propuesta, PropuestaDto>();

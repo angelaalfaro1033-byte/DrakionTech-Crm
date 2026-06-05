@@ -1,0 +1,88 @@
+﻿/* ── Backdrop ─────────────────────────────────────────────── */
+.modal-backdrop-custom {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(3px);
+    z-index: 1000;
+}
+
+/* ── Contenedor del modal ─────────────────────────────────── */
+.modal-custom {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1001;
+    background: var(--bg-card, #ffffff);
+    border-radius: 14px;
+    border: 1px solid var(--border-soft, #e5e7eb);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: modal-entrada 0.2s ease;
+}
+
+@keyframes modal-entrada {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -48%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+.modal-custom-header {
+    padding: 18px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-main, #111827);
+    border-bottom: 1px solid var(--border-soft, #e5e7eb);
+}
+
+/* ── Body ─────────────────────────────────────────────────── */
+.modal-custom-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+    .modal-custom-body p {
+        font-size: 14px;
+        color: var(--text-main, #374151);
+        margin: 0 0 8px;
+    }
+
+.modal-etapa-siguiente {
+    background: var(--bg-subtle, #f9fafb);
+    border: 1px solid var(--border-soft, #e5e7eb);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    margin-bottom: 12px !important;
+}
+
+/* ── Footer ───────────────────────────────────────────────── */
+.modal-custom-footer {
+    padding: 14px 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid var(--border-soft, #e5e7eb);
+    background: var(--bg-subtle, #f9fafb);
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 540px) {
+    .modal-custom {
+        max-width: calc(100vw - 32px);
+    }
+}

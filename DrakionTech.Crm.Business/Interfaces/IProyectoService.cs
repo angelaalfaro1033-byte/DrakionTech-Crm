@@ -1,5 +1,6 @@
 ﻿using DrakionTech.Crm.Business.Common;
 using DrakionTech.Crm.Business.DTOs.Proyecto;
+using DrakionTech.Crm.Data.Entities.Enums;
 
 namespace DrakionTech.Crm.Business.Interfaces;
 
@@ -11,4 +12,6 @@ public interface IProyectoService
     Task CrearAsync(CrearProyectoDto dto);
     Task ActualizarAsync(ActualizarProyectoDto dto);
     Task EliminarAsync(int id);
+    Task CambiarEtapaAsync(CambiarEtapaProyectoDto dto);
+    EtapaFlujoProyecto? ObtenerSiguienteEtapa(EtapaFlujoProyecto actual); // agregar esto
 }

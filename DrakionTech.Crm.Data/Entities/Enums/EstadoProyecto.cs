@@ -2,8 +2,6 @@
 
 public enum EstadoProyecto
 {
-    Planificado,
-    Ejecutándose,
-    Completado,
-    Cancelado
+    Activo,
+    Inactivo
 }

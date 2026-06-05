@@ -4,6 +4,7 @@ using DrakionTech.Crm.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DrakionTech.Crm.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260605165953_RefactorFases")]
+    partial class RefactorFases
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -497,18 +500,12 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
-                    b.Property<string>("Cargo")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Email")
                         .HasMaxLength(320)
                         .HasColumnType("nvarchar(320)");
 
                     b.Property<int>("EmpresaId")
                         .HasColumnType("int");
-
-                    b.Property<bool>("EsPrincipal")
-                        .HasColumnType("bit");
 
                     b.Property<DateTime>("FechaCreacion")
                         .ValueGeneratedOnAdd()
@@ -691,119 +688,87 @@ namespace DrakionTech.Crm.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Activa")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<int>("CiudadId")
                         .HasColumnType("int");
 
                     b.Property<string>("Correo")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Descripcion")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.Property<string>("Direccion")
+                        .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
+                    b.Property<int?>("EstadoId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EstadoOtro")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
                     b.Property<DateTime>("FechaCreacion")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("FechaCreacionEmpresa")
+                    b.Property<DateTime?>("FechaEspecial")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("FechaRegistroCrm")
+                    b.Property<DateTime>("FechaVinculacion")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("HaTrabajadoAntes")
                         .HasColumnType("bit");
 
+                    b.Property<string>("Nit")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("NumeroDocumento")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<int>("PaisId")
                         .HasColumnType("int");
 
-                    b.Property<string>("PrefijoTelefonicoCodigo")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<int?>("PrefijoTelefonicoId")
-                        .HasColumnType("int");
-
                     b.Property<string>("RepresentanteLegal")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("SectorEmpresaId")
+                    b.Property<int?>("SectorId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Seguimiento")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<int?>("SubsectorEmpresaId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Tamaño")
-                        .HasColumnType("int");
+                    b.Property<string>("SectorOtro")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.Property<string>("Telefono")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<int>("TipoCliente")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TipoDocumento")
-                        .HasColumnType("int");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CiudadId");
 
+                    b.HasIndex("EstadoId");
+
+                    b.HasIndex("Nit")
+                        .IsUnique();
+
                     b.HasIndex("PaisId");
 
-                    b.HasIndex("SectorEmpresaId");
+                    b.HasIndex("SectorId");
 
-                    b.HasIndex("SubsectorEmpresaId");
+                    b.ToTable("Empresas", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Empresas_Estado", "(\r\n                        (EstadoId IS NOT NULL AND EstadoOtro IS NULL)\r\n                        OR\r\n                        (EstadoId IS NULL AND LTRIM(RTRIM(EstadoOtro)) <> '')\r\n                    )");
 
-                    b.ToTable("Empresas", (string)null);
-                });
-
-            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.EmpresaCorreo", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Correo")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<int>("EmpresaId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("EsPrincipal")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmpresaId");
-
-                    b.ToTable("EmpresaCorreos", (string)null);
+                            t.HasCheckConstraint("CK_Empresas_Sector", "(\r\n                        (SectorId IS NOT NULL AND SectorOtro IS NULL)\r\n                        OR\r\n                        (SectorId IS NULL AND LTRIM(RTRIM(SectorOtro)) <> '')\r\n                    )");
+                        });
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Especialidad", b =>
@@ -1664,64 +1629,6 @@ namespace DrakionTech.Crm.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.SectorEmpresa", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SectoresEmpresa", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Nombre = "Primario"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Nombre = "Manufactura"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Nombre = "Comercio"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Nombre = "Servicios"
-                        });
-                });
-
-            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.SubsectorEmpresa", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SubsectoresEmpresa", (string)null);
-                });
-
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.TipoActividad", b =>
                 {
                     b.Property<int>("Id")
@@ -1953,21 +1860,6 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.ToTable("GoogleEventos", (string)null);
                 });
 
-            modelBuilder.Entity("SectorEmpresaSubsectorEmpresa", b =>
-                {
-                    b.Property<int>("SectoresId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SubsectoresId")
-                        .HasColumnType("int");
-
-                    b.HasKey("SectoresId", "SubsectoresId");
-
-                    b.HasIndex("SubsectoresId");
-
-                    b.ToTable("SectorSubsector", (string)null);
-                });
-
             modelBuilder.Entity("Actividad", b =>
                 {
                     b.HasOne("Actividad", "ActividadPrevia")
@@ -2126,40 +2018,29 @@ namespace DrakionTech.Crm.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Estado", "Estado")
+                        .WithMany()
+                        .HasForeignKey("EstadoId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("DrakionTech.Crm.Data.Entities.Pais", "Pais")
                         .WithMany()
                         .HasForeignKey("PaisId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("DrakionTech.Crm.Data.Entities.SectorEmpresa", "SectorEmpresa")
-                        .WithMany("Empresas")
-                        .HasForeignKey("SectorEmpresaId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("DrakionTech.Crm.Data.Entities.SubsectorEmpresa", "SubsectorEmpresa")
-                        .WithMany("Empresas")
-                        .HasForeignKey("SubsectorEmpresaId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Sector", "Sector")
+                        .WithMany()
+                        .HasForeignKey("SectorId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Ciudad");
 
+                    b.Navigation("Estado");
+
                     b.Navigation("Pais");
 
-                    b.Navigation("SectorEmpresa");
-
-                    b.Navigation("SubsectorEmpresa");
-                });
-
-            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.EmpresaCorreo", b =>
-                {
-                    b.HasOne("DrakionTech.Crm.Data.Entities.Empresa", "Empresa")
-                        .WithMany("Correos")
-                        .HasForeignKey("EmpresaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Empresa");
+                    b.Navigation("Sector");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Especialidad", b =>
@@ -2297,21 +2178,6 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Navigation("Rol");
                 });
 
-            modelBuilder.Entity("SectorEmpresaSubsectorEmpresa", b =>
-                {
-                    b.HasOne("DrakionTech.Crm.Data.Entities.SectorEmpresa", null)
-                        .WithMany()
-                        .HasForeignKey("SectoresId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DrakionTech.Crm.Data.Entities.SubsectorEmpresa", null)
-                        .WithMany()
-                        .HasForeignKey("SubsectoresId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Actividad", b =>
                 {
                     b.Navigation("ActividadesRelacionadas");
@@ -2335,8 +2201,6 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.Navigation("Contactos");
 
-                    b.Navigation("Correos");
-
                     b.Navigation("Oportunidades");
                 });
 
@@ -2359,16 +2223,6 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Navigation("Ciudades");
 
                     b.Navigation("PrefijosTelefonicos");
-                });
-
-            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.SectorEmpresa", b =>
-                {
-                    b.Navigation("Empresas");
-                });
-
-            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.SubsectorEmpresa", b =>
-                {
-                    b.Navigation("Empresas");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.TipoActividad", b =>

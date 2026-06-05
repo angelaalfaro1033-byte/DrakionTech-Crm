@@ -41,6 +41,7 @@ namespace DrakionTech.Crm.Data.Context
         public DbSet<SectorEmpresa> SectoresEmpresa { get; set; } = null!;
         public DbSet<SubsectorEmpresa> SubsectoresEmpresa { get; set; } = null!;
         public DbSet<EmpresaCorreo> EmpresaCorreos { get; set; } = null!;
+        public DbSet<HistorialEtapaProyecto> HistorialesEtapaProyecto => Set<HistorialEtapaProyecto>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -74,6 +75,7 @@ namespace DrakionTech.Crm.Data.Context
             modelBuilder.ApplyConfiguration(new SectorEmpresaConfiguration());
             modelBuilder.ApplyConfiguration(new SubsectorEmpresaConfiguration());
             modelBuilder.ApplyConfiguration(new EmpresaCorreoConfiguration());
+
 
             InitialSeed.Seed(modelBuilder);
 
