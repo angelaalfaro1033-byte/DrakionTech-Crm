@@ -201,8 +201,7 @@ public class OportunidadService : IOportunidadService
 
         var tieneProyectoVigente = await _context.Proyectos
             .AnyAsync(p => p.Oportunidad!.EmpresaId == empresaId
-                        && p.Estado != EstadoProyecto.Cancelado
-                        && p.Estado != EstadoProyecto.Completado, ct);
+                        && p.Estado != EstadoProyecto.Inactivo, ct);
 
         var empresa = await _context.Empresas
             .FirstOrDefaultAsync(e => e.Id == empresaId, ct);
