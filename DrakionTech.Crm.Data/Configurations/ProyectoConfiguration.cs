@@ -37,7 +37,7 @@ public class ProyectoConfiguration : IEntityTypeConfiguration<Proyecto>
                .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(p => p.Oportunidad)
-               .WithMany()
+               .WithMany(o => o.Proyectos)
                .HasForeignKey(p => p.OportunidadId)
                .OnDelete(DeleteBehavior.SetNull);
     }

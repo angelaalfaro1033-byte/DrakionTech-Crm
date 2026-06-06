@@ -2,12 +2,12 @@
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+#pragma warning disable CA1814
 
 namespace DrakionTech.Crm.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate_v2 : Migration
+    public partial class RefactorEmpresas : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -202,27 +202,6 @@ namespace DrakionTech.Crm.Data.Migrations
                 defaultValue: false);
 
             migrationBuilder.CreateTable(
-                name: "EmpresaCorreos",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    EmpresaId = table.Column<int>(type: "int", nullable: false),
-                    Correo = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    EsPrincipal = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_EmpresaCorreos", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_EmpresaCorreos_Empresas_EmpresaId",
-                        column: x => x.EmpresaId,
-                        principalTable: "Empresas",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "SectoresEmpresa",
                 columns: table => new
                 {
@@ -246,6 +225,27 @@ namespace DrakionTech.Crm.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SubsectoresEmpresa", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EmpresaCorreos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EmpresaId = table.Column<int>(type: "int", nullable: false),
+                    Correo = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    EsPrincipal = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmpresaCorreos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_EmpresaCorreos_Empresas_EmpresaId",
+                        column: x => x.EmpresaId,
+                        principalTable: "Empresas",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -318,215 +318,29 @@ namespace DrakionTech.Crm.Data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Empresas_SectoresEmpresa_SectorEmpresaId",
-                table: "Empresas");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Empresas_SubsectoresEmpresa_SubsectorEmpresaId",
-                table: "Empresas");
-
-            migrationBuilder.DropTable(
-                name: "EmpresaCorreos");
-
-            migrationBuilder.DropTable(
-                name: "SectorSubsector");
-
-            migrationBuilder.DropTable(
-                name: "SectoresEmpresa");
-
-            migrationBuilder.DropTable(
-                name: "SubsectoresEmpresa");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Empresas_SectorEmpresaId",
-                table: "Empresas");
-
-            migrationBuilder.DropColumn(
-                name: "Descripcion",
-                table: "Empresas");
-
-            migrationBuilder.DropColumn(
-                name: "NumeroDocumento",
-                table: "Empresas");
-
-            migrationBuilder.DropColumn(
-                name: "PrefijoTelefonicoCodigo",
-                table: "Empresas");
-
-            migrationBuilder.DropColumn(
-                name: "PrefijoTelefonicoId",
-                table: "Empresas");
-
-            migrationBuilder.DropColumn(
-                name: "SectorEmpresaId",
-                table: "Empresas");
-
-            migrationBuilder.DropColumn(
-                name: "Seguimiento",
-                table: "Empresas");
-
-            migrationBuilder.DropColumn(
-                name: "TipoCliente",
-                table: "Empresas");
-
-            migrationBuilder.DropColumn(
-                name: "TipoDocumento",
-                table: "Empresas");
-
-            migrationBuilder.DropColumn(
-                name: "Cargo",
-                table: "Contactos");
-
-            migrationBuilder.DropColumn(
-                name: "EsPrincipal",
-                table: "Contactos");
-
-            migrationBuilder.RenameColumn(
-                name: "Tamaño",
-                table: "Empresas",
-                newName: "SectorId");
-
-            migrationBuilder.RenameColumn(
-                name: "SubsectorEmpresaId",
-                table: "Empresas",
-                newName: "EstadoId");
-
-            migrationBuilder.RenameColumn(
-                name: "FechaRegistroCrm",
-                table: "Empresas",
-                newName: "FechaVinculacion");
-
-            migrationBuilder.RenameColumn(
-                name: "FechaCreacionEmpresa",
-                table: "Empresas",
-                newName: "FechaEspecial");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_Empresas_SubsectorEmpresaId",
-                table: "Empresas",
-                newName: "IX_Empresas_EstadoId");
-
-            migrationBuilder.AlterColumn<string>(
-                name: "Telefono",
-                table: "Empresas",
-                type: "nvarchar(max)",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(30)",
-                oldMaxLength: 30,
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<string>(
-                name: "RepresentanteLegal",
-                table: "Empresas",
-                type: "nvarchar(max)",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(200)",
-                oldMaxLength: 200,
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<string>(
-                name: "Nombre",
-                table: "Empresas",
-                type: "nvarchar(250)",
-                maxLength: 250,
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(200)",
-                oldMaxLength: 200);
-
-            migrationBuilder.AlterColumn<string>(
-                name: "Direccion",
-                table: "Empresas",
-                type: "nvarchar(300)",
-                maxLength: 300,
-                nullable: false,
-                defaultValue: "",
-                oldClrType: typeof(string),
-                oldType: "nvarchar(300)",
-                oldMaxLength: 300,
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<string>(
-                name: "Correo",
-                table: "Empresas",
-                type: "nvarchar(150)",
-                maxLength: 150,
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(200)",
-                oldMaxLength: 200,
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<bool>(
-                name: "Activa",
-                table: "Empresas",
-                type: "bit",
-                nullable: false,
-                defaultValue: true,
-                oldClrType: typeof(bool),
-                oldType: "bit");
-
-            migrationBuilder.AddColumn<string>(
-                name: "EstadoOtro",
-                table: "Empresas",
-                type: "nvarchar(150)",
-                maxLength: 150,
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "Nit",
-                table: "Empresas",
-                type: "nvarchar(50)",
-                maxLength: 50,
-                nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.AddColumn<string>(
-                name: "SectorOtro",
-                table: "Empresas",
-                type: "nvarchar(150)",
-                maxLength: 150,
-                nullable: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Empresas_Nit",
-                table: "Empresas",
-                column: "Nit",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Empresas_SectorId",
-                table: "Empresas",
-                column: "SectorId");
-
-            migrationBuilder.AddCheckConstraint(
-                name: "CK_Empresas_Estado",
-                table: "Empresas",
-                sql: "(\r\n                        (EstadoId IS NOT NULL AND EstadoOtro IS NULL)\r\n                        OR\r\n                        (EstadoId IS NULL AND LTRIM(RTRIM(EstadoOtro)) <> '')\r\n                    )");
-
-            migrationBuilder.AddCheckConstraint(
-                name: "CK_Empresas_Sector",
-                table: "Empresas",
-                sql: "(\r\n                        (SectorId IS NOT NULL AND SectorOtro IS NULL)\r\n                        OR\r\n                        (SectorId IS NULL AND LTRIM(RTRIM(SectorOtro)) <> '')\r\n                    )");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Empresas_Estados_EstadoId",
-                table: "Empresas",
-                column: "EstadoId",
-                principalTable: "Estados",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Empresas_Sectores_SectorId",
-                table: "Empresas",
-                column: "SectorId",
-                principalTable: "Sectores",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+            migrationBuilder.DropForeignKey(name: "FK_Empresas_SectoresEmpresa_SectorEmpresaId", table: "Empresas");
+            migrationBuilder.DropForeignKey(name: "FK_Empresas_SubsectoresEmpresa_SubsectorEmpresaId", table: "Empresas");
+            migrationBuilder.DropTable(name: "EmpresaCorreos");
+            migrationBuilder.DropTable(name: "SectorSubsector");
+            migrationBuilder.DropTable(name: "SectoresEmpresa");
+            migrationBuilder.DropTable(name: "SubsectoresEmpresa");
+            migrationBuilder.DropIndex(name: "IX_Empresas_SectorEmpresaId", table: "Empresas");
+            migrationBuilder.DropIndex(name: "IX_Empresas_SubsectorEmpresaId", table: "Empresas");
+            migrationBuilder.DropColumn(name: "Descripcion", table: "Empresas");
+            migrationBuilder.DropColumn(name: "NumeroDocumento", table: "Empresas");
+            migrationBuilder.DropColumn(name: "PrefijoTelefonicoCodigo", table: "Empresas");
+            migrationBuilder.DropColumn(name: "PrefijoTelefonicoId", table: "Empresas");
+            migrationBuilder.DropColumn(name: "SectorEmpresaId", table: "Empresas");
+            migrationBuilder.DropColumn(name: "Seguimiento", table: "Empresas");
+            migrationBuilder.DropColumn(name: "TipoCliente", table: "Empresas");
+            migrationBuilder.DropColumn(name: "TipoDocumento", table: "Empresas");
+            migrationBuilder.DropColumn(name: "Cargo", table: "Contactos");
+            migrationBuilder.DropColumn(name: "EsPrincipal", table: "Contactos");
+            migrationBuilder.RenameColumn(name: "Tamaño", table: "Empresas", newName: "SectorId");
+            migrationBuilder.RenameColumn(name: "SubsectorEmpresaId", table: "Empresas", newName: "EstadoId");
+            migrationBuilder.RenameColumn(name: "FechaRegistroCrm", table: "Empresas", newName: "FechaVinculacion");
+            migrationBuilder.RenameColumn(name: "FechaCreacionEmpresa", table: "Empresas", newName: "FechaEspecial");
+            migrationBuilder.RenameIndex(name: "IX_Empresas_SubsectorEmpresaId", table: "Empresas", newName: "IX_Empresas_EstadoId");
         }
     }
 }

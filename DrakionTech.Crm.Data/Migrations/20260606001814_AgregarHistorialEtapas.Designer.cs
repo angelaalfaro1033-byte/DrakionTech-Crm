@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DrakionTech.Crm.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260605212830_InitialCreate_v2")]
-    partial class InitialCreate_v2
+    [Migration("20260606001814_AgregarHistorialEtapas")]
+    partial class AgregarHistorialEtapas
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -983,6 +983,42 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.ToTable("HistorialCambiosOportunidad", (string)null);
                 });
 
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.HistorialEtapaProyecto", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("EtapaAnterior")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EtapaNueva")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FechaCambio")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Observaciones")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("PorcentajeIva")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ProyectoId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("ValorCalculado")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProyectoId");
+
+                    b.ToTable("HistorialesEtapaProyecto");
+                });
+
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Oportunidad", b =>
                 {
                     b.Property<int>("Id")
@@ -1334,9 +1370,24 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<string>("DocumentosUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EquipoTrabajo")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Estado")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("EtapaFlujo")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FasesJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("FechaFin")
                         .HasColumnType("datetime2");
@@ -1344,18 +1395,39 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<DateTime>("FechaInicio")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("FechaPago")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FechaUltimaModificacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("MontoPagado")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
+                    b.Property<string>("Observaciones")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("OportunidadId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("OportunidadId1")
-                        .HasColumnType("int");
+                    b.Property<decimal?>("PresupuestoTotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("RecordatorioPago")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ResponsableId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Soporte")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("SupervisorId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -1364,9 +1436,9 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.HasIndex("OportunidadId");
 
-                    b.HasIndex("OportunidadId1");
-
                     b.HasIndex("ResponsableId");
+
+                    b.HasIndex("SupervisorId");
 
                     b.ToTable("Proyectos", (string)null);
                 });
@@ -2120,6 +2192,17 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Navigation("Oportunidad");
                 });
 
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.HistorialEtapaProyecto", b =>
+                {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Proyecto", "Proyecto")
+                        .WithMany()
+                        .HasForeignKey("ProyectoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Proyecto");
+                });
+
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Oportunidad", b =>
                 {
                     b.HasOne("DrakionTech.Crm.Data.Entities.Contacto", "ContactoPrincipal")
@@ -2169,13 +2252,9 @@ namespace DrakionTech.Crm.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("DrakionTech.Crm.Data.Entities.Oportunidad", "Oportunidad")
-                        .WithMany()
+                        .WithMany("Proyectos")
                         .HasForeignKey("OportunidadId")
                         .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("DrakionTech.Crm.Data.Entities.Oportunidad", null)
-                        .WithMany("Proyectos")
-                        .HasForeignKey("OportunidadId1");
 
                     b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "Responsable")
                         .WithMany()
@@ -2183,11 +2262,17 @@ namespace DrakionTech.Crm.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "Supervisor")
+                        .WithMany()
+                        .HasForeignKey("SupervisorId");
+
                     b.Navigation("Area");
 
                     b.Navigation("Oportunidad");
 
                     b.Navigation("Responsable");
+
+                    b.Navigation("Supervisor");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Usuario", b =>
