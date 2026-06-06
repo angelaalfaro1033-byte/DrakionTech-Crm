@@ -1368,20 +1368,17 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("DocumentosUrl")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EquipoTrabajo")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Estado")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("EtapaFlujo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("EtapaFlujo")
+                        .HasColumnType("int");
 
                     b.Property<string>("FasesJson")
                         .HasColumnType("nvarchar(max)");
@@ -1410,8 +1407,7 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasColumnType("nvarchar(150)");
 
                     b.Property<string>("Observaciones")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("OportunidadId")
                         .HasColumnType("int");
@@ -1420,15 +1416,13 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("RecordatorioPago")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ResponsableId")
                         .HasColumnType("int");
 
                     b.Property<string>("Soporte")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("SupervisorId")
                         .HasColumnType("int");
@@ -2267,8 +2261,7 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "Supervisor")
                         .WithMany()
-                        .HasForeignKey("SupervisorId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("SupervisorId");
 
                     b.Navigation("Area");
 

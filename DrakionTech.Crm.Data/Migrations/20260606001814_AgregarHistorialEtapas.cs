@@ -5,10 +5,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DrakionTech.Crm.Data.Migrations
 {
-    /// <inheritdoc />
-    public partial class RefactorFases : Migration
+    public partial class AgregarHistorialEtapas : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -42,7 +40,6 @@ namespace DrakionTech.Crm.Data.Migrations
                 column: "ProyectoId");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
