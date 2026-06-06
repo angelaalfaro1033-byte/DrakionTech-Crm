@@ -32,9 +32,9 @@ namespace DrakionTech.Crm.Data.Migrations
             migrationBuilder.AddColumn<string>(
                 name: "EtapaFlujo",
                 table: "Proyectos",
-                type: "nvarchar(max)",
+                type: "int",
                 nullable: false,
-                defaultValue: "");
+                defaultValue: 0);
 
             migrationBuilder.AddColumn<string>(
                 name: "EquipoTrabajo",
