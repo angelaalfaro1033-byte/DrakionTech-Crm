@@ -72,6 +72,8 @@ namespace DrakionTech.Crm.Business.Mapping
                     GetDisplayName((EtapaOportunidad)s.Etapa)));
 
             // ACTIVIDAD
+            CreateMap<TipoActividad, TipoActividadDto>();
+
             CreateMap<Actividad, ActividadDto>()
                 .ForMember(d => d.Fecha,
                     o => o.MapFrom(s => s.Inicio))
