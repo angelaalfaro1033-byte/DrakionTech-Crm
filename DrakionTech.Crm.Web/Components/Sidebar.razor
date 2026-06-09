@@ -6,12 +6,6 @@
 
 <div class="crm-sidebar @(collapsed ? "collapsed" : "")">
 
-    @* Botón toggle *@
-    <button class="sidebar-toggle" @onclick="ToggleSidebar" title="@(collapsed ? "Expandir" : "Contraer")">
-        <i class="bi @(collapsed ? "bi-chevron-right" : "bi-chevron-left")"></i>
-    </button>
-
-    @* Perfil de usuario *@
     <div class="sidebar-profile">
         <div class="profile-avatar" title="@nombreUsuario">@inicialesUsuario</div>
         @if (!collapsed)
@@ -21,6 +15,10 @@
             </div>
         }
     </div>
+
+    <button class="sidebar-toggle" @onclick="ToggleSidebar" title="@(collapsed ? "Expandir" : "Contraer")">
+        <i class="bi @(collapsed ? "bi-chevron-right" : "bi-chevron-left")"></i>
+    </button>
 
     <nav class="sidebar-nav">
 

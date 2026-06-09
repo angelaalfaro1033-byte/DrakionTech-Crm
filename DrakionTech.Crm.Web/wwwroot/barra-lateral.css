@@ -2,14 +2,13 @@
 .crm-sidebar {
     width: 240px;
     min-height: 100vh;
-    background: #ffffff;
-    border-right: 1px solid var(--border-soft);
+    background: #071947;
+    border-right: 1px solid rgba(255,255,255,0.1);
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
     transition: width 0.25s ease;
     position: relative;
-    overflow: hidden;
 }
 
     .crm-sidebar.collapsed {
@@ -18,35 +17,42 @@
 
 .sidebar-toggle {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    top: 16px;
+    /* CAMBIO: Usamos 'right: 0' y 'transform' para centrarlo exactamente sobre el borde */
+    right: 0;
+    transform: translateX(50%); /* Hace que la mitad exacta del botón sobresalga */
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    border: 1px solid var(--border-soft);
-    background: #fff;
-    color: var(--text-muted);
+    border: 1px solid rgba(255,255,255,0.2);
+    background: #1E3ACC;
+    color: #FFFFFF;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     font-size: 12px;
-    z-index: 10;
-    transition: background 0.15s;
+    z-index: 1050; /* Aumentado para asegurar que quede por encima de los avatares y el contenido general */
+    transition: background 0.15s, transform 0.25s ease;
     padding: 0;
 }
 
     .sidebar-toggle:hover {
-        background: var(--primary-soft);
-        color: var(--primary);
+        background: #C4003D;
+        color: #FFFFFF;
     }
+
+.crm-sidebar.collapsed .sidebar-toggle {
+    right: 0;
+   
+}
 
 .sidebar-profile {
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 1.2rem 1rem 1rem;
-    border-bottom: 1px solid var(--border-soft);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
     margin-bottom: 0.5rem;
     margin-top: 0.5rem;
 }
@@ -60,8 +66,8 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: var(--primary-soft);
-    color: var(--primary);
+    background: #1E3ACC;
+    color: #FFFFFF;
     font-size: 13px;
     font-weight: 600;
     display: flex;
@@ -73,14 +79,14 @@
 .profile-name {
     font-size: 14px;
     font-weight: 600;
-    color: var(--text-main);
+    color: #FFFFFF;
     display: block;
     white-space: nowrap;
 }
 
 .profile-role {
     font-size: 12px;
-    color: var(--text-muted);
+    color: rgba(255,255,255,0.6);
     white-space: nowrap;
 }
 
@@ -98,7 +104,7 @@
 .nav-section-label {
     font-size: 11px;
     font-weight: 600;
-    color: var(--text-muted);
+    color: rgba(255,255,255,0.45);
     text-transform: uppercase;
     letter-spacing: 0.06em;
     padding: 0.75rem 1rem 0.25rem;
@@ -111,7 +117,7 @@
     gap: 10px;
     padding: 9px 1rem;
     font-size: 14px;
-    color: var(--text-muted) !important;
+    color: rgba(255,255,255,0.75) !important;
     text-decoration: none !important;
     border-right: 2px solid transparent;
     transition: background 0.15s;
@@ -124,15 +130,15 @@
 }
 
 .sidebar-nav .nav-item a:hover {
-    background: #e8eafd;
-    color: var(--text-main) !important;
+    background: rgba(30,58,204,0.3);
+    color: #FFFFFF !important;
 }
 
 .sidebar-nav .nav-item.active a {
-    color: var(--primary) !important;
-    background: var(--primary-soft);
-    font-weight: 500;
-    border-right: 2px solid var(--primary);
+    color: #FFFFFF !important;
+    background: #1E3ACC;
+    border-right: 4px solid #C4003D;
+    font-weight: 600;
 }
 
 .sidebar-nav .nav-item a i {
@@ -151,7 +157,7 @@
     border-right: 2px solid transparent;
     font-size: 14px;
     font-weight: 500;
-    color: var(--text-main);
+    color: rgba(255,255,255,0.75);
     cursor: pointer;
     text-align: left;
     white-space: nowrap;
@@ -164,7 +170,8 @@
 }
 
 .nav-group-header .group-toggle:hover {
-    background: #e8eafd;
+    background: rgba(30,58,204,0.3);
+    color: #FFFFFF;
 }
 
 .group-arrow {
@@ -194,19 +201,19 @@
     gap: 10px;
     padding: 8px 1rem 8px 2.4rem !important;
     font-size: 13px;
-    color: var(--text-muted) !important;
+    color: rgba(255,255,255,0.6) !important;
     text-decoration: none !important;
     transition: background 0.15s;
     white-space: nowrap;
 }
 
     .nav-sub a:hover {
-        background: #e8eafd;
-        color: var(--text-main) !important;
+        background: rgba(30,58,204,0.3);
+        color: #FFFFFF !important;
     }
 
 .nav-sub.active a {
-    color: var(--primary) !important;
-    font-weight: 500;
-    background: var(--primary-soft);
+    color: #FFFFFF !important;
+    background: #1E3ACC;
+    font-weight: 600;
 }
