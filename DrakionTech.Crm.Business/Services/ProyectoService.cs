@@ -68,6 +68,7 @@ public class ProyectoService : IProyectoService
     public async Task CrearAsync(CrearProyectoDto dto)
     {
         await ValidarResponsableEnAreaAsync(dto.AreaId, dto.ResponsableId);
+        await ValidarSupervisoresAsync(dto.OportunidadId, dto.SupervisorInternoId, dto.SupervisorExternoId);
         var proyecto = _mapper.Map<Proyecto>(dto);
         await _repository.AgregarAsync(proyecto);
     }
@@ -78,6 +79,7 @@ public class ProyectoService : IProyectoService
             ?? throw new KeyNotFoundException($"Proyecto {dto.Id} no encontrado.");
 
         await ValidarResponsableEnAreaAsync(dto.AreaId, dto.ResponsableId);
+        await ValidarSupervisoresAsync(dto.OportunidadId, dto.SupervisorInternoId, dto.SupervisorExternoId);
 
         _mapper.Map(dto, proyecto);
         await _repository.ActualizarAsync(proyecto);
@@ -99,6 +101,40 @@ public class ProyectoService : IProyectoService
         if (!perteneceAlArea)
             throw new InvalidOperationException(
                 "El responsable seleccionado no pertenece al área asociada al proyecto.");
+    }
+
+    private async Task ValidarSupervisoresAsync(
+        int? oportunidadId,
+        int? supervisorInternoId,
+        int? supervisorExternoId)
+    {
+        if (!oportunidadId.HasValue)
+            throw new InvalidOperationException("Selecciona una oportunidad para el proyecto.");
+
+        var oportunidad = await _context.Oportunidades
+            .AsNoTracking()
+            .FirstOrDefaultAsync(o => o.Id == oportunidadId.Value);
+
+        if (oportunidad is null)
+            throw new InvalidOperationException("La oportunidad seleccionada no existe.");
+
+        if (supervisorInternoId.HasValue)
+        {
+            var existeUsuario = await _context.Usuarios
+                .AnyAsync(u => u.Id == supervisorInternoId.Value && u.IsActive);
+
+            if (!existeUsuario)
+                throw new InvalidOperationException("El supervisor interno seleccionado no existe o no está activo.");
+        }
+
+        if (supervisorExternoId.HasValue)
+        {
+            var contactoPerteneceEmpresa = await _context.Contactos
+                .AnyAsync(c => c.Id == supervisorExternoId.Value && c.EmpresaId == oportunidad.EmpresaId);
+
+            if (!contactoPerteneceEmpresa)
+                throw new InvalidOperationException("El supervisor externo debe ser un contacto de la empresa asociada a la oportunidad.");
+        }
     }
 
     public async Task CambiarEtapaAsync(CambiarEtapaProyectoDto dto)
@@ -129,5 +165,62 @@ public class ProyectoService : IProyectoService
         int max = (int)EtapaFlujoProyecto.CierreProyecto;
         if (siguiente > max) return null;
         return (EtapaFlujoProyecto)siguiente;
+    }
+
+    public async Task AgregarPagoAsync(int proyectoId, PagoProyectoDto dto)
+    {
+        var existeProyecto = await _context.Proyectos.AnyAsync(p => p.Id == proyectoId);
+        if (!existeProyecto)
+            throw new KeyNotFoundException($"Proyecto {proyectoId} no encontrado.");
+
+        ValidarPago(dto);
+
+        var pago = _mapper.Map<PagoProyecto>(dto);
+        pago.ProyectoId = proyectoId;
+        pago.FechaCreacion = DateTime.UtcNow;
+
+        _context.PagosProyecto.Add(pago);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task ActualizarPagoAsync(int proyectoId, PagoProyectoDto dto)
+    {
+        var pago = await _context.PagosProyecto
+            .FirstOrDefaultAsync(p => p.Id == dto.Id && p.ProyectoId == proyectoId)
+            ?? throw new KeyNotFoundException($"Pago {dto.Id} no encontrado.");
+
+        ValidarPago(dto);
+
+        pago.Valor = dto.Valor;
+        pago.FechaProgramada = dto.FechaProgramada;
+        pago.FechaPago = dto.FechaPago;
+        pago.Estado = dto.Estado;
+        pago.DiasAnticipacionRecordatorio = dto.DiasAnticipacionRecordatorio;
+        pago.DescripcionRecordatorio = dto.DescripcionRecordatorio;
+        pago.FechaUltimaModificacion = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task EliminarPagoAsync(int proyectoId, int pagoId)
+    {
+        var pago = await _context.PagosProyecto
+            .FirstOrDefaultAsync(p => p.Id == pagoId && p.ProyectoId == proyectoId)
+            ?? throw new KeyNotFoundException($"Pago {pagoId} no encontrado.");
+
+        _context.PagosProyecto.Remove(pago);
+        await _context.SaveChangesAsync();
+    }
+
+    private static void ValidarPago(PagoProyectoDto dto)
+    {
+        if (dto.Valor <= 0)
+            throw new InvalidOperationException("El valor del pago debe ser mayor a cero.");
+
+        if (dto.DiasAnticipacionRecordatorio is < 0)
+            throw new InvalidOperationException("Los días de anticipación no pueden ser negativos.");
+
+        if (dto.Estado == EstadoPagoProyecto.Pagado && dto.FechaPago is null)
+            dto.FechaPago = DateTime.Today;
     }
 }

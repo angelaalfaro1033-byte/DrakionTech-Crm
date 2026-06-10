@@ -20,16 +20,12 @@ public class Proyecto
     public EtapaFlujoProyecto EtapaFlujo { get; set; } = EtapaFlujoProyecto.FirmaContrato;
 
     // Equipo
-    public int? SupervisorId { get; set; }
-    public Usuario? Supervisor { get; set; }
+    public int? SupervisorInternoId { get; set; }
+    public Usuario? SupervisorInterno { get; set; }
+    public int? SupervisorExternoId { get; set; }
+    public Contacto? SupervisorExterno { get; set; }
     public string? EquipoTrabajo { get; set; }   // nombres separados por coma o JSON simple
     public string? Soporte { get; set; }
-
-    // Pagos
-    public DateTime? FechaPago { get; set; }
-    public string? RecordatorioPago { get; set; }
-    [Column(TypeName = "decimal(18,2)")]
-    public decimal? MontoPagado { get; set; }
 
     // Observaciones y documentos
     public string? Observaciones { get; set; }
@@ -47,6 +43,7 @@ public class Proyecto
 
     public int? OportunidadId { get; set; }
     public Oportunidad? Oportunidad { get; set; }
+    public ICollection<PagoProyecto> Pagos { get; set; } = new List<PagoProyecto>();
 
     public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
     public DateTime? FechaUltimaModificacion { get; set; }

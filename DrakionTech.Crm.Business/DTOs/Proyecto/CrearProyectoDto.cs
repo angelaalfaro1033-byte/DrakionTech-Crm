@@ -25,16 +25,15 @@ public class CrearProyectoDto
     [Range(1, int.MaxValue, ErrorMessage = "Selecciona un responsable.")]
     public int ResponsableId { get; set; }
 
-    public int? SupervisorId { get; set; }
+    public int? SupervisorInternoId { get; set; }
+    public int? SupervisorExternoId { get; set; }
+
+    [Required(ErrorMessage = "Selecciona una oportunidad.")]
     public int? OportunidadId { get; set; }
 
     public decimal? PresupuestoTotal { get; set; }
     public string? EquipoTrabajo { get; set; }
     public string? Soporte { get; set; }
-
-    public DateTime? FechaPago { get; set; }
-    public string? RecordatorioPago { get; set; }
-    public decimal? MontoPagado { get; set; }
 
     public string? Observaciones { get; set; }
     public string? DocumentosUrl { get; set; }
