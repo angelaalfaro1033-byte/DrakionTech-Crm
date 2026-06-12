@@ -1,14 +1,22 @@
-﻿using DrakionTech.Crm.Data.Configurations;
+using DrakionTech.Crm.Data.Configurations;
 using DrakionTech.Crm.Data.Entities;
+using DrakionTech.Crm.Data.Entities.Base;
 using DrakionTech.Crm.Data.Seed;
+using DrakionTech.Crm.Data.Services;
 using Microsoft.EntityFrameworkCore;
+
 namespace DrakionTech.Crm.Data.Context
 {
     public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        private readonly ICurrentUserContext? _currentUserContext;
+
+        public ApplicationDbContext(
+            DbContextOptions<ApplicationDbContext> options,
+            ICurrentUserContext? currentUserContext = null)
             : base(options)
         {
+            _currentUserContext = currentUserContext;
         }
 
         // DbSets
@@ -74,8 +82,8 @@ namespace DrakionTech.Crm.Data.Context
             modelBuilder.ApplyConfiguration(new EmailTemplateConfiguration());
             modelBuilder.ApplyConfiguration(new UsuarioConfiguration());
             modelBuilder.ApplyConfiguration(new EmpleadoSalarioConfiguration());
-            modelBuilder.Entity<Area>()  .HasOne(a => a.Responsable) .WithMany() .HasForeignKey(a => a.ResponsableId) .OnDelete(DeleteBehavior.SetNull) .IsRequired(false);
-            modelBuilder.Entity<Usuario>() .HasOne(u => u.Area).WithMany(a => a.Usuarios) .HasForeignKey(u => u.AreaId) .OnDelete(DeleteBehavior.SetNull) .IsRequired(false);
+            modelBuilder.Entity<Area>().HasOne(a => a.Responsable).WithMany().HasForeignKey(a => a.ResponsableId).OnDelete(DeleteBehavior.SetNull).IsRequired(false);
+            modelBuilder.Entity<Usuario>().HasOne(u => u.Area).WithMany(a => a.Usuarios).HasForeignKey(u => u.AreaId).OnDelete(DeleteBehavior.SetNull).IsRequired(false);
             modelBuilder.ApplyConfiguration(new ProyectoConfiguration());
             modelBuilder.ApplyConfiguration(new PagoProyectoConfiguration());
             modelBuilder.ApplyConfiguration(new SectorEmpresaConfiguration());
@@ -84,11 +92,108 @@ namespace DrakionTech.Crm.Data.Context
             modelBuilder.ApplyConfiguration(new PublicacionMarketingConfiguration());
             modelBuilder.ApplyConfiguration(new PublicacionRedSocialConfiguration());
             modelBuilder.ApplyConfiguration(new MetricaPublicacionConfiguration());
-            modelBuilder.Entity<ArchivoPublicacionMarketing>() .HasOne(x => x.PublicacionMarketing) .WithMany(x => x.Archivos) .HasForeignKey(x => x.PublicacionMarketingId) .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<ArchivoPublicacionMarketing>().HasOne(x => x.PublicacionMarketing).WithMany(x => x.Archivos).HasForeignKey(x => x.PublicacionMarketingId).OnDelete(DeleteBehavior.Cascade);
+
+            ConfigureAuditableEntities(modelBuilder);
 
             InitialSeed.Seed(modelBuilder);
 
             base.OnModelCreating(modelBuilder);
+        }
+
+        public override int SaveChanges()
+        {
+            ApplyAuditInformation();
+            return base.SaveChanges();
+        }
+
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            ApplyAuditInformation();
+            return base.SaveChanges(acceptAllChangesOnSuccess);
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            ApplyAuditInformation();
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
+        public override Task<int> SaveChangesAsync(
+            bool acceptAllChangesOnSuccess,
+            CancellationToken cancellationToken = default)
+        {
+            ApplyAuditInformation();
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        }
+
+        private static void ConfigureAuditableEntities(ModelBuilder modelBuilder)
+        {
+            var auditableEntityTypes = modelBuilder.Model
+                .GetEntityTypes()
+                .Where(entityType => typeof(AuditableEntity).IsAssignableFrom(entityType.ClrType));
+
+            foreach (var entityType in auditableEntityTypes)
+            {
+                var entity = modelBuilder.Entity(entityType.ClrType);
+
+                entity.Property(nameof(AuditableEntity.CreatedByUserId))
+                    .IsRequired(false);
+
+                entity.Property(nameof(AuditableEntity.CreatedAt))
+                    .IsRequired(false);
+
+                entity.Property(nameof(AuditableEntity.ModifiedByUserId))
+                    .IsRequired(false);
+
+                entity.Property(nameof(AuditableEntity.ModifiedAt))
+                    .IsRequired(false);
+
+                entity.HasOne(typeof(Usuario), nameof(AuditableEntity.CreatedByUser))
+                    .WithMany()
+                    .HasForeignKey(nameof(AuditableEntity.CreatedByUserId))
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired(false);
+
+                entity.HasOne(typeof(Usuario), nameof(AuditableEntity.ModifiedByUser))
+                    .WithMany()
+                    .HasForeignKey(nameof(AuditableEntity.ModifiedByUserId))
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired(false);
+            }
+        }
+
+        private void ApplyAuditInformation()
+        {
+            var now = DateTime.UtcNow;
+            var currentUserId = _currentUserContext?.UserId;
+
+            foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    entry.Entity.CreatedAt = now;
+                    entry.Entity.CreatedByUserId = currentUserId;
+
+                    if (entry.Entity is BaseEntity baseEntity && baseEntity.FechaCreacion == default)
+                    {
+                        baseEntity.FechaCreacion = now;
+                    }
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    entry.Property(entity => entity.CreatedAt).IsModified = false;
+                    entry.Property(entity => entity.CreatedByUserId).IsModified = false;
+
+                    entry.Entity.ModifiedAt = now;
+                    entry.Entity.ModifiedByUserId = currentUserId;
+
+                    if (entry.Entity is BaseEntity baseEntity)
+                    {
+                        baseEntity.FechaActualizacion = now;
+                    }
+                }
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using DrakionTech.Crm.Data.Entities;
 
-public class GoogleEvento
+public class GoogleEvento : DrakionTech.Crm.Data.Entities.Base.AuditableEntity
 {
     public int Id { get; set; }
 

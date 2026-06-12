@@ -1,5 +1,5 @@
 ﻿using DrakionTech.Crm.Data.Entities;
-public class Actividad
+public class Actividad : DrakionTech.Crm.Data.Entities.Base.AuditableEntity
 {
     public int Id { get; set; }
     public int TipoActividadId { get; set; }

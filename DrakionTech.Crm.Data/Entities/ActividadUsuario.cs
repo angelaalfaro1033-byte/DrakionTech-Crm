@@ -1,6 +1,6 @@
 ﻿using DrakionTech.Crm.Data.Entities;
 
-public class ActividadUsuario
+public class ActividadUsuario : DrakionTech.Crm.Data.Entities.Base.AuditableEntity
 {
     public int ActividadId { get; set; }
     public Actividad Actividad { get; set; } = null!;

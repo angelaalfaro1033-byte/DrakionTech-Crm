@@ -1,6 +1,6 @@
 ﻿namespace DrakionTech.Crm.Data.Entities
 {
-    public class UsuarioInterno
+    public class UsuarioInterno : DrakionTech.Crm.Data.Entities.Base.AuditableEntity
     {
         public int Id { get; set; }
 

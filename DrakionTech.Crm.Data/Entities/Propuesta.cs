@@ -1,6 +1,6 @@
 ﻿namespace DrakionTech.Crm.Data.Entities
 {
-    public class Propuesta
+    public class Propuesta : DrakionTech.Crm.Data.Entities.Base.AuditableEntity
     {
         public int Id { get; set; }
 

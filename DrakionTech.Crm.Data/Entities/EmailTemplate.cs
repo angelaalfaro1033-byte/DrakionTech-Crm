@@ -1,6 +1,6 @@
 ﻿namespace DrakionTech.Crm.Data.Entities
 {
-    public class EmailTemplate
+    public class EmailTemplate : DrakionTech.Crm.Data.Entities.Base.AuditableEntity
     {
         public int Id { get; set; }
 

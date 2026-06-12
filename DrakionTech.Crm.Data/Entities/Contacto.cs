@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DrakionTech.Crm.Data.Entities
 {
-    public class Contacto
+    public class Contacto : DrakionTech.Crm.Data.Entities.Base.AuditableEntity
     {
         public int Id { get; set; }
 
