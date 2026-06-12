@@ -8,6 +8,7 @@ using DrakionTech.Crm.Data.Entities;
 using DrakionTech.Crm.Data.Entities.Enums;
 using DrakionTech.Crm.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace DrakionTech.Crm.Business.Services;
 
@@ -142,6 +143,7 @@ public class ProyectoService : IProyectoService
         var proyecto = await _repository.ObtenerPorIdAsync(dto.ProyectoId)
             ?? throw new KeyNotFoundException($"Proyecto {dto.ProyectoId} no encontrado.");
 
+        var fechaCambio = DateTime.UtcNow;
         var historial = new HistorialEtapaProyecto
         {
             ProyectoId = dto.ProyectoId,
@@ -150,13 +152,70 @@ public class ProyectoService : IProyectoService
             PorcentajeIva = dto.PorcentajeIva,
             ValorCalculado = dto.ValorCalculado,
             Observaciones = dto.Observaciones,
-            FechaCambio = DateTime.UtcNow
+            FechaCambio = fechaCambio
         };
 
+        SincronizarFaseJson(proyecto, dto, fechaCambio);
         proyecto.EtapaFlujo = dto.NuevaEtapa;
 
         _context.HistorialesEtapaProyecto.Add(historial);
         await _repository.ActualizarAsync(proyecto);
+    }
+
+    private static void SincronizarFaseJson(
+        Proyecto proyecto,
+        CambiarEtapaProyectoDto dto,
+        DateTime fechaCambio)
+    {
+        var fases = DeserializarFases(proyecto.FasesJson);
+        var fasesDeEtapa = fases
+            .Where(f => f.EtapaFlujo == dto.NuevaEtapa)
+            .ToList();
+
+        if (fasesDeEtapa.Count > 1)
+        {
+            throw new InvalidOperationException(
+                $"El proyecto tiene más de una fase asociada a la etapa {dto.NuevaEtapa}.");
+        }
+
+        var fase = fasesDeEtapa.SingleOrDefault();
+        if (fase is null)
+        {
+            var requiereBackfill = fases.Any(f => !f.EtapaFlujo.HasValue);
+            var mensaje = requiereBackfill
+                ? "No se puede actualizar FasesJson porque una o más fases no tienen EtapaFlujo. Realiza el backfill de FasesJson antes de cambiar la etapa del proyecto."
+                : $"No existe una fase asociada a la etapa {dto.NuevaEtapa} en FasesJson.";
+
+            throw new InvalidOperationException(mensaje);
+        }
+
+        fase.Iva = dto.PorcentajeIva ?? fase.Iva;
+        fase.ValorCalculado = dto.ValorCalculado ?? fase.ValorCalculado;
+        fase.Observaciones = dto.Observaciones;
+        fase.FechaInicio ??= fechaCambio;
+        fase.FechaFin = fechaCambio;
+        fase.PorcentajeAvance = 100;
+        fase.Completada = true;
+
+        proyecto.FasesJson = JsonSerializer.Serialize(fases, (JsonSerializerOptions?)null);
+        proyecto.FechaUltimaModificacion = fechaCambio;
+    }
+
+    private static List<FaseProyectoDto> DeserializarFases(string? fasesJson)
+    {
+        if (string.IsNullOrWhiteSpace(fasesJson))
+            return CrearProyectoDto.GenerarFasesDefault();
+
+        try
+        {
+            return JsonSerializer.Deserialize<List<FaseProyectoDto>>(
+                fasesJson,
+                new JsonSerializerOptions()) ?? new List<FaseProyectoDto>();
+        }
+        catch (JsonException ex)
+        {
+            throw new InvalidOperationException("FasesJson no tiene un formato JSON válido.", ex);
+        }
     }
 
     public EtapaFlujoProyecto? ObtenerSiguienteEtapa(EtapaFlujoProyecto actual)

@@ -43,18 +43,18 @@ public class CrearProyectoDto
 
     public static List<FaseProyectoDto> GenerarFasesDefault() => new()
     {
-        new() { Nombre = "Firma de contrato" },
-        new() { Nombre = "Pago del proyecto" },
-        new() { Nombre = "Conformación del equipo" },
-        new() { Nombre = "Reunión inicial" },
-        new() { Nombre = "Información general" },
-        new() { Nombre = "Ejecución del proyecto" },
-        new() { Nombre = "Seguimiento de fases" },
-        new() { Nombre = "Actas de entrega de fase" },
-        new() { Nombre = "Reunión de cierre" },
-        new() { Nombre = "Acta final" },
-        new() { Nombre = "Otrosí" },
-        new() { Nombre = "Calificación" },
-        new() { Nombre = "Cierre del proyecto" }
+        new() { EtapaFlujo = EtapaFlujoProyecto.FirmaContrato, Nombre = "Firma de contrato" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.PagoProyecto, Nombre = "Pago del proyecto" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.ConformacionEquipo, Nombre = "Conformación del equipo" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.ReunionInicial, Nombre = "Reunión inicial" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.InformacionGeneral, Nombre = "Información general" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.EjecucionProyecto, Nombre = "Ejecución del proyecto" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.SeguimientoFases, Nombre = "Seguimiento de fases" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.ActasEntregaFase, Nombre = "Actas de entrega de fase" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.ReunionCierre, Nombre = "Reunión de cierre" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.ActaFinal, Nombre = "Acta final" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.Otrosi, Nombre = "Otrosí" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.Calificacion, Nombre = "Calificación" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.CierreProyecto, Nombre = "Cierre del proyecto" }
     };
 }
