@@ -4,6 +4,7 @@ using DrakionTech.Crm.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DrakionTech.Crm.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260612150416_fasesCompletadas")]
+    partial class fasesCompletadas
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -123,49 +126,6 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.HasIndex("UsuarioInternoId");
 
                     b.ToTable("ActividadUsuarios");
-                });
-
-            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.ArchivoPublicacionMarketing", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Activo")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("ArchivoIdExterno")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("FechaActualizacion")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("FechaCreacion")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("MimeType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("PublicacionMarketingId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PublicacionMarketingId");
-
-                    b.ToTable("ArchivosPublicacionMarketing");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Area", b =>
@@ -1059,55 +1019,6 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.ToTable("HistorialesEtapaProyecto");
                 });
 
-            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.MetricaPublicacion", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Activo")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("Alcance")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("ContactoAreaComercial")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("FechaActualizacion")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("FechaCreacion")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("FechaRegistro")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Observaciones")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<int>("PublicacionMarketingId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Reacciones")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RedSocial")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Visualizaciones")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PublicacionMarketingId");
-
-                    b.ToTable("MetricasPublicacion", (string)null);
-                });
-
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Oportunidad", b =>
                 {
                     b.Property<int>("Id")
@@ -1570,112 +1481,6 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.HasIndex("SupervisorInternoId");
 
                     b.ToTable("Proyectos", (string)null);
-                });
-
-            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.PublicacionMarketing", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Activo")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("AlertaRetrasoEnviada")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("CopyUtilizado")
-                        .IsRequired()
-                        .HasMaxLength(5000)
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DescripcionCampania")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<bool>("EnvioAutomatico")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("Estado")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("FechaActualizacion")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("FechaCreacion")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("FechaPublicacionProgramada")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("FechaPublicacionReal")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Observaciones")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<bool>("Recordatorio3DiasEnviado")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("RecordatorioDiaPublicacionEnviado")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("ResponsableId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ResponsableId");
-
-                    b.ToTable("PublicacionesMarketing", (string)null);
-                });
-
-            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.PublicacionRedSocial", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Activo")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal?>("CostoPauta")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int?>("DiasPauta")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("FechaActualizacion")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("FechaCreacion")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("PublicacionMarketingId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RedSocial")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("TienePauta")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PublicacionMarketingId", "RedSocial")
-                        .IsUnique();
-
-                    b.ToTable("PublicacionRedesSociales", (string)null);
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.RolContacto", b =>
@@ -2282,17 +2087,6 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.ArchivoPublicacionMarketing", b =>
-                {
-                    b.HasOne("DrakionTech.Crm.Data.Entities.PublicacionMarketing", "PublicacionMarketing")
-                        .WithMany("Archivos")
-                        .HasForeignKey("PublicacionMarketingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PublicacionMarketing");
-                });
-
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Area", b =>
                 {
                     b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "Responsable")
@@ -2449,17 +2243,6 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Navigation("Proyecto");
                 });
 
-            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.MetricaPublicacion", b =>
-                {
-                    b.HasOne("DrakionTech.Crm.Data.Entities.PublicacionMarketing", "PublicacionMarketing")
-                        .WithMany("Metricas")
-                        .HasForeignKey("PublicacionMarketingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PublicacionMarketing");
-                });
-
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Oportunidad", b =>
                 {
                     b.HasOne("DrakionTech.Crm.Data.Entities.Contacto", "ContactoPrincipal")
@@ -2551,28 +2334,6 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Navigation("SupervisorInterno");
                 });
 
-            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.PublicacionMarketing", b =>
-                {
-                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "Responsable")
-                        .WithMany()
-                        .HasForeignKey("ResponsableId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Responsable");
-                });
-
-            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.PublicacionRedSocial", b =>
-                {
-                    b.HasOne("DrakionTech.Crm.Data.Entities.PublicacionMarketing", "PublicacionMarketing")
-                        .WithMany("RedesSociales")
-                        .HasForeignKey("PublicacionMarketingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PublicacionMarketing");
-                });
-
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Usuario", b =>
                 {
                     b.HasOne("DrakionTech.Crm.Data.Entities.Area", "Area")
@@ -2653,6 +2414,11 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Navigation("Ciudades");
 
                     b.Navigation("PrefijosTelefonicos");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Proyecto", b =>
+                {
+                    b.Navigation("Pagos");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.SectorEmpresa", b =>

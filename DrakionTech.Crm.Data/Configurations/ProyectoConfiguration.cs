@@ -36,6 +36,16 @@ public class ProyectoConfiguration : IEntityTypeConfiguration<Proyecto>
                .HasForeignKey(p => p.ResponsableId)
                .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasOne(p => p.SupervisorInterno)
+               .WithMany()
+               .HasForeignKey(p => p.SupervisorInternoId)
+               .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(p => p.SupervisorExterno)
+               .WithMany()
+               .HasForeignKey(p => p.SupervisorExternoId)
+               .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasOne(p => p.Oportunidad)
                .WithMany(o => o.Proyectos)
                .HasForeignKey(p => p.OportunidadId)

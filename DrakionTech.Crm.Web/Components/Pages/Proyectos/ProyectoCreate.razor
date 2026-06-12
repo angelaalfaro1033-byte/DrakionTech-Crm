@@ -1,12 +1,16 @@
 ﻿@page "/proyectos/crear"
 @using DrakionTech.Crm.Business.DTOs.Proyecto
 @using DrakionTech.Crm.Business.DTOs.Area
+@using DrakionTech.Crm.Business.DTOs.Contacto
+@using DrakionTech.Crm.Business.DTOs.Oportunidad
 @using DrakionTech.Crm.Business.DTOs.Usuario
 @using DrakionTech.Crm.Business.Interfaces
 @using DrakionTech.Crm.Data.Entities.Enums
 @inject IProyectoService ProyectoService
 @inject IAreaService AreaService
 @inject IUsuarioService UsuarioService
+@inject IOportunidadService OportunidadService
+@inject IContactoService ContactoService
 @inject NavigationManager Nav
 
 <div class="page-header">
@@ -19,6 +23,11 @@
 <EditForm Model="_modelo" OnValidSubmit="GuardarAsync">
     <DataAnnotationsValidator />
 
+    @if (!string.IsNullOrWhiteSpace(_error))
+    {
+        <div class="alert alert-danger">@_error</div>
+    }
+
     <div class="form-section">
         <p class="section-title">Información general</p>
         <div class="mb-3">
@@ -29,6 +38,18 @@
         <div class="mb-3">
             <label class="form-label">Descripción</label>
             <InputTextArea class="form-control" @bind-Value="_modelo.Descripcion" rows="3" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Oportunidad</label>
+            <InputSelect class="form-select" @bind-Value="_modelo.OportunidadId"
+                         @bind-Value:after="OnOportunidadCambiadaAsync">
+                <option value="">-- Selecciona una oportunidad --</option>
+                @foreach (var o in _oportunidades)
+                {
+                    <option value="@o.Id">@o.NombreProyecto - @o.EmpresaNombre</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="() => _modelo.OportunidadId" />
         </div>
         <div class="mb-3">
             <label class="form-label">Estado</label>
@@ -71,6 +92,27 @@
                 </InputSelect>
                 <ValidationMessage For="() => _modelo.ResponsableId" />
             </div>
+            <div class="mb-3">
+                <label class="form-label">Supervisor interno</label>
+                <InputSelect class="form-select" @bind-Value="_modelo.SupervisorInternoId">
+                    <option value="">-- Sin supervisor interno --</option>
+                    @foreach (var u in _todosUsuarios)
+                    {
+                        <option value="@u.Id">@u.Nombre @u.Apellido</option>
+                    }
+                </InputSelect>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Supervisor externo</label>
+                <InputSelect class="form-select" @bind-Value="_modelo.SupervisorExternoId"
+                             disabled="@(!_modelo.OportunidadId.HasValue)">
+                    <option value="">-- Sin supervisor externo --</option>
+                    @foreach (var c in _contactosEmpresa)
+                    {
+                        <option value="@c.Id">@c.NombreCompleto</option>
+                    }
+                </InputSelect>
+            </div>
         </div>
     </div>
 
@@ -89,6 +131,26 @@
         </div>
     </div>
 
+    <div class="form-section">
+        <p class="section-title">Fases del proyecto</p>
+        @for (var i = 0; i < _modelo.Fases.Count; i++)
+        {
+            var index = i;
+            <div class="grid-2col mb-3">
+                <div>
+                    <label class="form-label">Fase @(index + 1)</label>
+                    <InputText class="form-control" @bind-Value="_modelo.Fases[index].Nombre" />
+                </div>
+                <div class="form-actions" style="align-items:end; justify-content:flex-start;">
+                    <button type="button" class="btn btn-secondary" disabled="@(index == 0)" @onclick="() => MoverFase(index, -1)">Subir</button>
+                    <button type="button" class="btn btn-secondary" disabled="@(index == _modelo.Fases.Count - 1)" @onclick="() => MoverFase(index, 1)">Bajar</button>
+                    <button type="button" class="btn btn-outline-danger" @onclick="() => QuitarFase(index)">Quitar</button>
+                </div>
+            </div>
+        }
+        <button type="button" class="btn btn-secondary" @onclick="AgregarFase">Agregar fase</button>
+    </div>
+
     <div class="form-actions">
         <button type="submit" class="btn btn-primary">Guardar</button>
         <button type="button" class="btn btn-secondary"
@@ -103,12 +165,16 @@
     private IEnumerable<AreaListDto> _areas = new List<AreaListDto>();
     private List<UsuarioListDto> _todosUsuarios = new();
     private List<UsuarioListDto> _usuariosFiltrados = new();
+    private List<OportunidadDto> _oportunidades = new();
+    private List<ContactoDto> _contactosEmpresa = new();
+    private string? _error;
 
     protected override async Task OnInitializedAsync()
     {
         _areas = await AreaService.ObtenerTodasAsync(soloActivas: true);
         var todos = await UsuarioService.ObtenerTodosAsync();
         _todosUsuarios = todos.Where(u => u.IsActive).ToList();
+        _oportunidades = (await OportunidadService.ObtenerTodasAsync()).ToList();
     }
 
     private void OnAreaCambiada()
@@ -118,6 +184,38 @@
         _usuariosFiltrados = _modelo.AreaId == 0
             ? new List<UsuarioListDto>()
             : _todosUsuarios.Where(u => u.AreaId.HasValue && u.AreaId.Value == _modelo.AreaId).ToList();
+    }
+
+    private async Task OnOportunidadCambiadaAsync()
+    {
+        _modelo.SupervisorExternoId = null;
+        _contactosEmpresa = new();
+
+        var oportunidad = _oportunidades.FirstOrDefault(o => o.Id == _modelo.OportunidadId);
+        if (oportunidad is null) return;
+
+        _contactosEmpresa = (await ContactoService.ObtenerPorEmpresaAsync(oportunidad.EmpresaId)).ToList();
+    }
+
+    private void AgregarFase()
+    {
+        _modelo.Fases.Add(new FaseProyectoDto { Nombre = "Nueva fase" });
+    }
+
+    private void QuitarFase(int index)
+    {
+        if (index < 0 || index >= _modelo.Fases.Count) return;
+        _modelo.Fases.RemoveAt(index);
+    }
+
+    private void MoverFase(int index, int direccion)
+    {
+        var nuevoIndex = index + direccion;
+        if (nuevoIndex < 0 || nuevoIndex >= _modelo.Fases.Count) return;
+
+        var fase = _modelo.Fases[index];
+        _modelo.Fases.RemoveAt(index);
+        _modelo.Fases.Insert(nuevoIndex, fase);
     }
 
     private async Task GuardarAsync()
@@ -132,6 +230,4 @@
             _error = ex.Message;
         }
     }
-
-    private string? _error;
 }

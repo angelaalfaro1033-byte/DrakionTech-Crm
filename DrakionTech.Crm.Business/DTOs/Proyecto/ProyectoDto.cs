@@ -42,21 +42,22 @@ public class ProyectoDto
     public string AreaNombre { get; set; } = string.Empty;
     public int ResponsableId { get; set; }
     public string ResponsableNombre { get; set; } = string.Empty;
-    public string? SupervisorNombre { get; set; }
+    public int? SupervisorInternoId { get; set; }
+    public string? SupervisorInternoNombre { get; set; }
+    public int? SupervisorExternoId { get; set; }
+    public string? SupervisorExternoNombre { get; set; }
 
     public int? OportunidadId { get; set; }
     public string? OportunidadNombre { get; set; }
+    public int? EmpresaId { get; set; }
     public string? EmpresaNombre { get; set; }
 
     public string? EquipoTrabajo { get; set; }
     public string? Soporte { get; set; }
 
-    public DateTime? FechaPago { get; set; }
-    public string? RecordatorioPago { get; set; }
-    public decimal? MontoPagado { get; set; }
-
     public string? Observaciones { get; set; }
     public string? DocumentosUrl { get; set; }
 
     public List<FaseProyectoDto> Fases { get; set; } = new();
+    public List<PagoProyectoDto> Pagos { get; set; } = new();
 }
