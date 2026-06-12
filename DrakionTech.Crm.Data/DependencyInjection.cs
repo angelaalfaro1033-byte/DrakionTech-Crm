@@ -35,6 +35,7 @@ namespace DrakionTech.Crm.Data
             services.AddScoped<ITipoActividadRepository, TipoActividadRepository>();
             services.AddScoped<IRolUsuarioRepository, RolUsuarioRepository>();
             services.AddScoped<IEspecialidadRepository, EspecialidadRepository>();
+            services.AddScoped<IPublicacionMarketingRepository, PublicacionMarketingRepository>();
 
             return services;
         }

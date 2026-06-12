@@ -1,0 +1,32 @@
+﻿.etabs {
+    display: flex;
+    gap: 2px;
+    border-bottom: 1px solid var(--border-soft);
+    padding-bottom: 0;
+}
+
+.etabs-item {
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-decoration: none;
+    border-radius: 8px 8px 0 0;
+    border: 1px solid transparent;
+    border-bottom: none;
+    position: relative;
+    bottom: -1px;
+}
+
+    .etabs-item:hover {
+        color: var(--text-main);
+        background: var(--border-soft);
+    }
+
+    .etabs-item.active {
+        color: #2A3EF4;
+        background: white;
+        border-color: var(--border-soft);
+        border-bottom-color: white;
+        font-weight: 600;
+    }

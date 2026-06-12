@@ -38,6 +38,10 @@ namespace DrakionTech.Crm.Data.Context
         public DbSet<EmpleadoSalario> EmpleadoSalarios { get; set; } = null!;
         public DbSet<Area> Areas { get; set; }
         public DbSet<Proyecto> Proyectos { get; set; }
+        public DbSet<PublicacionMarketing> PublicacionesMarketing { get; set; } = null!;
+        public DbSet<PublicacionRedSocial> PublicacionRedesSociales { get; set; } = null!;
+        public DbSet<ArchivoPublicacionMarketing> ArchivosPublicacionMarketing { get; set; }
+        public DbSet<MetricaPublicacion> MetricasPublicacion { get; set; } = null!;
         public DbSet<SectorEmpresa> SectoresEmpresa { get; set; } = null!;
         public DbSet<SubsectorEmpresa> SubsectoresEmpresa { get; set; } = null!;
         public DbSet<EmpresaCorreo> EmpresaCorreos { get; set; } = null!;
@@ -75,7 +79,10 @@ namespace DrakionTech.Crm.Data.Context
             modelBuilder.ApplyConfiguration(new SectorEmpresaConfiguration());
             modelBuilder.ApplyConfiguration(new SubsectorEmpresaConfiguration());
             modelBuilder.ApplyConfiguration(new EmpresaCorreoConfiguration());
-
+            modelBuilder.ApplyConfiguration(new PublicacionMarketingConfiguration());
+            modelBuilder.ApplyConfiguration(new PublicacionRedSocialConfiguration());
+            modelBuilder.ApplyConfiguration(new MetricaPublicacionConfiguration());
+            modelBuilder.Entity<ArchivoPublicacionMarketing>() .HasOne(x => x.PublicacionMarketing) .WithMany(x => x.Archivos) .HasForeignKey(x => x.PublicacionMarketingId) .OnDelete(DeleteBehavior.Cascade);
 
             InitialSeed.Seed(modelBuilder);
 

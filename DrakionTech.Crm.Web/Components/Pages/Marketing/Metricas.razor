@@ -1,0 +1,147 @@
+﻿@page "/marketing/metricas"
+@attribute [Authorize]
+
+@using DrakionTech.Crm.Business.DTOs.Marketing
+@using DrakionTech.Crm.Business.Interfaces
+@using DrakionTech.Crm.Data.Entities.Enums
+
+@inject IPublicacionMarketingService MarketingService
+
+<div class="empleados-container">
+
+    <div class="page-header">
+        <div class="header-text">
+            <h1 class="page-title">Marketing</h1>
+            <p class="page-subtitle">Seguimiento mensual y métricas por canal</p>
+        </div>
+    </div>
+
+    <MarketingTabs />
+
+    <div class="form-section mt-4">
+        <p class="section-title">Registrar Métrica</p>
+
+        <EditForm Model="_modelo" OnValidSubmit="GuardarMetricaAsync">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="grid-2col">
+                <div class="mb-3">
+                    <label class="form-label">Publicación</label>
+                    <InputSelect class="form-select" @bind-Value="_modelo.PublicacionMarketingId">
+                        <option value="0">-- Seleccione --</option>
+                        @foreach (var publicacion in _publicaciones)
+                        {
+                            <option value="@publicacion.Id">@publicacion.Nombre</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Canal</label>
+                    <InputSelect class="form-select" @bind-Value="_modelo.RedSocial">
+                        @foreach (var red in Enum.GetValues<RedSocial>())
+                        {
+                            <option value="@red">@red</option>
+                        }
+                    </InputSelect>
+                </div>
+            </div>
+
+            <div class="grid-2col">
+                <div class="mb-3">
+                    <label class="form-label">Visualizaciones</label>
+                    <InputNumber class="form-control" @bind-Value="_modelo.Visualizaciones" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Reacciones</label>
+                    <InputNumber class="form-control" @bind-Value="_modelo.Reacciones" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Alcance</label>
+                    <InputNumber class="form-control" @bind-Value="_modelo.Alcance" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Fecha de registro</label>
+                    <InputDate class="form-control" @bind-Value="_modelo.FechaRegistro" />
+                </div>
+            </div>
+
+            <div class="form-check mb-3">
+                <InputCheckbox class="form-check-input" @bind-Value="_modelo.ContactoAreaComercial" />
+                <label class="form-check-label">Hubo contacto con el área comercial</label>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Observaciones</label>
+                <InputTextArea class="form-control"
+                               rows="3"
+                               @bind-Value="_modelo.Observaciones" />
+            </div>
+
+            <button class="btn btn-primary" type="submit">Guardar métrica</button>
+        </EditForm>
+    </div>
+
+    <div class="ui-card mt-4">
+        <table class="ui-table">
+            <thead>
+                <tr>
+                    <th>Publicación</th>
+                    <th>Canal</th>
+                    <th>Fecha</th>
+                    <th>Visualizaciones</th>
+                    <th>Reacciones</th>
+                    <th>Alcance</th>
+                    <th>Comercial</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var metrica in _metricas)
+                {
+                    <tr>
+                        <td>@metrica.PublicacionNombre</td>
+                        <td>@metrica.RedSocialNombre</td>
+                        <td>@metrica.FechaRegistro.ToString("dd/MM/yyyy")</td>
+                        <td>@metrica.Visualizaciones</td>
+                        <td>@metrica.Reacciones</td>
+                        <td>@metrica.Alcance</td>
+                        <td>@(metrica.ContactoAreaComercial ? "Sí" : "No")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+@code {
+    private CrearMetricaPublicacionDto _modelo = new()
+    {
+        FechaRegistro = DateTime.Today
+    };
+
+    private List<PublicacionMarketingDto> _publicaciones = new();
+    private List<MetricaPublicacionDto> _metricas = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _publicaciones = await MarketingService.ObtenerTodosAsync();
+        _metricas = await MarketingService.ObtenerMetricasAsync();
+    }
+
+    private async Task GuardarMetricaAsync()
+    {
+        await MarketingService.CrearMetricaAsync(_modelo);
+
+        _modelo = new CrearMetricaPublicacionDto
+        {
+            FechaRegistro = DateTime.Today
+        };
+
+        _metricas = await MarketingService.ObtenerMetricasAsync();
+    }
+}

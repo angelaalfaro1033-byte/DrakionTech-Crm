@@ -68,6 +68,15 @@
                     }
                 </a>
             </li>
+            <li class="@GetNavClass("/marketing")">
+                <a href="/marketing" title="Marketing">
+                    <i class="bi bi-megaphone"></i>
+                    @if (!collapsed)
+                    {
+                        <span>Marketing</span>
+                    }
+                </a>
+            </li>
             <li class="nav-group-header @(personasOpen ? "open" : "")">
                 <button class="group-toggle" @onclick="TogglePersonas" title="Personas">
                     <i class="bi bi-people"></i>
