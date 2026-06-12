@@ -1,4 +1,4 @@
-﻿@page "/proyectos/editar/{Id:int}"
+@page "/proyectos/editar/{Id:int}"
 @using DrakionTech.Crm.Business.DTOs.Proyecto
 @using DrakionTech.Crm.Business.DTOs.Area
 @using DrakionTech.Crm.Business.DTOs.Contacto
@@ -6,6 +6,7 @@
 @using DrakionTech.Crm.Business.DTOs.Usuario
 @using DrakionTech.Crm.Business.Interfaces
 @using DrakionTech.Crm.Data.Entities.Enums
+@using System.Globalization
 @inject IProyectoService ProyectoService
 @inject IAreaService AreaService
 @inject IUsuarioService UsuarioService
@@ -16,8 +17,11 @@
 <div class="page-header">
     <div>
         <h3 class="page-title">Editar Proyecto</h3>
-        <p class="page-subtitle">Modifica la información del proyecto</p>
+        <p class="page-subtitle">Actualiza la información, asignación y fases del proyecto</p>
     </div>
+    <button type="button" class="btn btn-secondary" @onclick='() => Nav.NavigateTo("/proyectos")'>
+        Volver
+    </button>
 </div>
 
 @if (_cargando)
@@ -30,7 +34,7 @@
 }
 else
 {
-    <EditForm Model="_modelo" OnValidSubmit="GuardarAsync">
+    <EditForm Model="_modelo" OnValidSubmit="GuardarAsync" class="project-edit-shell">
         <DataAnnotationsValidator />
 
         @if (!string.IsNullOrWhiteSpace(_error))
@@ -38,131 +42,228 @@ else
             <div class="alert alert-danger">@_error</div>
         }
 
-        <div class="form-section">
-            <p class="section-title">Información general</p>
-            <div class="mb-3">
-                <label class="form-label">Nombre</label>
-                <InputText class="form-control" @bind-Value="_modelo.Nombre" />
-                <ValidationMessage For="() => _modelo.Nombre" />
+        <div class="project-edit-card">
+            <div class="project-edit-intro">
+                <div>
+                    <p class="project-edit-eyebrow">Proyecto</p>
+                    <h4>@_modelo.Nombre</h4>
+                </div>
+                <span class="badge badge-secondary">@_modelo.Estado</span>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Descripción</label>
-                <InputTextArea class="form-control" @bind-Value="_modelo.Descripcion" rows="3" />
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Oportunidad</label>
-                <InputSelect class="form-select" @bind-Value="_modelo.OportunidadId"
-                             @bind-Value:after="OnOportunidadCambiadaAsync">
-                    <option value="">-- Selecciona una oportunidad --</option>
-                    @foreach (var o in _oportunidades)
-                    {
-                        <option value="@o.Id">@o.NombreProyecto - @o.EmpresaNombre</option>
-                    }
-                </InputSelect>
-                <ValidationMessage For="() => _modelo.OportunidadId" />
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Estado</label>
-                <InputSelect class="form-select" @bind-Value="_modelo.Estado">
-                    @foreach (var e in Enum.GetValues<EstadoProyecto>())
-                    {
-                        <option value="@e">@e</option>
-                    }
-                </InputSelect>
-            </div>
-        </div>
 
-        <div class="form-section">
-            <p class="section-title">Asignación</p>
-            <div class="grid-2col">
-                <div class="mb-3">
-                    <label class="form-label">Área</label>
-                    <InputSelect class="form-select" @bind-Value="_modelo.AreaId"
-                                 @bind-Value:after="OnAreaCambiada">
-                        <option value="0">-- Selecciona un área --</option>
-                        @foreach (var a in _areas)
-                        {
-                            <option value="@a.Id">@a.Nombre</option>
-                        }
-                    </InputSelect>
-                    <ValidationMessage For="() => _modelo.AreaId" />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Responsable</label>
-                    <InputSelect class="form-select" @bind-Value="_modelo.ResponsableId">
-                        <option value="">-- Selecciona un responsable --</option>
-                        @foreach (var u in _usuariosFiltrados)
-                        {
-                            <option value="@u.Id">@u.Nombre @u.Apellido</option>
-                        }
-                    </InputSelect>
-                    <ValidationMessage For="() => _modelo.ResponsableId" />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Supervisor interno</label>
-                    <InputSelect class="form-select" @bind-Value="_modelo.SupervisorInternoId">
-                        <option value="">-- Sin supervisor interno --</option>
-                        @foreach (var u in _usuarios)
-                        {
-                            <option value="@u.Id">@u.Nombre @u.Apellido</option>
-                        }
-                    </InputSelect>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Supervisor externo</label>
-                    <InputSelect class="form-select" @bind-Value="_modelo.SupervisorExternoId"
-                                 disabled="@(!_modelo.OportunidadId.HasValue)">
-                        <option value="">-- Sin supervisor externo --</option>
-                        @foreach (var c in _contactosEmpresa)
-                        {
-                            <option value="@c.Id">@c.NombreCompleto</option>
-                        }
-                    </InputSelect>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-section">
-            <p class="section-title">Fechas</p>
-            <div class="grid-2col">
-                <div class="mb-3">
-                    <label class="form-label">Fecha Inicio</label>
-                    <InputDate class="form-control" @bind-Value="_modelo.FechaInicio" />
-                    <ValidationMessage For="() => _modelo.FechaInicio" />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Fecha Fin <span class="text-muted">(opcional)</span></label>
-                    <InputDate class="form-control" @bind-Value="_modelo.FechaFin" />
-                </div>
-            </div>
-        </div>
-
-        <div class="form-section">
-            <p class="section-title">Fases del proyecto</p>
-            @for (var i = 0; i < _modelo.Fases.Count; i++)
-            {
-                var index = i;
-                <div class="grid-2col mb-3">
+            <div class="form-section project-section">
+                <div class="project-section-header">
                     <div>
-                        <label class="form-label">Fase @(index + 1)</label>
-                        <InputText class="form-control" @bind-Value="_modelo.Fases[index].Nombre" />
-                    </div>
-                    <div class="form-actions" style="align-items:end; justify-content:flex-start;">
-                        <button type="button" class="btn btn-secondary" disabled="@(index == 0)" @onclick="() => MoverFase(index, -1)">Subir</button>
-                        <button type="button" class="btn btn-secondary" disabled="@(index == _modelo.Fases.Count - 1)" @onclick="() => MoverFase(index, 1)">Bajar</button>
-                        <button type="button" class="btn btn-outline-danger" @onclick="() => QuitarFase(index)">Quitar</button>
+                        <p class="section-title">Información general</p>
+                        <h5>Datos principales</h5>
                     </div>
                 </div>
-            }
-            <button type="button" class="btn btn-secondary" @onclick="AgregarFase">Agregar fase</button>
-        </div>
 
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Guardar</button>
-            <button type="button" class="btn btn-secondary"
-                    @onclick='() => Nav.NavigateTo("/proyectos")'>
-                Cancelar
-            </button>
+                <div class="grid-2col">
+                    <div class="mb-3 field-wide">
+                        <label class="form-label">Nombre</label>
+                        <InputText class="form-control" @bind-Value="_modelo.Nombre" />
+                        <ValidationMessage For="() => _modelo.Nombre" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Estado</label>
+                        <InputSelect class="form-select" @bind-Value="_modelo.Estado">
+                            @foreach (var e in Enum.GetValues<EstadoProyecto>())
+                            {
+                                <option value="@e">@e</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Presupuesto total</label>
+                        <InputText class="form-control money-input"
+                                   inputmode="numeric"
+                                   Value="@_presupuestoTotalTexto"
+                                   ValueChanged="OnPresupuestoTotalChanged"
+                                   ValueExpression="() => _presupuestoTotalTexto" />
+                    </div>
+
+                    <div class="mb-3 field-wide">
+                        <label class="form-label">Oportunidad</label>
+                        <InputSelect class="form-select" @bind-Value="_modelo.OportunidadId"
+                                     @bind-Value:after="OnOportunidadCambiadaAsync">
+                            <option value="">-- Selecciona una oportunidad --</option>
+                            @foreach (var o in _oportunidades)
+                            {
+                                <option value="@o.Id">@o.NombreProyecto - @o.EmpresaNombre</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="() => _modelo.OportunidadId" />
+                    </div>
+
+                    <div class="mb-3 field-wide">
+                        <label class="form-label">Descripción</label>
+                        <InputTextArea class="form-control textarea-tall" @bind-Value="_modelo.Descripcion" rows="3" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section project-section">
+                <div class="project-section-header">
+                    <div>
+                        <p class="section-title">Asignación</p>
+                        <h5>Equipo y supervisión</h5>
+                    </div>
+                </div>
+
+                <div class="grid-2col">
+                    <div class="mb-3">
+                        <label class="form-label">Área</label>
+                        <InputSelect class="form-select" @bind-Value="_modelo.AreaId"
+                                     @bind-Value:after="OnAreaCambiada">
+                            <option value="0">-- Selecciona un área --</option>
+                            @foreach (var a in _areas)
+                            {
+                                <option value="@a.Id">@a.Nombre</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="() => _modelo.AreaId" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Responsable</label>
+                        <InputSelect class="form-select" @bind-Value="_modelo.ResponsableId">
+                            <option value="">-- Selecciona un responsable --</option>
+                            @foreach (var u in _usuariosFiltrados)
+                            {
+                                <option value="@u.Id">@u.Nombre @u.Apellido</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="() => _modelo.ResponsableId" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Supervisor interno</label>
+                        <InputSelect class="form-select" @bind-Value="_modelo.SupervisorInternoId">
+                            <option value="">-- Sin supervisor interno --</option>
+                            @foreach (var u in _usuarios)
+                            {
+                                <option value="@u.Id">@u.Nombre @u.Apellido</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Supervisor externo</label>
+                        <InputSelect class="form-select" @bind-Value="_modelo.SupervisorExternoId"
+                                     disabled="@(!_modelo.OportunidadId.HasValue)">
+                            <option value="">-- Sin supervisor externo --</option>
+                            @foreach (var c in _contactosEmpresa)
+                            {
+                                <option value="@c.Id">@c.NombreCompleto</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Equipo de trabajo</label>
+                        <InputSelect class="form-select" @bind-Value="_modelo.EquipoTrabajo">
+                            <option value="">-- Sin equipo --</option>
+                            @foreach (var u in _usuarios)
+                            {
+                                <option value="@u.Id">@u.Nombre @u.Apellido</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Soporte</label>
+                        <InputSelect class="form-select" @bind-Value="_modelo.Soporte">
+                            <option value="">-- Sin soporte --</option>
+                            @foreach (var u in _usuarios)
+                            {
+                                <option value="@u.Id">@u.Nombre @u.Apellido</option>
+                            }
+                        </InputSelect>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section project-section">
+                <div class="project-section-header">
+                    <div>
+                        <p class="section-title">Planificación</p>
+                        <h5>Fechas </h5>
+                    </div>
+                </div>
+
+                <div class="grid-2col">
+                    <div class="mb-3">
+                        <label class="form-label">Fecha Inicio</label>
+                        <InputDate class="form-control" @bind-Value="_modelo.FechaInicio" />
+                        <ValidationMessage For="() => _modelo.FechaInicio" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Fecha Fin <span class="text-muted">(opcional)</span></label>
+                        <InputDate class="form-control" @bind-Value="_modelo.FechaFin" />
+                    </div>            
+                </div>
+            </div>
+
+            <div class="form-section project-section project-section-last">
+                <div class="project-section-header">
+                    <div>
+                        <p class="section-title">Fases del proyecto</p>
+                        <h5>Secuencia de trabajo</h5>
+                    </div>
+                    <button type="button" class="btn btn-secondary" @onclick="AgregarFase">Agregar fase</button>
+                </div>
+
+                <div class="phase-list">
+                    @for (var i = 0; i < _modelo.Fases.Count; i++)
+                    {
+                        var index = i;
+                        var fase = _modelo.Fases[index];
+
+                        <div @key="fase"
+                             class="phase-item @(index == _faseArrastradaIndex ? "is-dragging" : "")"
+                             draggable="true"
+                             @ondragstart="() => IniciarArrastreFase(index)"
+                             @ondragend="FinalizarArrastreFase"
+                             @ondragover="(() => {})" @ondragover:preventDefault
+                             @ondragenter="(() => {})" @ondragenter:preventDefault
+                             @ondrop="() => SoltarFase(index)">
+
+                            <div class="phase-handle" aria-hidden="true">
+                                <i class="bi bi-grip-vertical"></i>
+                            </div>
+
+                            <div class="phase-index">@(index + 1)</div>
+
+                            <div class="phase-field">
+                                <label class="form-label">Fase @(index + 1)</label>
+                                <InputText class="form-control" @bind-Value="_modelo.Fases[index].Nombre" />
+                            </div>
+
+                            <button type="button" class="btn btn-outline-danger phase-remove" @onclick="() => QuitarFase(index)">
+                                Quitar
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="project-sticky-actions">
+                <div>
+                    <strong>Editar proyecto</strong>
+                    <span>Los cambios se aplican al guardar.</span>
+                </div>
+                <div class="form-actions form-actions--end">
+                    <button type="button" class="btn btn-secondary"
+                            @onclick='() => Nav.NavigateTo("/proyectos")'>
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                </div>
+            </div>
         </div>
     </EditForm>
 }
@@ -178,6 +279,8 @@ else
     private List<ContactoDto> _contactosEmpresa = new();
     private bool _cargando = true;
     private string? _error;
+    private string _presupuestoTotalTexto = string.Empty;
+    private int? _faseArrastradaIndex;
 
     protected override async Task OnInitializedAsync()
     {
@@ -210,6 +313,7 @@ else
                     Fases = proyecto.Fases
                 };
 
+            _presupuestoTotalTexto = FormatearMonedaCop(_modelo.PresupuestoTotal);
             FiltrarUsuarios();
             await CargarContactosOportunidadAsync();
         }
@@ -270,13 +374,60 @@ else
         _modelo.Fases.RemoveAt(index);
     }
 
-    private void MoverFase(int index, int direccion)
+    private void IniciarArrastreFase(int index)
     {
-        var nuevoIndex = index + direccion;
-        if (nuevoIndex < 0 || nuevoIndex >= _modelo.Fases.Count) return;
+        _faseArrastradaIndex = index;
+    }
 
-        var fase = _modelo.Fases[index];
-        _modelo.Fases.RemoveAt(index);
-        _modelo.Fases.Insert(nuevoIndex, fase);
+    private void SoltarFase(int destinoIndex)
+    {
+        if (!_faseArrastradaIndex.HasValue || _faseArrastradaIndex.Value == destinoIndex) return;
+
+        MoverFase(_faseArrastradaIndex.Value, destinoIndex);
+
+        _faseArrastradaIndex = null;
+
+        StateHasChanged();
+    }
+
+    private void MoverFase(int origenIndex, int destinoIndex)
+    {
+        if (origenIndex < 0 || origenIndex >= _modelo.Fases.Count) return;
+        if (destinoIndex < 0 || destinoIndex >= _modelo.Fases.Count) return;
+
+        var fase = _modelo.Fases[origenIndex];
+        var listaTemporal = _modelo.Fases.ToList();
+        listaTemporal.RemoveAt(origenIndex);
+        listaTemporal.Insert(destinoIndex, fase);
+
+        _modelo.Fases = listaTemporal;
+    }
+
+    private void FinalizarArrastreFase()
+    {
+        _faseArrastradaIndex = null;
+    }
+    private void OnPresupuestoTotalChanged(string? value)
+    {
+        var soloDigitos = new string((value ?? string.Empty).Where(char.IsDigit).ToArray());
+
+        if (string.IsNullOrWhiteSpace(soloDigitos))
+        {
+            _modelo.PresupuestoTotal = null;
+            _presupuestoTotalTexto = string.Empty;
+            return;
+        }
+
+        if (decimal.TryParse(soloDigitos, NumberStyles.Number, CultureInfo.InvariantCulture, out var valor))
+        {
+            _modelo.PresupuestoTotal = valor;
+            _presupuestoTotalTexto = FormatearMonedaCop(valor);
+        }
+    }
+
+    private static string FormatearMonedaCop(decimal? valor)
+    {
+        if (!valor.HasValue) return string.Empty;
+        return valor.Value.ToString("N0", new CultureInfo("es-CO"));
     }
 }
