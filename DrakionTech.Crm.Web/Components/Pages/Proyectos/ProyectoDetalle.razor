@@ -21,7 +21,7 @@
 
 @if (_cargando)
 {
-    <div style="position:relative; min-height:120px;">
+    <div class="ui-card project-detail-loading">
         <div class="card-loading">
             <div class="spinner small"></div>
         </div>
@@ -33,11 +33,13 @@ else if (_proyecto is null)
 }
 else
 {
-    @if (!string.IsNullOrWhiteSpace(_error))
-    {
-        <div class="alert alert-danger">@_error</div>
-    }
+    <div class="project-detail-shell">
+        @if (!string.IsNullOrWhiteSpace(_error))
+        {
+            <div class="alert alert-danger">@_error</div>
+        }
 
+        <div class="project-detail-card">
     <div class="form-section">
         <p class="section-title">Información general</p>
         <div class="grid-2col">
@@ -192,6 +194,8 @@ else
                 </tbody>
             </table>
         }
+        </div>
+    </div>
     </div>
 }
 
