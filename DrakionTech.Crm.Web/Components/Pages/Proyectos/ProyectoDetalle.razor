@@ -1,0 +1,284 @@
+@page "/proyectos/detalle/{Id:int}"
+@using DrakionTech.Crm.Business.DTOs.Proyecto
+@using DrakionTech.Crm.Business.Interfaces
+@using DrakionTech.Crm.Data.Entities.Enums
+@inject IProyectoService ProyectoService
+@inject NavigationManager Nav
+
+<div class="page-header">
+    <div>
+        <h3 class="page-title">@(_proyecto?.Nombre ?? "Detalle del proyecto")</h3>
+        <p class="page-subtitle">Fases, pagos y recordatorios del proyecto</p>
+    </div>
+    <div class="form-actions">
+        <button class="btn btn-secondary" @onclick='() => Nav.NavigateTo("/proyectos")'>Volver</button>
+        @if (_proyecto is not null)
+        {
+            <button class="btn btn-primary" @onclick='() => Nav.NavigateTo($"/proyectos/editar/{Id}")'>Editar</button>
+        }
+    </div>
+</div>
+
+@if (_cargando)
+{
+    <div class="ui-card project-detail-loading">
+        <div class="card-loading">
+            <div class="spinner small"></div>
+        </div>
+    </div>
+}
+else if (_proyecto is null)
+{
+    <div class="alert alert-danger">No se encontró el proyecto.</div>
+}
+else
+{
+    <div class="project-detail-shell">
+        @if (!string.IsNullOrWhiteSpace(_error))
+        {
+            <div class="alert alert-danger">@_error</div>
+        }
+
+        <div class="project-detail-card">
+    <div class="form-section">
+        <p class="section-title">Información general</p>
+        <div class="grid-2col">
+            <p><strong>Empresa:</strong> @(_proyecto.EmpresaNombre ?? "-")</p>
+            <p><strong>Oportunidad:</strong> @(_proyecto.OportunidadNombre ?? "-")</p>
+            <p><strong>Área:</strong> @_proyecto.AreaNombre</p>
+            <p><strong>Responsable:</strong> @_proyecto.ResponsableNombre</p>
+            <p><strong>Supervisor interno:</strong> @(_proyecto.SupervisorInternoNombre ?? "-")</p>
+            <p><strong>Supervisor externo:</strong> @(_proyecto.SupervisorExternoNombre ?? "-")</p>
+            <p><strong>Fecha inicio:</strong> @_proyecto.FechaInicio.ToShortDateString()</p>
+            <p><strong>Fecha fin:</strong> @(_proyecto.FechaFin?.ToShortDateString() ?? "-")</p>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <p class="section-title">Fases</p>
+        <table class="ui-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nombre</th>
+                    <th>Avance</th>
+                    <th>Completada</th>
+                    <th>Fechas</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < _proyecto.Fases.Count; i++)
+                {
+                    var fase = _proyecto.Fases[i];
+                    <tr>
+                        <td>@(i + 1)</td>
+                        <td>@fase.Nombre</td>
+                        <td>@fase.PorcentajeAvance%</td>
+                        <td>@(fase.Completada ? "Sí" : "No")</td>
+                        <td>@(fase.FechaInicio?.ToShortDateString() ?? "-") - @(fase.FechaFin?.ToShortDateString() ?? "-")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="form-section">
+        <p class="section-title">@(_editandoPagoId.HasValue ? "Editar pago" : "Nuevo pago")</p>
+        <EditForm Model="_pago" OnValidSubmit="GuardarPagoAsync">
+            <DataAnnotationsValidator />
+            <div class="grid-2col">
+                <div class="mb-3">
+                    <label class="form-label">Valor</label>
+                    <InputNumber class="form-control" @bind-Value="_pago.Valor" />
+                    <ValidationMessage For="() => _pago.Valor" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Fecha programada</label>
+                    <InputDate class="form-control" @bind-Value="_pago.FechaProgramada" />
+                    <ValidationMessage For="() => _pago.FechaProgramada" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Fecha de pago</label>
+                    <InputDate class="form-control" @bind-Value="_pago.FechaPago" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Estado</label>
+                    <InputSelect class="form-select" @bind-Value="_pago.Estado">
+                        @foreach (var estado in Enum.GetValues<EstadoPagoProyecto>())
+                        {
+                            <option value="@estado">@estado</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Días de anticipación</label>
+                    <InputNumber class="form-control" @bind-Value="_pago.DiasAnticipacionRecordatorio" />
+                    <ValidationMessage For="() => _pago.DiasAnticipacionRecordatorio" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Descripción del recordatorio</label>
+                    <InputTextArea class="form-control" @bind-Value="_pago.DescripcionRecordatorio" rows="2" />
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Guardar pago</button>
+                @if (_editandoPagoId.HasValue)
+                {
+                    <button type="button" class="btn btn-secondary" @onclick="CancelarEdicionPago">Cancelar edición</button>
+                }
+            </div>
+        </EditForm>
+    </div>
+
+    <div class="form-section">
+        <p class="section-title">Pagos registrados</p>
+        <table class="ui-table">
+            <thead>
+                <tr>
+                    <th>Valor</th>
+                    <th>Programado</th>
+                    <th>Pagado</th>
+                    <th>Estado</th>
+                    <th>Recordatorio</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var pago in _proyecto.Pagos)
+                {
+                    <tr>
+                        <td>@pago.Valor.ToString("C0")</td>
+                        <td>@pago.FechaProgramada.ToShortDateString()</td>
+                        <td>@(pago.FechaPago?.ToShortDateString() ?? "-")</td>
+                        <td><span class="badge @ObtenerBadgePago(pago.Estado)">@pago.EstadoTexto</span></td>
+                        <td>@pago.RecordatorioTexto</td>
+                        <td>
+                            <div class="ui-actions">
+                                <button class="btn btn-sm btn-outline-primary" @onclick="() => EditarPago(pago)">Editar</button>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => EliminarPagoAsync(pago.Id)">Eliminar</button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="form-section">
+        <p class="section-title">Recordatorios pendientes</p>
+        @if (!_proyecto.Pagos.Any(p => p.TieneRecordatorioPendiente))
+        {
+            <p>No hay recordatorios pendientes.</p>
+        }
+        else
+        {
+            <table class="ui-table">
+                <thead>
+                    <tr>
+                        <th>Fecha recordatorio</th>
+                        <th>Pago programado</th>
+                        <th>Valor</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var pago in _proyecto.Pagos.Where(p => p.TieneRecordatorioPendiente).OrderBy(p => p.FechaRecordatorio))
+                    {
+                        <tr>
+                            <td>@pago.FechaRecordatorio!.Value.ToShortDateString()</td>
+                            <td>@pago.FechaProgramada.ToShortDateString()</td>
+                            <td>@pago.Valor.ToString("C0")</td>
+                            <td>@(pago.DescripcionRecordatorio ?? "-")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        </div>
+    </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private ProyectoDto? _proyecto;
+    private PagoProyectoDto _pago = new();
+    private int? _editandoPagoId;
+    private bool _cargando = true;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarAsync();
+    }
+
+    private async Task CargarAsync()
+    {
+        _cargando = true;
+        _proyecto = await ProyectoService.ObtenerPorIdAsync(Id);
+        _cargando = false;
+    }
+
+    private async Task GuardarPagoAsync()
+    {
+        try
+        {
+            _error = null;
+
+            if (_editandoPagoId.HasValue)
+            {
+                _pago.Id = _editandoPagoId.Value;
+                await ProyectoService.ActualizarPagoAsync(Id, _pago);
+            }
+            else
+            {
+                await ProyectoService.AgregarPagoAsync(Id, _pago);
+            }
+
+            CancelarEdicionPago();
+            await CargarAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private void EditarPago(PagoProyectoDto pago)
+    {
+        _editandoPagoId = pago.Id;
+        _pago = new PagoProyectoDto
+        {
+            Id = pago.Id,
+            ProyectoId = pago.ProyectoId,
+            Valor = pago.Valor,
+            FechaProgramada = pago.FechaProgramada,
+            FechaPago = pago.FechaPago,
+            Estado = pago.Estado,
+            DiasAnticipacionRecordatorio = pago.DiasAnticipacionRecordatorio,
+            DescripcionRecordatorio = pago.DescripcionRecordatorio
+        };
+    }
+
+    private async Task EliminarPagoAsync(int pagoId)
+    {
+        await ProyectoService.EliminarPagoAsync(Id, pagoId);
+        await CargarAsync();
+    }
+
+    private void CancelarEdicionPago()
+    {
+        _editandoPagoId = null;
+        _pago = new PagoProyectoDto();
+    }
+
+    private string ObtenerBadgePago(EstadoPagoProyecto estado) => estado switch
+    {
+        EstadoPagoProyecto.Pendiente => "badge-secondary",
+        EstadoPagoProyecto.Pagado => "badge-success",
+        EstadoPagoProyecto.Vencido => "badge-danger",
+        EstadoPagoProyecto.Cancelado => "badge-secondary",
+        _ => "badge-secondary"
+    };
+}

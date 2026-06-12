@@ -25,16 +25,15 @@ public class CrearProyectoDto
     [Range(1, int.MaxValue, ErrorMessage = "Selecciona un responsable.")]
     public int ResponsableId { get; set; }
 
-    public int? SupervisorId { get; set; }
+    public int? SupervisorInternoId { get; set; }
+    public int? SupervisorExternoId { get; set; }
+
+    [Required(ErrorMessage = "Selecciona una oportunidad.")]
     public int? OportunidadId { get; set; }
 
     public decimal? PresupuestoTotal { get; set; }
     public string? EquipoTrabajo { get; set; }
     public string? Soporte { get; set; }
-
-    public DateTime? FechaPago { get; set; }
-    public string? RecordatorioPago { get; set; }
-    public decimal? MontoPagado { get; set; }
 
     public string? Observaciones { get; set; }
     public string? DocumentosUrl { get; set; }
@@ -44,18 +43,18 @@ public class CrearProyectoDto
 
     public static List<FaseProyectoDto> GenerarFasesDefault() => new()
     {
-        new() { Nombre = "Firma de contrato" },
-        new() { Nombre = "Pago del proyecto" },
-        new() { Nombre = "Conformación del equipo" },
-        new() { Nombre = "Reunión inicial" },
-        new() { Nombre = "Información general" },
-        new() { Nombre = "Ejecución del proyecto" },
-        new() { Nombre = "Seguimiento de fases" },
-        new() { Nombre = "Actas de entrega de fase" },
-        new() { Nombre = "Reunión de cierre" },
-        new() { Nombre = "Acta final" },
-        new() { Nombre = "Otrosí" },
-        new() { Nombre = "Calificación" },
-        new() { Nombre = "Cierre del proyecto" }
+        new() { EtapaFlujo = EtapaFlujoProyecto.FirmaContrato, Nombre = "Firma de contrato" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.PagoProyecto, Nombre = "Pago del proyecto" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.ConformacionEquipo, Nombre = "Conformación del equipo" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.ReunionInicial, Nombre = "Reunión inicial" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.InformacionGeneral, Nombre = "Información general" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.EjecucionProyecto, Nombre = "Ejecución del proyecto" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.SeguimientoFases, Nombre = "Seguimiento de fases" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.ActasEntregaFase, Nombre = "Actas de entrega de fase" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.ReunionCierre, Nombre = "Reunión de cierre" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.ActaFinal, Nombre = "Acta final" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.Otrosi, Nombre = "Otrosí" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.Calificacion, Nombre = "Calificación" },
+        new() { EtapaFlujo = EtapaFlujoProyecto.CierreProyecto, Nombre = "Cierre del proyecto" }
     };
 }

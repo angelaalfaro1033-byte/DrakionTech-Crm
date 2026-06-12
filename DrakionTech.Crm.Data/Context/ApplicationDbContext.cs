@@ -38,6 +38,7 @@ namespace DrakionTech.Crm.Data.Context
         public DbSet<EmpleadoSalario> EmpleadoSalarios { get; set; } = null!;
         public DbSet<Area> Areas { get; set; }
         public DbSet<Proyecto> Proyectos { get; set; }
+        public DbSet<PagoProyecto> PagosProyecto { get; set; } = null!;
         public DbSet<SectorEmpresa> SectoresEmpresa { get; set; } = null!;
         public DbSet<SubsectorEmpresa> SubsectoresEmpresa { get; set; } = null!;
         public DbSet<EmpresaCorreo> EmpresaCorreos { get; set; } = null!;
@@ -72,6 +73,7 @@ namespace DrakionTech.Crm.Data.Context
             modelBuilder.Entity<Area>()  .HasOne(a => a.Responsable) .WithMany() .HasForeignKey(a => a.ResponsableId) .OnDelete(DeleteBehavior.SetNull) .IsRequired(false);
             modelBuilder.Entity<Usuario>() .HasOne(u => u.Area).WithMany(a => a.Usuarios) .HasForeignKey(u => u.AreaId) .OnDelete(DeleteBehavior.SetNull) .IsRequired(false);
             modelBuilder.ApplyConfiguration(new ProyectoConfiguration());
+            modelBuilder.ApplyConfiguration(new PagoProyectoConfiguration());
             modelBuilder.ApplyConfiguration(new SectorEmpresaConfiguration());
             modelBuilder.ApplyConfiguration(new SubsectorEmpresaConfiguration());
             modelBuilder.ApplyConfiguration(new EmpresaCorreoConfiguration());

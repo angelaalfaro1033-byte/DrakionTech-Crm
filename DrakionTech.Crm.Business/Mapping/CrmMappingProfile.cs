@@ -107,12 +107,18 @@ namespace DrakionTech.Crm.Business.Mapping
                     o => o.MapFrom(s => s.Area.Nombre))
                 .ForMember(d => d.ResponsableNombre,
                     o => o.MapFrom(s => s.Responsable.Nombre + " " + s.Responsable.Apellido))
-                .ForMember(d => d.SupervisorNombre,
-                    o => o.MapFrom(s => s.Supervisor != null
-                        ? s.Supervisor.Nombre + " " + s.Supervisor.Apellido
+                .ForMember(d => d.SupervisorInternoNombre,
+                    o => o.MapFrom(s => s.SupervisorInterno != null
+                        ? s.SupervisorInterno.Nombre + " " + s.SupervisorInterno.Apellido
+                        : null))
+                .ForMember(d => d.SupervisorExternoNombre,
+                    o => o.MapFrom(s => s.SupervisorExterno != null
+                        ? s.SupervisorExterno.Nombre + " " + s.SupervisorExterno.Apellido
                         : null))
                 .ForMember(d => d.OportunidadNombre,
                     o => o.MapFrom(s => s.Oportunidad != null ? s.Oportunidad.NombreProyecto : null))
+                .ForMember(d => d.EmpresaId,
+                    o => o.MapFrom(s => s.Oportunidad != null ? (int?)s.Oportunidad.EmpresaId : null))
                 .ForMember(d => d.EmpresaNombre,
                     o => o.MapFrom(s => s.Oportunidad != null && s.Oportunidad.Empresa != null
                         ? s.Oportunidad.Empresa.Nombre
@@ -137,6 +143,16 @@ namespace DrakionTech.Crm.Business.Mapping
                 .ForMember(d => d.Id, o => o.Ignore())
                 .ForMember(d => d.FasesJson,
                     o => o.MapFrom(s => System.Text.Json.JsonSerializer.Serialize(s.Fases, (System.Text.Json.JsonSerializerOptions?)null)))
+                .ForMember(d => d.FechaCreacion, o => o.Ignore())
+                .ForMember(d => d.FechaUltimaModificacion,
+                    o => o.MapFrom(_ => DateTime.UtcNow));
+
+            CreateMap<PagoProyecto, PagoProyectoDto>();
+
+            CreateMap<PagoProyectoDto, PagoProyecto>()
+                .ForMember(d => d.Id, o => o.Ignore())
+                .ForMember(d => d.ProyectoId, o => o.Ignore())
+                .ForMember(d => d.Proyecto, o => o.Ignore())
                 .ForMember(d => d.FechaCreacion, o => o.Ignore())
                 .ForMember(d => d.FechaUltimaModificacion,
                     o => o.MapFrom(_ => DateTime.UtcNow));

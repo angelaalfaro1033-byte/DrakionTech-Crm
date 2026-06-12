@@ -18,7 +18,10 @@ public class ProyectoRepository : IProyectoRepository
         return _context.Proyectos
             .Include(p => p.Area)
             .Include(p => p.Responsable)
+            .Include(p => p.SupervisorInterno)
+            .Include(p => p.SupervisorExterno)
             .Include(p => p.Oportunidad)
+                .ThenInclude(o => o!.Empresa)
             .AsQueryable();
     }
 
@@ -27,7 +30,10 @@ public class ProyectoRepository : IProyectoRepository
         return await _context.Proyectos
             .Include(p => p.Area)
             .Include(p => p.Responsable)
+            .Include(p => p.SupervisorInterno)
+            .Include(p => p.SupervisorExterno)
             .Include(p => p.Oportunidad)
+                .ThenInclude(o => o!.Empresa)
             .AsNoTracking()
             .ToListAsync();
     }
@@ -37,7 +43,11 @@ public class ProyectoRepository : IProyectoRepository
         return await _context.Proyectos
             .Include(p => p.Area)
             .Include(p => p.Responsable)
+            .Include(p => p.SupervisorInterno)
+            .Include(p => p.SupervisorExterno)
             .Include(p => p.Oportunidad)
+                .ThenInclude(o => o!.Empresa)
+            .Include(p => p.Pagos.OrderBy(pg => pg.FechaProgramada))
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 
