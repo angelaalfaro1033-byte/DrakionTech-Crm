@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DrakionTech.Crm.Data.Entities
 {
-    public class Oportunidad
+    public class Oportunidad : DrakionTech.Crm.Data.Entities.Base.AuditableEntity
     {
         public int Id { get; set; }
 

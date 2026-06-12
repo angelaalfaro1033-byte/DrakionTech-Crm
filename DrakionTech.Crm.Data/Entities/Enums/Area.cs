@@ -1,7 +1,7 @@
 ﻿namespace DrakionTech.Crm.Data.Entities;
 
 /// <summary>Entidad que representa un área organizacional.</summary>
-public class Area
+public class Area : DrakionTech.Crm.Data.Entities.Base.AuditableEntity
 {
     public int Id { get; set; }
 

@@ -1,6 +1,6 @@
 ﻿namespace DrakionTech.Crm.Data.Entities;
 
-public class Usuario
+public class Usuario : DrakionTech.Crm.Data.Entities.Base.AuditableEntity
 {
     public int Id { get; set; }
     public string Nombre { get; set; } = null!;

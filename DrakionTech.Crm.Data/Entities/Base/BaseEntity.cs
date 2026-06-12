@@ -1,6 +1,6 @@
 ﻿namespace DrakionTech.Crm.Data.Entities.Base
 {
-    public abstract class BaseEntity
+    public abstract class BaseEntity : AuditableEntity
     {
         public int Id { get; set; }
         public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;

@@ -2,7 +2,7 @@
 
 namespace DrakionTech.Crm.Data.Entities
 {
-    public class Empleado
+    public class Empleado : DrakionTech.Crm.Data.Entities.Base.AuditableEntity
     {
         public int Id { get; set; }
         public TipoDocumento TipoDocumento { get; set; }

@@ -1,6 +1,6 @@
 ﻿namespace DrakionTech.Crm.Data.Entities
 {
-    public class EmpleadoSalario
+    public class EmpleadoSalario : DrakionTech.Crm.Data.Entities.Base.AuditableEntity
     {
         public int Id { get; set; }
         public int EmpleadoId { get; set; }

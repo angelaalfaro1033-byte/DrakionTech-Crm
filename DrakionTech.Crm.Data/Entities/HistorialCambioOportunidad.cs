@@ -2,7 +2,7 @@
 
 namespace DrakionTech.Crm.Data.Entities
 {
-    public class HistorialCambioOportunidad
+    public class HistorialCambioOportunidad : DrakionTech.Crm.Data.Entities.Base.AuditableEntity
     {
         public int Id { get; set; } 
 

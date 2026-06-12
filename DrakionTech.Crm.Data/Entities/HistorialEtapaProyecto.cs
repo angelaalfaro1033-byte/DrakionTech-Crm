@@ -2,7 +2,7 @@
 
 namespace DrakionTech.Crm.Data.Entities;
 
-public class HistorialEtapaProyecto
+public class HistorialEtapaProyecto : DrakionTech.Crm.Data.Entities.Base.AuditableEntity
 {
     public int Id { get; set; }
     public int ProyectoId { get; set; }

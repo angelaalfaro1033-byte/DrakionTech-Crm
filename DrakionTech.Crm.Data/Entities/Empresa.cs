@@ -2,7 +2,7 @@
 
 namespace DrakionTech.Crm.Data.Entities
 {
-    public class Empresa
+    public class Empresa : DrakionTech.Crm.Data.Entities.Base.AuditableEntity
     {
         public int Id { get; set; }
 

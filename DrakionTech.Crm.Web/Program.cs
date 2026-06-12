@@ -15,6 +15,8 @@ using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 using DrakionTech.Crm.Data.Entities;
 using DrakionTech.Crm.Data.Entities.Enums;
+using DrakionTech.Crm.Data.Services;
+using DrakionTech.Crm.Web.Services;
 // BUILDER
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +45,7 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserContext, HttpCurrentUserContext>();
 
 // EMAIL
 builder.Services.Configure<EmailSettings>(

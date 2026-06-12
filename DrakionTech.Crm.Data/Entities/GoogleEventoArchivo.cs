@@ -1,6 +1,6 @@
 ﻿namespace DrakionTech.Crm.Data.Entities
 {
-    public class GoogleEventoArchivo
+    public class GoogleEventoArchivo : DrakionTech.Crm.Data.Entities.Base.AuditableEntity
     {
         public int Id { get; set; }
 

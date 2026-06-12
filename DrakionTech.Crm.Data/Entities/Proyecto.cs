@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DrakionTech.Crm.Data.Entities;
 
-public class Proyecto
+public class Proyecto : DrakionTech.Crm.Data.Entities.Base.AuditableEntity
 {
     public int Id { get; set; }
     public string Nombre { get; set; } = string.Empty;
