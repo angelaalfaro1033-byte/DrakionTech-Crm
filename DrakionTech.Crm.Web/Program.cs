@@ -69,6 +69,10 @@ builder.Services.AddScoped<IAreaService, AreaService>();
 builder.Services.AddScoped<IProyectoRepository, ProyectoRepository>();
 builder.Services.AddScoped<IProyectoService, ProyectoService>();
 
+//MARKETING
+builder.Services.AddScoped<IPublicacionMarketingRepository, PublicacionMarketingRepository>();
+builder.Services.AddScoped<IPublicacionMarketingService, PublicacionMarketingService>();
+
 //Roles
 builder.Services.AddScoped<IRolUsuarioService, RolUsuarioService>();
 

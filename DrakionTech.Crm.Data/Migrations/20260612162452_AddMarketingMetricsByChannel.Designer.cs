@@ -4,6 +4,7 @@ using DrakionTech.Crm.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DrakionTech.Crm.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260612162452_AddMarketingMetricsByChannel")]
+    partial class AddMarketingMetricsByChannel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1153,50 +1156,6 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.ToTable("Oportunidades", (string)null);
                 });
 
-            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.PagoProyecto", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("DescripcionRecordatorio")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<int?>("DiasAnticipacionRecordatorio")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Estado")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("FechaCreacion")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("FechaPago")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("FechaProgramada")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("FechaUltimaModificacion")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ProyectoId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Valor")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProyectoId");
-
-                    b.ToTable("PagosProyecto", (string)null);
-                });
-
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Pais", b =>
                 {
                     b.Property<int>("Id")
@@ -1528,8 +1487,14 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<DateTime>("FechaInicio")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("FechaPago")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime?>("FechaUltimaModificacion")
                         .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("MontoPagado")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -1545,16 +1510,16 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<decimal?>("PresupuestoTotal")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("RecordatorioPago")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("ResponsableId")
                         .HasColumnType("int");
 
                     b.Property<string>("Soporte")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("SupervisorExternoId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("SupervisorInternoId")
+                    b.Property<int?>("SupervisorId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -1565,9 +1530,7 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.HasIndex("ResponsableId");
 
-                    b.HasIndex("SupervisorExternoId");
-
-                    b.HasIndex("SupervisorInternoId");
+                    b.HasIndex("SupervisorId");
 
                     b.ToTable("Proyectos", (string)null);
                 });
@@ -2478,17 +2441,6 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Navigation("Empresa");
                 });
 
-            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.PagoProyecto", b =>
-                {
-                    b.HasOne("DrakionTech.Crm.Data.Entities.Proyecto", "Proyecto")
-                        .WithMany("Pagos")
-                        .HasForeignKey("ProyectoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Proyecto");
-                });
-
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.PrefijoTelefonico", b =>
                 {
                     b.HasOne("DrakionTech.Crm.Data.Entities.Pais", "Pais")
@@ -2530,15 +2482,9 @@ namespace DrakionTech.Crm.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("DrakionTech.Crm.Data.Entities.Contacto", "SupervisorExterno")
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "Supervisor")
                         .WithMany()
-                        .HasForeignKey("SupervisorExternoId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "SupervisorInterno")
-                        .WithMany()
-                        .HasForeignKey("SupervisorInternoId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("SupervisorId");
 
                     b.Navigation("Area");
 
@@ -2546,9 +2492,7 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.Navigation("Responsable");
 
-                    b.Navigation("SupervisorExterno");
-
-                    b.Navigation("SupervisorInterno");
+                    b.Navigation("Supervisor");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.PublicacionMarketing", b =>
@@ -2653,6 +2597,15 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Navigation("Ciudades");
 
                     b.Navigation("PrefijosTelefonicos");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.PublicacionMarketing", b =>
+                {
+                    b.Navigation("Archivos");
+
+                    b.Navigation("Metricas");
+
+                    b.Navigation("RedesSociales");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.SectorEmpresa", b =>

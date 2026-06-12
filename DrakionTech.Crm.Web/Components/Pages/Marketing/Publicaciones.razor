@@ -1,0 +1,170 @@
+﻿@page "/marketing/publicaciones"
+@attribute [Authorize]
+
+@using DrakionTech.Crm.Business.DTOs.Marketing
+@using DrakionTech.Crm.Business.Interfaces
+@using DrakionTech.Crm.Web.Components
+@using DrakionTech.Crm.Web.Shared
+
+@inject IPublicacionMarketingService MarketingService
+
+@inherits PaginacionBase
+
+<div class="empleados-container">
+
+    <div class="page-header">
+        <div class="header-text">
+            <h1 class="page-title">Marketing</h1>
+            <p class="page-subtitle">
+                Gestiona campañas, publicaciones y material publicitario
+            </p>
+        </div>
+
+        <div>
+            <a class="btn btn-primary" href="/marketing/crear-publicacion">
+                + Nueva Publicación
+            </a>
+        </div>
+    </div>
+
+    <MarketingTabs />
+
+    <FiltroTabla TItem="PublicacionMarketingDto"
+                 PlaceholderBusqueda="Buscar campaña o responsable..."
+                 MostrarFiltroEstado="false"
+                 OnFiltroChanged="OnFiltroChanged" />
+
+    @if (cargando)
+    {
+        <p>Cargando publicaciones...</p>
+    }
+    else if (!publicaciones.Any())
+    {
+        <div class="alert alert-info">
+            No hay publicaciones registradas.
+        </div>
+    }
+    else
+    {
+        <div class="ui-card">
+
+            <table class="ui-table">
+
+                <thead>
+                    <tr>
+                        <th>Campaña</th>
+                        <th>Responsable</th>
+                        <th>Programada</th>
+                        <th>Estado</th>
+                        <th>Redes</th>
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (var item in publicaciones)
+                    {
+                        <tr>
+
+                            <td>
+                                <strong>@item.Nombre</strong>
+                            </td>
+
+                            <td>
+                                @item.ResponsableNombre
+                            </td>
+
+                            <td>
+                                @item.FechaPublicacionProgramada.ToString("dd/MM/yyyy")
+                            </td>
+
+                            <td>
+                                <span class="badge badge-success">
+                                    @item.EstadoTexto
+                                </span>
+                            </td>
+
+                            <td>
+                                @(item.RedesSociales?.Count ?? 0)
+                            </td>
+
+                            <td class="text-end">
+
+                                <div class="ui-actions">
+
+                                    <a href="/marketing/editar-publicacion/@item.Id"
+                                       title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+            <Paginacion PaginaActual="paginaActual"
+                        TotalPaginas="totalPaginas"
+                        OnPaginaChanged="IrAPagina" />
+
+        </div>
+    }
+
+</div>
+
+@code {
+
+    private List<PublicacionMarketingDto> publicaciones = new();
+
+    private bool cargando = true;
+
+    private string? busqueda;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Cargar();
+    }
+
+    private async Task Cargar()
+    {
+        cargando = true;
+
+        StateHasChanged();
+
+        var resultado =
+            await MarketingService.ObtenerTodosConPaginacionAsync(
+                busqueda,
+                paginaActual,
+                tamañoPagina);
+
+        publicaciones = resultado.Items;
+
+        totalRegistros = resultado.TotalRegistros;
+        totalPaginas = resultado.TotalPaginas;
+
+        cargando = false;
+    }
+
+    private async Task OnFiltroChanged(
+        Dictionary<string, string?> valores)
+    {
+        busqueda = valores.GetValueOrDefault("busqueda");
+
+        paginaActual = 1;
+
+        await Cargar();
+    }
+
+    private async Task IrAPagina(int pagina)
+    {
+        await CambiarPaginaAsync(
+            pagina,
+            Cargar);
+    }
+}

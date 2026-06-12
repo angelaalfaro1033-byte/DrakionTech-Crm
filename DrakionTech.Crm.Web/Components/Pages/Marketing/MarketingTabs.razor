@@ -1,0 +1,21 @@
+﻿@inject NavigationManager Navigation
+
+<div class="etabs">
+    <a class="etabs-item @IsActive("/marketing/publicaciones")"
+       href="/marketing/publicaciones">
+        Publicaciones
+    </a>
+
+    <a class="etabs-item @IsActive("/marketing/metricas")"
+       href="/marketing/metricas">
+        Métricas
+    </a>
+</div>
+
+@code {
+    private string IsActive(string path)
+    {
+        var uri = new Uri(Navigation.Uri).AbsolutePath;
+        return uri.StartsWith(path) ? "active" : string.Empty;
+    }
+}

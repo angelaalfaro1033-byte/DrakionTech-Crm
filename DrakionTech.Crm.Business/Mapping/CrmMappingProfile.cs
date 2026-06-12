@@ -8,6 +8,7 @@ using DrakionTech.Crm.Business.DTOs.PrefijoTelefonico;
 using DrakionTech.Crm.Business.DTOs.Propuesta;
 using DrakionTech.Crm.Business.DTOs.Proyecto;
 using DrakionTech.Crm.Business.DTOs.Ubicacion;
+using DrakionTech.Crm.Business.DTOs.Marketing;
 using DrakionTech.Crm.Data.Entities;
 using DrakionTech.Crm.Data.Entities.Enums;
 using System.ComponentModel.DataAnnotations;
@@ -100,7 +101,6 @@ namespace DrakionTech.Crm.Business.Mapping
                         ? s.ActividadPrevia.TipoActividad.Nombre
                         : null));
 
-            //Proyecto
             // PROYECTO
             CreateMap<Proyecto, ProyectoDto>()
                 .ForMember(d => d.AreaNombre,
@@ -170,7 +170,29 @@ namespace DrakionTech.Crm.Business.Mapping
             // PREFIJO TELEFONICO
             CreateMap<PrefijoTelefonico, PrefijoTelefonicoDto>();
 
-        
+            //MARKETING
+            CreateMap<PublicacionRedSocial, PublicacionRedSocialDto>();
+
+            CreateMap<MetricaPublicacion, MetricaPublicacionDto>();
+
+            CreateMap<RedSocialPublicacionDto, PublicacionRedSocial>();
+
+            CreateMap<PublicacionMarketing, PublicacionMarketingDto>()
+                .ForMember(d => d.ResponsableNombre,
+                    o => o.MapFrom(s =>
+                        s.Responsable.Nombre + " " + s.Responsable.Apellido));
+
+            CreateMap<CrearPublicacionMarketingDto, PublicacionMarketing>();
+
+            CreateMap<ArchivoPublicacionMarketing, ArchivoPublicacionDto>();
+
+            CreateMap<ArchivoPublicacionDto, ArchivoPublicacionMarketing>();
+
+            CreateMap<ActualizarPublicacionMarketingDto, PublicacionMarketing>()
+                .ForMember(d => d.Id, o => o.Ignore())
+                .ForMember(d => d.FechaCreacion, o => o.Ignore())
+                .ForMember(d => d.FechaActualizacion,
+                    o => o.MapFrom(_ => DateTime.UtcNow));
         }
 
         private static string GetDisplayName(Enum value)
