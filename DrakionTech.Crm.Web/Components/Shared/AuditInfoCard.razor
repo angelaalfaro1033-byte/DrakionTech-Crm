@@ -1,0 +1,68 @@
+@using DrakionTech.Crm.Business.DTOs
+
+@if (AuditInfo is not null)
+{
+    <aside class="audit-card" aria-label="Información del registro">
+        <div class="audit-card__header">
+            <span class="audit-card__icon">
+                <i class="bi bi-shield-check"></i>
+            </span>
+            <div>
+                <p class="audit-card__eyebrow">Información del registro</p>
+                <h6 class="audit-card__title">Auditoría</h6>
+            </div>
+        </div>
+
+        <div class="audit-card__grid">
+            <div class="audit-card__item">
+                <span class="audit-card__label">
+                    <i class="bi bi-person-plus"></i>
+                    Creado por
+                </span>
+                <strong>@Usuario(AuditInfo.CreatedByUserName)</strong>
+            </div>
+
+            <div class="audit-card__item">
+                <span class="audit-card__label">
+                    <i class="bi bi-calendar-plus"></i>
+                    Fecha de creación
+                </span>
+                <strong>@Fecha(AuditInfo.CreatedAt)</strong>
+            </div>
+
+            <div class="audit-card__item">
+                <span class="audit-card__label">
+                    <i class="bi bi-person-gear"></i>
+                    Última modificación
+                </span>
+                <strong>@UsuarioModificacion()</strong>
+            </div>
+
+            @if (AuditInfo.ModifiedAt.HasValue)
+            {
+                <div class="audit-card__item">
+                    <span class="audit-card__label">
+                        <i class="bi bi-calendar-check"></i>
+                        Fecha de modificación
+                    </span>
+                    <strong>@Fecha(AuditInfo.ModifiedAt)</strong>
+                </div>
+            }
+        </div>
+    </aside>
+}
+
+@code {
+    [Parameter] public AuditInfoDto? AuditInfo { get; set; }
+
+    private static string Usuario(string? usuario)
+        => string.IsNullOrWhiteSpace(usuario) ? "Sin usuario registrado" : usuario;
+
+    private static string Fecha(DateTime? fecha)
+        => fecha.HasValue ? fecha.Value.ToString("dd/MM/yyyy HH:mm") : "Sin fecha registrada";
+
+    private string UsuarioModificacion()
+        => AuditInfo?.ModifiedAt.HasValue == true
+            ? Usuario(AuditInfo.ModifiedByUserName)
+            : "Sin modificaciones registradas";
+}

@@ -10,6 +10,8 @@ using DrakionTech.Crm.Business.DTOs.Proyecto;
 using DrakionTech.Crm.Business.DTOs.Ubicacion;
 using DrakionTech.Crm.Business.DTOs.Marketing;
 using DrakionTech.Crm.Data.Entities;
+using DrakionTech.Crm.Data.Entities.Base;
+using DrakionTech.Crm.Business.DTOs;
 using DrakionTech.Crm.Data.Entities.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
@@ -27,6 +29,8 @@ namespace DrakionTech.Crm.Business.Mapping
             CreateMap<ActualizarEmpresaDto, Empresa>();
 
             CreateMap<Empresa, EmpresaDto>()
+                .ForMember(dest => dest.AuditInfo,
+                    opt => opt.MapFrom(src => MapAuditInfo(src)))
                 .ForMember(dest => dest.PaisNombre,
                     opt => opt.MapFrom(src => src.Pais != null ? src.Pais.Nombre : string.Empty))
                 .ForMember(dest => dest.CiudadNombre,
@@ -51,6 +55,8 @@ namespace DrakionTech.Crm.Business.Mapping
                     opt => opt.MapFrom(src => src.RolContactoId));
 
             CreateMap<Contacto, ContactoDto>()
+                .ForMember(dest => dest.AuditInfo,
+                    opt => opt.MapFrom(src => MapAuditInfo(src)))
                 .ForMember(dest => dest.EmpresaNombre,
                     opt => opt.MapFrom(src => src.Empresa!.Nombre))
                 .ForMember(dest => dest.RolNombre,
@@ -60,6 +66,8 @@ namespace DrakionTech.Crm.Business.Mapping
             CreateMap<CrearOportunidadDto, Oportunidad>();
             CreateMap<ActualizarOportunidadDto, Oportunidad>();
             CreateMap<Oportunidad, OportunidadDto>()
+                .ForMember(d => d.AuditInfo,
+                    o => o.MapFrom(s => MapAuditInfo(s)))
                 .ForMember(d => d.EmpresaNombre,
                     o => o.MapFrom(s => s.Empresa!.Nombre))
                 .ForMember(d => d.ContactoPrincipalNombre,
@@ -76,6 +84,8 @@ namespace DrakionTech.Crm.Business.Mapping
             CreateMap<TipoActividad, TipoActividadDto>();
 
             CreateMap<Actividad, ActividadDto>()
+                .ForMember(d => d.AuditInfo,
+                    o => o.MapFrom(s => MapAuditInfo(s)))
                 .ForMember(d => d.Fecha,
                     o => o.MapFrom(s => s.Inicio))
                 .ForMember(d => d.FechaVencimiento,
@@ -103,6 +113,8 @@ namespace DrakionTech.Crm.Business.Mapping
 
             // PROYECTO
             CreateMap<Proyecto, ProyectoDto>()
+                .ForMember(d => d.AuditInfo,
+                    o => o.MapFrom(s => MapAuditInfo(s)))
                 .ForMember(d => d.AreaNombre,
                     o => o.MapFrom(s => s.Area.Nombre))
                 .ForMember(d => d.ResponsableNombre,
@@ -147,7 +159,9 @@ namespace DrakionTech.Crm.Business.Mapping
                 .ForMember(d => d.FechaUltimaModificacion,
                     o => o.MapFrom(_ => DateTime.UtcNow));
 
-            CreateMap<PagoProyecto, PagoProyectoDto>();
+            CreateMap<PagoProyecto, PagoProyectoDto>()
+                .ForMember(d => d.AuditInfo,
+                    o => o.MapFrom(s => MapAuditInfo(s)));
 
             CreateMap<PagoProyectoDto, PagoProyecto>()
                 .ForMember(d => d.Id, o => o.Ignore())
@@ -158,7 +172,9 @@ namespace DrakionTech.Crm.Business.Mapping
                     o => o.MapFrom(_ => DateTime.UtcNow));
             // PROPUESTA
             CreateMap<CrearPropuestaDto, Propuesta>();
-            CreateMap<Propuesta, PropuestaDto>();
+            CreateMap<Propuesta, PropuestaDto>()
+                .ForMember(d => d.AuditInfo,
+                    o => o.MapFrom(s => MapAuditInfo(s)));
 
             CreateMap<Pais, PaisDto>();
             CreateMap<Ciudad, CiudadDto>();
@@ -178,6 +194,8 @@ namespace DrakionTech.Crm.Business.Mapping
             CreateMap<RedSocialPublicacionDto, PublicacionRedSocial>();
 
             CreateMap<PublicacionMarketing, PublicacionMarketingDto>()
+                .ForMember(d => d.AuditInfo,
+                    o => o.MapFrom(s => MapAuditInfo(s)))
                 .ForMember(d => d.ResponsableNombre,
                     o => o.MapFrom(s =>
                         s.Responsable.Nombre + " " + s.Responsable.Apellido));
@@ -200,6 +218,28 @@ namespace DrakionTech.Crm.Business.Mapping
             var field = value.GetType().GetField(value.ToString());
             var attribute = field?.GetCustomAttribute<DisplayAttribute>();
             return attribute?.Name ?? value.ToString();
+        }
+
+        private static AuditInfoDto MapAuditInfo(AuditableEntity entity)
+        {
+            return new AuditInfoDto
+            {
+                CreatedByUserId = entity.CreatedByUserId,
+                CreatedByUserName = FormatUserName(entity.CreatedByUser),
+                CreatedAt = entity.CreatedAt,
+                ModifiedByUserId = entity.ModifiedByUserId,
+                ModifiedByUserName = FormatUserName(entity.ModifiedByUser),
+                ModifiedAt = entity.ModifiedAt
+            };
+        }
+
+        private static string? FormatUserName(Usuario? usuario)
+        {
+            if (usuario is null)
+                return null;
+
+            var fullName = $"{usuario.Nombre} {usuario.Apellido}".Trim();
+            return string.IsNullOrWhiteSpace(fullName) ? usuario.Email : fullName;
         }
     }
 }

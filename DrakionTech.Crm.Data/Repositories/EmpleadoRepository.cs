@@ -20,6 +20,8 @@ namespace DrakionTech.Crm.Data.Repositories
                 .Include(e => e.Salario)
                 .Include(e => e.RolUsuario)
                 .Include(e => e.EspecialidadNavigation)
+                .Include(e => e.CreatedByUser)
+                .Include(e => e.ModifiedByUser)
                 .AsQueryable();
         }
 
@@ -29,6 +31,8 @@ namespace DrakionTech.Crm.Data.Repositories
                 .Include(e => e.Salario)
                 .Include(e => e.RolUsuario)
                 .Include(e => e.EspecialidadNavigation)
+                .Include(e => e.CreatedByUser)
+                .Include(e => e.ModifiedByUser)
                 .ToListAsync(); 
         }
 
@@ -38,6 +42,8 @@ namespace DrakionTech.Crm.Data.Repositories
                 .Include(e => e.Salario)
                 .Include(e => e.RolUsuario)
                 .Include(e => e.EspecialidadNavigation)
+                .Include(e => e.CreatedByUser)
+                .Include(e => e.ModifiedByUser)
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
 

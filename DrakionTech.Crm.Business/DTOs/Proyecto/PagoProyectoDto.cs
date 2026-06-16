@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DrakionTech.Crm.Business.DTOs.Proyecto;
 
-public class PagoProyectoDto
+public class PagoProyectoDto : DrakionTech.Crm.Business.DTOs.IHasAuditInfo
 {
     public int Id { get; set; }
     public int ProyectoId { get; set; }
@@ -46,4 +46,6 @@ public class PagoProyectoDto
             : Estado == EstadoPagoProyecto.Pagado
                 ? "Finalizado por pago registrado"
                 : FechaRecordatorio.Value.ToShortDateString();
+
+    public DrakionTech.Crm.Business.DTOs.AuditInfoDto? AuditInfo { get; set; }
 }

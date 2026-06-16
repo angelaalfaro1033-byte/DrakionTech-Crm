@@ -2,7 +2,7 @@
 
 namespace DrakionTech.Crm.Business.DTOs.Proyecto;
 
-public class ProyectoDto
+public class ProyectoDto : DrakionTech.Crm.Business.DTOs.IHasAuditInfo
 {
     public int Id { get; set; }
     public string Nombre { get; set; } = string.Empty;
@@ -60,4 +60,5 @@ public class ProyectoDto
 
     public List<FaseProyectoDto> Fases { get; set; } = new();
     public List<PagoProyectoDto> Pagos { get; set; } = new();
+    public DrakionTech.Crm.Business.DTOs.AuditInfoDto? AuditInfo { get; set; }
 }

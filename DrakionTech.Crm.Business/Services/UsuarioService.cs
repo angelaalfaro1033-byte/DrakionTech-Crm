@@ -57,7 +57,8 @@ public class UsuarioService : IUsuarioService
                 Telefono = u.Telefono,
                 Rol = u.Rol != null ? u.Rol.Nombre : "Sin rol",
                 IsActive = u.IsActive,
-                AreaId = u.AreaId
+                AreaId = u.AreaId,
+                AuditInfo = AuditInfoFactory.FromEntity(u)
             })
             .PaginarAsync(pagina, tamañoPagina);
     }
@@ -86,7 +87,8 @@ public class UsuarioService : IUsuarioService
             Telefono = u.Telefono,
             Rol = u.Rol != null ? u.Rol.Nombre : "Sin rol",
             IsActive = u.IsActive,
-            AreaId = u.AreaId
+            AreaId = u.AreaId,
+            AuditInfo = AuditInfoFactory.FromEntity(u)
         }).ToListAsync();
     }
 
@@ -181,7 +183,8 @@ public class UsuarioService : IUsuarioService
         Telefono = u.Telefono,
         Rol = u.Rol?.Nombre ?? "Sin rol",
         IsActive = u.IsActive,
-        AreaId = u.AreaId
+        AreaId = u.AreaId,
+        AuditInfo = AuditInfoFactory.FromEntity(u)
     };
 
     public async Task EditarAsync(ActualizarUsuarioDto dto)

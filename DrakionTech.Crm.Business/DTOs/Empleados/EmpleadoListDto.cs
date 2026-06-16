@@ -2,7 +2,7 @@
 
 namespace DrakionTech.Crm.Business.DTOs.Empleado
 {
-    public class EmpleadoListDto
+    public class EmpleadoListDto : DrakionTech.Crm.Business.DTOs.IHasAuditInfo
     {
         public int Id { get; set; }
         public string Nombre { get; set; } = null!;
@@ -16,5 +16,6 @@ namespace DrakionTech.Crm.Business.DTOs.Empleado
         public TipoDocumento TipoDocumento { get; set; }
         public string? NumeroDocumento { get; set; }
         public decimal? Salario { get; set; }
+        public DrakionTech.Crm.Business.DTOs.AuditInfoDto? AuditInfo { get; set; }
     }
 }

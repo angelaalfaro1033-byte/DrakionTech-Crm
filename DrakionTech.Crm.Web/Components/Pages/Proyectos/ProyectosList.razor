@@ -44,6 +44,7 @@ else
                     <th>Etapa</th>
                     <th>Estado</th>
                     <th>Fecha Inicio</th>
+                    <th>Última actualización</th>
                     <th></th>
                 </tr>
             </thead>
@@ -66,6 +67,9 @@ else
                             </span>
                         </td>
                         <td>@p.FechaInicio.ToShortDateString()</td>
+                        <td>
+                            <AuditLastUpdated AuditInfo="p.AuditInfo" />
+                        </td>
                         <td>
                             <div class="ui-actions">
                                 <button class="btn btn-sm btn-outline-primary"

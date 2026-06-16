@@ -18,35 +18,10 @@ namespace DrakionTech.Crm.Business.Services
 
         public async Task<ResultadoPaginacion<EspecialidadDto>> ObtenerTodosConPaginacionAsync(string? busqueda = null, bool? soloActivos = null, int pagina = 1, int tamañoPagina = 10)
         {
-            var query = _db.Especialidades.AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(busqueda))
-            {
-                var term = busqueda.Trim().ToLower();
-                query = query.Where(e => e.Nombre.ToLower().Contains(term));
-            }
-
-            if (soloActivos.HasValue)
-                query = query.Where(e => e.Activo == soloActivos.Value);
-
-            return await query
-                .OrderBy(e => e.Nombre)
-                .Select(e => new EspecialidadDto
-                {
-                    Id = e.Id,
-                    Nombre = e.Nombre,
-                    Descripcion = e.Descripcion,
-                    RolUsuarioId = e.RolUsuarioId,
-                    RolUsuarioNombre = e.RolUsuario != null ? e.RolUsuario.Nombre : null,
-                    Activo = e.Activo
-                })
-                .PaginarAsync(pagina, tamañoPagina);
-        }
-
-        public async Task<List<EspecialidadDto>> ObtenerTodosAsync(string? busqueda = null, bool? soloActivos = null)
-        {
             var query = _db.Especialidades
                 .Include(e => e.RolUsuario)
+                .Include(e => e.CreatedByUser)
+                .Include(e => e.ModifiedByUser)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(busqueda))
@@ -67,7 +42,40 @@ namespace DrakionTech.Crm.Business.Services
                     Descripcion = e.Descripcion,
                     RolUsuarioId = e.RolUsuarioId,
                     RolUsuarioNombre = e.RolUsuario != null ? e.RolUsuario.Nombre : null,
-                    Activo = e.Activo
+                    Activo = e.Activo,
+                    AuditInfo = AuditInfoFactory.FromEntity(e)
+                })
+                .PaginarAsync(pagina, tamañoPagina);
+        }
+
+        public async Task<List<EspecialidadDto>> ObtenerTodosAsync(string? busqueda = null, bool? soloActivos = null)
+        {
+            var query = _db.Especialidades
+                .Include(e => e.RolUsuario)
+                .Include(e => e.CreatedByUser)
+                .Include(e => e.ModifiedByUser)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(busqueda))
+            {
+                var term = busqueda.Trim().ToLower();
+                query = query.Where(e => e.Nombre.ToLower().Contains(term));
+            }
+
+            if (soloActivos.HasValue)
+                query = query.Where(e => e.Activo == soloActivos.Value);
+
+            return await query
+                .OrderBy(e => e.Nombre)
+                .Select(e => new EspecialidadDto
+                {
+                    Id = e.Id,
+                    Nombre = e.Nombre,
+                    Descripcion = e.Descripcion,
+                    RolUsuarioId = e.RolUsuarioId,
+                    RolUsuarioNombre = e.RolUsuario != null ? e.RolUsuario.Nombre : null,
+                    Activo = e.Activo,
+                    AuditInfo = AuditInfoFactory.FromEntity(e)
                 })
                 .ToListAsync();
         }
@@ -76,6 +84,8 @@ namespace DrakionTech.Crm.Business.Services
         {
             var e = await _db.Especialidades
                 .Include(e => e.RolUsuario)
+                .Include(e => e.CreatedByUser)
+                .Include(e => e.ModifiedByUser)
                 .FirstOrDefaultAsync(e => e.Id == id)
                 ?? throw new Exception(MensajesError.EspecialidadNoEncontrada);
             return MapToDto(e);
@@ -172,7 +182,8 @@ namespace DrakionTech.Crm.Business.Services
             Descripcion = e.Descripcion,
             RolUsuarioId = e.RolUsuarioId,
             RolUsuarioNombre = e.RolUsuario?.Nombre,
-            Activo = e.Activo
+            Activo = e.Activo,
+            AuditInfo = AuditInfoFactory.FromEntity(e)
         };
 
         private static string Normalizar(string texto) =>

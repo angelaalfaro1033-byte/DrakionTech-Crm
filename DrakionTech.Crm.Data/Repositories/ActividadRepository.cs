@@ -24,6 +24,8 @@ namespace DrakionTech.Crm.Data.Repositories
                 .Include(a => a.Empresa)
                 .Include(a => a.Contacto)
                 .Include(a => a.Oportunidad)
+                .Include(a => a.CreatedByUser)
+                .Include(a => a.ModifiedByUser)
                 .Include(a => a.ActividadPrevia)          // ← agregar
                     .ThenInclude(p => p.TipoActividad)    // ← agregar
                 .Where(a => a.EmpresaId == empresaId)
@@ -42,6 +44,8 @@ namespace DrakionTech.Crm.Data.Repositories
                 .Include(a => a.Empresa)
                 .Include(a => a.Contacto)
                 .Include(a => a.Oportunidad)
+                .Include(a => a.CreatedByUser)
+                .Include(a => a.ModifiedByUser)
                 .Where(a => a.OportunidadId == oportunidadId)
                 .AsNoTracking()
                 .ToListAsync(ct);
@@ -126,6 +130,8 @@ namespace DrakionTech.Crm.Data.Repositories
                 .Include(a => a.Empresa)
                 .Include(a => a.Contacto)
                 .Include(a => a.Oportunidad)
+                .Include(a => a.CreatedByUser)
+                .Include(a => a.ModifiedByUser)
                 .Include(a => a.ActividadPrevia)          // ← agregar
                     .ThenInclude(p => p.TipoActividad)    // ← agregar
                 .Where(a =>
@@ -143,6 +149,8 @@ namespace DrakionTech.Crm.Data.Repositories
             var todas = await _context.Actividades
                 .Include(a => a.TipoActividad)
                 .Include(a => a.EstadoActividad)
+                .Include(a => a.CreatedByUser)
+                .Include(a => a.ModifiedByUser)
                 .AsNoTracking()
                 .ToListAsync(ct);
 

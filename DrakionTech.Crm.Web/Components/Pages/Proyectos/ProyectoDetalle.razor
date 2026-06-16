@@ -54,6 +54,8 @@ else
         </div>
     </div>
 
+    <AuditInfoCard AuditInfo="_proyecto.AuditInfo" />
+
     <div class="form-section">
         <p class="section-title">Fases</p>
         <table class="ui-table">
@@ -140,6 +142,7 @@ else
                     <th>Pagado</th>
                     <th>Estado</th>
                     <th>Recordatorio</th>
+                    <th>Última actualización</th>
                     <th></th>
                 </tr>
             </thead>
@@ -152,6 +155,9 @@ else
                         <td>@(pago.FechaPago?.ToShortDateString() ?? "-")</td>
                         <td><span class="badge @ObtenerBadgePago(pago.Estado)">@pago.EstadoTexto</span></td>
                         <td>@pago.RecordatorioTexto</td>
+                        <td>
+                            <AuditLastUpdated AuditInfo="pago.AuditInfo" />
+                        </td>
                         <td>
                             <div class="ui-actions">
                                 <button class="btn btn-sm btn-outline-primary" @onclick="() => EditarPago(pago)">Editar</button>

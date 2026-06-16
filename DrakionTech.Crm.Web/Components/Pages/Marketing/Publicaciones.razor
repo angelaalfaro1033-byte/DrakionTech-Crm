@@ -57,6 +57,7 @@
                         <th>Programada</th>
                         <th>Estado</th>
                         <th>Redes</th>
+                        <th>Última actualización</th>
                         <th class="text-end">Acciones</th>
                     </tr>
                 </thead>
@@ -87,6 +88,10 @@
 
                             <td>
                                 @(item.RedesSociales?.Count ?? 0)
+                            </td>
+
+                            <td>
+                                <AuditLastUpdated AuditInfo="item.AuditInfo" />
                             </td>
 
                             <td class="text-end">
