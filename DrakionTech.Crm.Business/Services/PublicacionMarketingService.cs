@@ -196,4 +196,111 @@ public class PublicacionMarketingService : IPublicacionMarketingService
 
         await _repository.ActualizarAsync(publicacion);
     }
+
+    public async Task<ResultadoPaginacion<MetricaPublicacionDto>> ObtenerMetricasConPaginacionAsync(
+    string? busqueda = null,
+    int pagina = 1,
+    int tamañoPagina = 10)
+    {
+        var query = _repository.Query()
+            .AsNoTracking()
+            .SelectMany(publicacion => publicacion.Metricas.Select(metrica =>
+                new MetricaPublicacionDto
+                {
+                    Id = metrica.Id,
+                    PublicacionMarketingId = publicacion.Id,
+                    PublicacionNombre = publicacion.Nombre,
+                    RedSocial = metrica.RedSocial,
+                    FechaRegistro = metrica.FechaRegistro,
+                    Visualizaciones = metrica.Visualizaciones,
+                    Reacciones = metrica.Reacciones,
+                    Alcance = metrica.Alcance,
+                    ContactoAreaComercial = metrica.ContactoAreaComercial,
+                    Observaciones = metrica.Observaciones
+                }));
+
+        if (!string.IsNullOrWhiteSpace(busqueda))
+        {
+            var term = busqueda.Trim().ToLower();
+
+            query = query.Where(x =>
+                x.PublicacionNombre.ToLower().Contains(term) ||
+                x.RedSocial.ToString().ToLower().Contains(term));
+        }
+
+        var paginado = await query
+            .OrderByDescending(x => x.FechaRegistro)
+            .PaginarAsync(pagina, tamañoPagina);
+
+        return new ResultadoPaginacion<MetricaPublicacionDto>
+        {
+            Items = paginado.Items,
+            TotalRegistros = paginado.TotalRegistros,
+            Pagina = paginado.Pagina,
+            TamañoPagina = paginado.TamañoPagina
+        };
+    }
+
+    public async Task<MetricaPublicacionDto?> ObtenerMetricaPorIdAsync(int id)
+    {
+        var publicaciones = await _repository.Query()
+            .AsNoTracking()
+            .ToListAsync();
+
+        return publicaciones
+            .SelectMany(publicacion => publicacion.Metricas.Select(metrica =>
+                new MetricaPublicacionDto
+                {
+                    Id = metrica.Id,
+                    PublicacionMarketingId = publicacion.Id,
+                    PublicacionNombre = publicacion.Nombre,
+                    RedSocial = metrica.RedSocial,
+                    FechaRegistro = metrica.FechaRegistro,
+                    Visualizaciones = metrica.Visualizaciones,
+                    Reacciones = metrica.Reacciones,
+                    Alcance = metrica.Alcance,
+                    ContactoAreaComercial = metrica.ContactoAreaComercial,
+                    Observaciones = metrica.Observaciones
+                }))
+            .FirstOrDefault(x => x.Id == id);
+    }
+
+    public async Task ActualizarMetricaAsync(ActualizarMetricaPublicacionDto dto)
+    {
+        var publicaciones = await _repository.Query()
+            .ToListAsync();
+
+        var publicacionActual = publicaciones
+            .FirstOrDefault(x => x.Metricas.Any(m => m.Id == dto.Id));
+
+        if (publicacionActual is null)
+            throw new KeyNotFoundException($"Métrica {dto.Id} no encontrada.");
+
+        var metrica = publicacionActual.Metricas.First(x => x.Id == dto.Id);
+
+        if (publicacionActual.Id != dto.PublicacionMarketingId)
+        {
+            publicacionActual.Metricas.Remove(metrica);
+
+            var nuevaPublicacion = await _repository.ObtenerPorIdAsync(dto.PublicacionMarketingId);
+
+            if (nuevaPublicacion is null)
+                throw new KeyNotFoundException($"Publicación {dto.PublicacionMarketingId} no encontrada.");
+
+            nuevaPublicacion.Metricas.Add(metrica);
+            publicacionActual = nuevaPublicacion;
+        }
+
+        metrica.RedSocial = dto.RedSocial;
+        metrica.FechaRegistro = dto.FechaRegistro;
+        metrica.Visualizaciones = dto.Visualizaciones;
+        metrica.Reacciones = dto.Reacciones;
+        metrica.Alcance = dto.Alcance;
+        metrica.ContactoAreaComercial = dto.ContactoAreaComercial;
+        metrica.Observaciones = dto.Observaciones;
+
+        publicacionActual.FechaActualizacion = DateTime.UtcNow;
+
+        await _repository.ActualizarAsync(publicacionActual);
+    }
 }

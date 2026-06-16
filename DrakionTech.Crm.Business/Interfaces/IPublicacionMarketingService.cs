@@ -20,7 +20,16 @@ public interface IPublicacionMarketingService
 
     Task EliminarAsync(int id);
 
+    Task<ResultadoPaginacion<MetricaPublicacionDto>> ObtenerMetricasConPaginacionAsync(
+    string? busqueda = null,
+    int pagina = 1,
+    int tamañoPagina = 10);
+
     Task<List<MetricaPublicacionDto>> ObtenerMetricasAsync();
 
+    Task<MetricaPublicacionDto?> ObtenerMetricaPorIdAsync(int id);
+
     Task CrearMetricaAsync(CrearMetricaPublicacionDto dto);
+
+    Task ActualizarMetricaAsync(ActualizarMetricaPublicacionDto dto);
 }

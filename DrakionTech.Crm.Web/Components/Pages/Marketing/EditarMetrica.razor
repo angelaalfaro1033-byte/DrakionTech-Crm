@@ -1,0 +1,165 @@
+﻿@page "/marketing/editar-metrica/{Id:int}"
+@attribute [Authorize]
+
+@using DrakionTech.Crm.Business.DTOs.Marketing
+@using DrakionTech.Crm.Business.Interfaces
+@using DrakionTech.Crm.Data.Entities.Enums
+
+@inject IPublicacionMarketingService MarketingService
+@inject NavigationManager Nav
+
+<div class="page-header">
+    <div>
+        <h3 class="page-title">Editar Métrica</h3>
+        <p class="page-subtitle">Actualiza el seguimiento de una publicación por canal</p>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(_error))
+{
+    <div class="alert alert-danger">@_error</div>
+}
+else if (_cargando)
+{
+    <p>Cargando métrica...</p>
+}
+else
+{
+    <EditForm Model="_modelo" OnValidSubmit="ActualizarAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-section">
+            <p class="section-title">Información de la métrica</p>
+
+            <div class="grid-2col">
+                <div class="mb-3">
+                    <label class="form-label">Publicación</label>
+                    <InputSelect class="form-select" @bind-Value="_modelo.PublicacionMarketingId">
+                        <option value="0">-- Seleccione --</option>
+                        @foreach (var publicacion in _publicaciones)
+                        {
+                            <option value="@publicacion.Id">@publicacion.Nombre</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Canal</label>
+                    <InputSelect class="form-select" @bind-Value="_modelo.RedSocial">
+                        @foreach (var red in Enum.GetValues<RedSocial>())
+                        {
+                            <option value="@red">@ObtenerNombreRed(red)</option>
+                        }
+                    </InputSelect>
+                </div>
+            </div>
+
+            <div class="grid-2col">
+                <div class="mb-3">
+                    <label class="form-label">Visualizaciones</label>
+                    <InputNumber class="form-control" @bind-Value="_modelo.Visualizaciones" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Reacciones</label>
+                    <InputNumber class="form-control" @bind-Value="_modelo.Reacciones" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Alcance</label>
+                    <InputNumber class="form-control" @bind-Value="_modelo.Alcance" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Fecha de registro</label>
+                    <InputDate class="form-control" @bind-Value="_modelo.FechaRegistro" />
+                </div>
+            </div>
+
+            <div class="form-check mb-3">
+                <InputCheckbox class="form-check-input" @bind-Value="_modelo.ContactoAreaComercial" />
+                <label class="form-check-label">Hubo contacto con el área comercial</label>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Observaciones</label>
+                <InputTextArea class="form-control" rows="3" @bind-Value="_modelo.Observaciones" />
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Actualizar</button>
+            <button type="button" class="btn btn-secondary" @onclick='() => Nav.NavigateTo("/marketing/metricas")'>
+                Cancelar
+            </button>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private ActualizarMetricaPublicacionDto _modelo = new();
+
+    private List<PublicacionMarketingDto> _publicaciones = new();
+
+    private bool _cargando = true;
+
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _publicaciones = await MarketingService.ObtenerTodosAsync();
+
+        var metrica = await MarketingService.ObtenerMetricaPorIdAsync(Id);
+
+        if (metrica is null)
+        {
+            _error = "Métrica no encontrada.";
+            _cargando = false;
+            return;
+        }
+
+        _modelo = new ActualizarMetricaPublicacionDto
+        {
+            Id = metrica.Id,
+            PublicacionMarketingId = metrica.PublicacionMarketingId,
+            RedSocial = metrica.RedSocial,
+            FechaRegistro = metrica.FechaRegistro,
+            Visualizaciones = metrica.Visualizaciones,
+            Reacciones = metrica.Reacciones,
+            Alcance = metrica.Alcance,
+            ContactoAreaComercial = metrica.ContactoAreaComercial,
+            Observaciones = metrica.Observaciones
+        };
+
+        _cargando = false;
+    }
+
+    private async Task ActualizarAsync()
+    {
+        try
+        {
+            await MarketingService.ActualizarMetricaAsync(_modelo);
+            Nav.NavigateTo("/marketing/metricas");
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private static string ObtenerNombreRed(RedSocial red)
+    {
+        return red switch
+        {
+            RedSocial.WhatsAppBusiness => "WhatsApp Business",
+            RedSocial.Instagram => "Instagram",
+            RedSocial.LinkedIn => "LinkedIn",
+            RedSocial.PaginaWeb => "Página Web",
+            RedSocial.EventoFeria => "Evento / Feria",
+            _ => red.ToString()
+        };
+    }
+}

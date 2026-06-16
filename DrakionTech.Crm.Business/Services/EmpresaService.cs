@@ -102,6 +102,21 @@ namespace DrakionTech.Crm.Business.Services
                 });
             }
 
+            foreach (var ca in dto.ContactosAdicionales.Where(c => c.Nombre != null))
+            {
+                empresa.Contactos.Add(new Contacto
+                {
+                    Nombre = ca.Nombre,
+                    Apellido = ca.Apellido ?? string.Empty,
+                    Cargo = ca.Cargo,
+                    Email = ca.Email,
+                    Telefono = ca.Telefono,
+                    RolContactoId = ca.RolContactoId ?? 1,
+                    EsPrincipal = false,
+                    FechaCreacion = DateTime.UtcNow
+                });
+            }
+
             empresa.Activa = false;
 
             await _empresaRepository.AgregarAsync(empresa, ct);
@@ -172,6 +187,25 @@ namespace DrakionTech.Crm.Business.Services
                     principal.Telefono = cp.Telefono;
                     if (cp.RolContactoId.HasValue) principal.RolContactoId = cp.RolContactoId.Value;
                 }
+            }
+
+            var contactosNoPrincipales = empresa.Contactos.Where(c => !c.EsPrincipal).ToList();
+            foreach (var c in contactosNoPrincipales)
+                empresa.Contactos.Remove(c);
+
+            foreach (var ca in dto.ContactosAdicionales.Where(c => c.Nombre != null))
+            {
+                empresa.Contactos.Add(new Contacto
+                {
+                    Nombre = ca.Nombre,
+                    Apellido = ca.Apellido ?? string.Empty,
+                    Cargo = ca.Cargo,
+                    Email = ca.Email,
+                    Telefono = ca.Telefono,
+                    RolContactoId = ca.RolContactoId ?? 1,
+                    EsPrincipal = false,
+                    FechaCreacion = DateTime.UtcNow
+                });
             }
 
             await _db.SaveChangesAsync(ct);

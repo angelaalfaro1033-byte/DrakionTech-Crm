@@ -34,7 +34,7 @@ namespace DrakionTech.Crm.Business.DTOs.Empresa
         public List<EmpresaCorreoDto> Correos { get; set; } = new();
 
         public ContactoPrincipalDto? ContactoPrincipal { get; set; }
-
+        public List<ContactoAdicionalDto> ContactosAdicionales { get; set; } = new();
         public string? RepresentanteLegal { get; set; }
 
         public DateTime? FechaCreacionEmpresa { get; set; }

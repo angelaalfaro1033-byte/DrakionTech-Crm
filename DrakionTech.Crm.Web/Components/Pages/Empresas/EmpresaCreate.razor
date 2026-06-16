@@ -156,41 +156,39 @@
             </button>
         </div>
 
-        <!-- SECCIÓN 4: Contacto principal -->
+        <!-- SECCIÓN 4: Contactos -->
         <div class="form-section">
             <h3>Contacto principal</h3>
             <div class="row g-3">
                 <div class="col-md-4">
                     <label class="form-label required">Nombre</label>
-                    <InputText class="form-control"
-                               @bind-Value="modelo.ContactoPrincipal!.Nombre" />
+                    <InputText class="form-control" @bind-Value="modelo.ContactoPrincipal!.Nombre" />
                     <ValidationMessage For="() => modelo.ContactoPrincipal!.Nombre" />
                 </div>
                 <div class="col-md-4">
                     <label class="form-label required">Apellido</label>
-                    <InputText class="form-control"
-                               @bind-Value="modelo.ContactoPrincipal!.Apellido" />
+                    <InputText class="form-control" @bind-Value="modelo.ContactoPrincipal!.Apellido" />
                     <ValidationMessage For="() => modelo.ContactoPrincipal!.Apellido" />
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Cargo</label>
-                    <InputText class="form-control"
-                               @bind-Value="modelo.ContactoPrincipal!.Cargo" />
+                    <InputText class="form-control" @bind-Value="modelo.ContactoPrincipal!.Cargo" />
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Correo del contacto</label>
-                    <InputText class="form-control" type="email"
-                               @bind-Value="modelo.ContactoPrincipal!.Email" />
+                    <InputText class="form-control" type="email" @bind-Value="modelo.ContactoPrincipal!.Email" />
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Teléfono del contacto</label>
+
                     <InputText class="form-control"
                                @bind-Value="modelo.ContactoPrincipal!.Telefono" />
+
+                    <ValidationMessage For="() => modelo.ContactoPrincipal!.Telefono" />
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Rol</label>
-                    <InputSelect class="form-select"
-                                 @bind-Value="modelo.ContactoPrincipal!.RolContactoId">
+                    <InputSelect class="form-select" @bind-Value="modelo.ContactoPrincipal!.RolContactoId">
                         <option value="">-- Seleccione --</option>
                         @foreach (var rol in rolesContacto)
                         {
@@ -199,6 +197,62 @@
                     </InputSelect>
                 </div>
             </div>
+
+            @* Contactos adicionales *@
+            @for (int i = 0; i < modelo.ContactosAdicionales.Count; i++)
+            {
+                var idx = i;
+                <hr class="mt-3" />
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <h6 class="mb-0">Contacto adicional @(idx + 1)</h6>
+                    <button type="button" class="btn btn-sm btn-outline-danger"
+                            @onclick="() => EliminarContacto(idx)">
+                        Eliminar
+                    </button>
+                </div>
+                <div class="row g-3 mt-1">
+                    <div class="col-md-4">
+                        <label class="form-label required">Nombre</label>
+                        <InputText class="form-control" @bind-Value="modelo.ContactosAdicionales[idx].Nombre" />
+                        <ValidationMessage For="() => modelo.ContactosAdicionales[idx].Nombre" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label required">Apellido</label>
+                        <InputText class="form-control" @bind-Value="modelo.ContactosAdicionales[idx].Apellido" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Cargo</label>
+                        <InputText class="form-control" @bind-Value="modelo.ContactosAdicionales[idx].Cargo" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Correo</label>
+                        <InputText class="form-control" type="email" @bind-Value="modelo.ContactosAdicionales[idx].Email" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Teléfono</label>
+
+                        <InputText class="form-control"
+                                   @bind-Value="modelo.ContactosAdicionales[idx].Telefono" />
+
+                        <ValidationMessage For="() => modelo.ContactosAdicionales[idx].Telefono" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Rol</label>
+                        <InputSelect class="form-select" @bind-Value="modelo.ContactosAdicionales[idx].RolContactoId">
+                            <option value="">-- Seleccione --</option>
+                            @foreach (var rol in rolesContacto)
+                            {
+                                <option value="@rol.Id">@rol.Nombre</option>
+                            }
+                        </InputSelect>
+                    </div>
+                </div>
+            }
+
+            <button type="button" class="btn btn-sm btn-outline-secondary mt-3"
+                    @onclick="AgregarContacto">
+                + Agregar contacto
+            </button>
         </div>
 
         <!-- SECCIÓN 5: Clasificación -->
@@ -257,16 +311,19 @@
             <h3>Fechas</h3>
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label">Fecha de creación de empresa</label>
-                    <DateInput TValue="DateTime?"
-                               Placeholder="DD-MM-AAAA"
-                               Nullable="true"
+                    <label class="form-label">
+                        Fecha de creación de empresa
+                    </label>
+
+                    <InputDate class="form-control"
                                @bind-Value="modelo.FechaCreacionEmpresa" />
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label required">Fecha de registro en CRM</label>
-                    <DateInput TValue="DateTime"
-                               Placeholder="DD-MM-AAAA"
+                    <label class="form-label required">
+                        Fecha de registro en CRM
+                    </label>
+
+                    <InputDate class="form-control"
                                @bind-Value="modelo.FechaRegistroCrm" />
                 </div>
             </div>
@@ -309,6 +366,9 @@
 
     private string sectorSeleccionadoTexto = string.Empty;
     private string subsectorSeleccionadoTexto = string.Empty;
+
+    private string? sectorPendienteNombre = null;
+    private string? subsectorPendienteNombre = null;
 
     private static readonly TipoDocumento[] tiposDocumentoNatural =
         { TipoDocumento.CC, TipoDocumento.CE, TipoDocumento.PA, TipoDocumento.RC, TipoDocumento.TI };
@@ -356,34 +416,36 @@
     // Sector
     private async Task OnSectorSeleccionado(SectorEmpresaDto? sector)
     {
+        sectorPendienteNombre = null;
+        subsectorPendienteNombre = null;
+
         if (sector is null)
         {
             modelo.SectorEmpresaId = null;
             modelo.SubsectorEmpresaId = null;
-
             sectorSeleccionadoTexto = string.Empty;
             subsectorSeleccionadoTexto = string.Empty;
-
             subsectoresFiltrados.Clear();
-
             return;
         }
 
         modelo.SectorEmpresaId = sector.Id;
         sectorSeleccionadoTexto = sector.Nombre;
-
         await CargarSubsectores(sector.Id);
-
         modelo.SubsectorEmpresaId = null;
         subsectorSeleccionadoTexto = string.Empty;
     }
 
-    private async Task OnSectorCreado(string nombre)
+    private Task OnSectorCreado(string nombre)
     {
-        var nuevo = await SectorEmpresaService.CrearYObtenerAsync(nombre);
-        if (!sectoresEmpresa.Any(s => s.Id == nuevo.Id))
-            sectoresEmpresa.Add(nuevo);
-        await OnSectorSeleccionado(nuevo);
+        modelo.SectorEmpresaId = null;
+        sectorPendienteNombre = nombre;
+        sectorSeleccionadoTexto = nombre;
+        subsectoresFiltrados.Clear();
+        modelo.SubsectorEmpresaId = null;
+        subsectorSeleccionadoTexto = string.Empty;
+        subsectorPendienteNombre = null;
+        return Task.CompletedTask;
     }
 
     private async Task CargarSubsectores(int sectorId)
@@ -404,14 +466,12 @@
         subsectorSeleccionadoTexto = sub.Nombre;
     }
 
-    private async Task OnSubsectorCreado(string nombre)
+    private Task OnSubsectorCreado(string nombre)
     {
-        if (modelo.SectorEmpresaId is null) return;
-        var nuevo = await SectorEmpresaService
-            .CrearSubsectorYObtenerAsync(nombre, modelo.SectorEmpresaId.Value);
-        if (!subsectoresFiltrados.Any(s => s.Id == nuevo.Id))
-            subsectoresFiltrados.Add(nuevo);
-        OnSubsectorSeleccionado(nuevo);
+        modelo.SubsectorEmpresaId = null;
+        subsectorPendienteNombre = nombre;
+        subsectorSeleccionadoTexto = nombre;
+        return Task.CompletedTask;
     }
 
     // Correos
@@ -421,8 +481,27 @@
     private void EliminarCorreo(int index)
         => modelo.Correos.RemoveAt(index);
 
+    private void AgregarContacto()
+    => modelo.ContactosAdicionales.Add(new ContactoAdicionalDto());
+
+    private void EliminarContacto(int index)
+        => modelo.ContactosAdicionales.RemoveAt(index);
+
     private async Task HandleValidSubmit()
     {
+        if (sectorPendienteNombre is not null)
+        {
+            var nuevoSector = await SectorEmpresaService.CrearYObtenerAsync(sectorPendienteNombre);
+            modelo.SectorEmpresaId = nuevoSector.Id;
+        }
+
+        if (subsectorPendienteNombre is not null && modelo.SectorEmpresaId.HasValue)
+        {
+            var nuevoSub = await SectorEmpresaService
+                .CrearSubsectorYObtenerAsync(subsectorPendienteNombre, modelo.SectorEmpresaId.Value);
+            modelo.SubsectorEmpresaId = nuevoSub.Id;
+        }
+
         await EmpresaService.CrearAsync(modelo);
         Navigation.NavigateTo("/empresas");
     }

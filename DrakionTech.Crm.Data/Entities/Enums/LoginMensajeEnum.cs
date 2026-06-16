@@ -5,20 +5,20 @@ namespace DrakionTech.Crm.Data.Entities.Enums;
 public enum LoginErrorEnum
 {
     Ninguno,
-    [Description("Correo o contraseña incorrectos.")]
+    [Description("Correo o contraseÃ±a incorrectos.")]
     Credenciales,
-    [Description("Tu cuenta no está activada.")]
+    [Description("Tu cuenta no estÃ¡ activada.")]
     Inactivo,
-    [Description("No se pudo iniciar sesión con Google.")]
+    [Description("No se pudo iniciar sesiÃ³n con Google.")]
     Google,
-    [Description("Tu cuenta de Google no está registrada.")]
+    [Description("Tu cuenta de Google no estï¿½ registrada.")]
     NoRegistrado
 }
 
 public enum LoginMensajeEnum
 {
     Ninguno,
-    [Description("¡Cuenta creada! Ya puedes iniciar sesión.")]
+    [Description("ï¿½Cuenta creada! Ya puedes iniciar sesiï¿½n.")]
     CuentaCreada
 }
 
@@ -28,9 +28,9 @@ public enum RegistroResultadoEnum
     Bloqueado,
     [Description("Faltan campos por completar.")]
     CamposFaltantes,
-    [Description("Las contraseñas no coinciden.")]
+    [Description("Las contraseï¿½as no coinciden.")]
     PasswordsNoCoinciden,
-    [Description("La contraseña es muy corta.")]
+    [Description("La contraseï¿½a es muy corta.")]
     PasswordCorta
 }
 
@@ -39,8 +39,8 @@ public enum GoogleCallbackResultadoEnum
     Ok,
     [Description("No se pudo obtener el correo de Google.")]
     EmailNulo,
-    [Description("Tu cuenta de Google no está registrada.")]
+    [Description("Tu cuenta de Google no estÃ¡ registrada.")]
     NoRegistrado,
-    [Description("Tu cuenta no está activada.")]
+    [Description("Tu cuenta no estÃ¡ activada.")]
     Inactivo
 }
