@@ -3,6 +3,7 @@
 @inject IAreaService AreaService
 @inject IUsuarioService UsuarioService
 @inject NavigationManager Nav
+@implements IDisposable
 
 <EditForm Model="modelo" OnValidSubmit="HandleSubmit">
     <DataAnnotationsValidator />
@@ -137,12 +138,18 @@
         debounceNombre?.Dispose();
         debounceNombre = new System.Timers.Timer(500) { AutoReset = false };
         debounceNombre.Elapsed += async (_, _) =>
-            await InvokeAsync(async () =>
+        {
+            try
             {
-                nombreDuplicado = !string.IsNullOrWhiteSpace(modelo.Nombre) &&
-                    await AreaService.NombreExisteAsync(modelo.Nombre, AreaId);
-                StateHasChanged();
-            });
+                await InvokeAsync(async () =>
+                {
+                    nombreDuplicado = !string.IsNullOrWhiteSpace(modelo.Nombre) &&
+                        await AreaService.NombreExisteAsync(modelo.Nombre, AreaId);
+                    StateHasChanged();
+                });
+            }
+            catch (ObjectDisposedException) { }
+        };
         debounceNombre.Start();
     }
 
@@ -191,5 +198,11 @@
         {
             guardando = false;
         }
+    }
+    public void Dispose()
+    {
+        debounceNombre?.Stop();
+        debounceNombre?.Dispose();
+        debounceNombre = null;
     }
 }

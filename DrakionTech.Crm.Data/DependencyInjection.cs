@@ -14,8 +14,9 @@ namespace DrakionTech.Crm.Data
         {
             var connectionString = configuration.GetConnectionString("Drakion_Crm");
 
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
+            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
+
+            services.AddSingleton<IDbContextFactory<ApplicationDbContext>, ScopedDbContextFactory>();
 
             // Register Repositories
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
