@@ -2,17 +2,17 @@
 
 namespace DrakionTech.Crm.Business.DTOs.Empresa
 {
-    public class ContactoPrincipalDto
+    public class ContactoAdicionalDto
     {
-        [Required(ErrorMessage = "El nombre del contacto es obligatorio")]
+        [Required(ErrorMessage = "El nombre es obligatorio")]
         public string Nombre { get; set; } = null!;
 
-        [Required(ErrorMessage = "El apellido del contacto es obligatorio")]
+        [Required(ErrorMessage = "El apellido es obligatorio")]
         public string Apellido { get; set; } = null!;
 
         public string? Cargo { get; set; }
 
-        [EmailAddress]
+        [EmailAddress(ErrorMessage = "Correo inválido")]
         public string? Email { get; set; }
 
         [Phone(ErrorMessage = "Ingrese un teléfono válido.")]

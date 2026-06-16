@@ -1,5 +1,4 @@
-﻿namespace DrakionTech.Crm.Business.DTOs.Marketing;
-using DrakionTech.Crm.Data.Entities.Enums;
+﻿using DrakionTech.Crm.Data.Entities.Enums;
 
 public class MetricaPublicacionDto
 {

@@ -39,6 +39,7 @@ namespace DrakionTech.Crm.Business.DTOs.Empresa
 
         // Contacto principal inline
         public ContactoPrincipalDto? ContactoPrincipal { get; set; }
+        public List<ContactoAdicionalDto> ContactosAdicionales { get; set; } = new();
 
         // Fechas
         public DateTime? FechaCreacionEmpresa { get; set; }
