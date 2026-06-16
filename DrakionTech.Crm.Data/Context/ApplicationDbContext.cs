@@ -19,6 +19,20 @@ namespace DrakionTech.Crm.Data.Context
             _currentUserContext = currentUserContext;
         }
 
+        internal IDisposable? ScopeOwner { get; set; }
+
+        public override void Dispose()
+        {
+            ScopeOwner?.Dispose();
+            base.Dispose();
+        }
+
+        public override async ValueTask DisposeAsync()
+        {
+            ScopeOwner?.Dispose();
+            await base.DisposeAsync();
+        }
+
         // DbSets
         public DbSet<Empresa> Empresas { get; set; } = null!;
         public DbSet<Contacto> Contactos { get; set; } = null!;

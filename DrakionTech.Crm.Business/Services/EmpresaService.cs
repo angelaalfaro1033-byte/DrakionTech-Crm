@@ -151,7 +151,6 @@ namespace DrakionTech.Crm.Business.Services
             empresa.Descripcion = dto.Descripcion;
             empresa.Seguimiento = dto.Seguimiento;
 
-            // Sincronizar correos adicionales
             _db.EmpresaCorreos.RemoveRange(empresa.Correos);
             empresa.Correos = new List<EmpresaCorreo>
     {
@@ -160,7 +159,6 @@ namespace DrakionTech.Crm.Business.Services
             foreach (var c in dto.Correos.Where(c => c.Correo != dto.Correo))
                 empresa.Correos.Add(new EmpresaCorreo { Correo = c.Correo, EsPrincipal = false });
 
-            // Actualizar contacto principal
             var principal = empresa.Contactos.FirstOrDefault(c => c.EsPrincipal);
             if (dto.ContactoPrincipal is { Nombre: not null } cp)
             {
@@ -190,8 +188,7 @@ namespace DrakionTech.Crm.Business.Services
             }
 
             var contactosNoPrincipales = empresa.Contactos.Where(c => !c.EsPrincipal).ToList();
-            foreach (var c in contactosNoPrincipales)
-                empresa.Contactos.Remove(c);
+            _db.Contactos.RemoveRange(contactosNoPrincipales);
 
             foreach (var ca in dto.ContactosAdicionales.Where(c => c.Nombre != null))
             {

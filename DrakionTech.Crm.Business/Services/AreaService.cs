@@ -3,23 +3,24 @@ using DrakionTech.Crm.Business.DTOs.Area;
 using DrakionTech.Crm.Business.Interfaces;
 using DrakionTech.Crm.Data.Context;
 using DrakionTech.Crm.Data.Entities;
-using DrakionTech.Crm.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace DrakionTech.Crm.Business.Services;
 
 public class AreaService : IAreaService
 {
-    private readonly ApplicationDbContext _db;
+    private readonly IDbContextFactory<ApplicationDbContext> _dbFactory;
 
-    public AreaService(ApplicationDbContext db)
+    public AreaService(IDbContextFactory<ApplicationDbContext> dbFactory)
     {
-        _db = db;
+        _dbFactory = dbFactory;
     }
 
     public async Task<ResultadoPaginacion<AreaListDto>> ObtenerTodasConPaginacionAsync(string? busqueda = null, bool? soloActivas = null, int pagina = 1, int tamañoPagina = 10)
     {
-        var query = _db.Areas
+        using var db = await _dbFactory.CreateDbContextAsync();
+
+        var query = db.Areas
             .Include(a => a.Responsable)
             .Include(a => a.CreatedByUser)
             .Include(a => a.ModifiedByUser)
@@ -65,17 +66,17 @@ public class AreaService : IAreaService
     // ─────────────────────────────────────────────
     public async Task<IEnumerable<AreaListDto>> ObtenerTodasAsync(string? busqueda = null, bool? soloActivas = null)
     {
-        var query = _db.Areas
+        using var db = await _dbFactory.CreateDbContextAsync();
+
+        var query = db.Areas
             .Include(a => a.Responsable)
             .Include(a => a.CreatedByUser)
             .Include(a => a.ModifiedByUser)
             .AsQueryable();
 
-        // Filtro por estado
         if (soloActivas.HasValue)
             query = query.Where(a => a.Activa == soloActivas.Value);
 
-        // Búsqueda case-insensitive
         if (!string.IsNullOrWhiteSpace(busqueda))
         {
             var term = busqueda.Trim().ToLower();
@@ -109,7 +110,9 @@ public class AreaService : IAreaService
     // ─────────────────────────────────────────────
     public async Task<AreaDto?> ObtenerPorIdAsync(int id)
     {
-        var area = await _db.Areas
+        using var db = await _dbFactory.CreateDbContextAsync();
+
+        var area = await db.Areas
             .Include(a => a.Responsable)
             .Include(a => a.CreatedByUser)
             .Include(a => a.ModifiedByUser)
@@ -122,10 +125,12 @@ public class AreaService : IAreaService
 
     public async Task<AreaDto> CrearAsync(CrearAreaDto dto)
     {
-        await ValidarNombreUnicoAsync(dto.Nombre, excludeId: null);
+        using var db = await _dbFactory.CreateDbContextAsync();
+
+        await ValidarNombreUnicoAsync(db, dto.Nombre, excludeId: null);
 
         if (dto.ResponsableId.HasValue)
-            await ValidarResponsableExisteAsync(dto.ResponsableId.Value);
+            await ValidarResponsableExisteAsync(db, dto.ResponsableId.Value);
 
         var area = new Area
         {
@@ -136,17 +141,17 @@ public class AreaService : IAreaService
             FechaCreacion = DateTime.UtcNow
         };
 
-        _db.Areas.Add(area);
-        await _db.SaveChangesAsync(); // aquí ya tiene Id
+        db.Areas.Add(area);
+        await db.SaveChangesAsync(); // aquí ya tiene Id
 
         // Actualizar AreaId del responsable
         if (dto.ResponsableId.HasValue)
         {
-            var usuario = await _db.Usuarios.FindAsync(dto.ResponsableId.Value);
+            var usuario = await db.Usuarios.FindAsync(dto.ResponsableId.Value);
             if (usuario is not null)
             {
                 usuario.AreaId = area.Id;
-                await _db.SaveChangesAsync();
+                await db.SaveChangesAsync();
             }
         }
 
@@ -155,18 +160,20 @@ public class AreaService : IAreaService
 
     public async Task<AreaDto> ActualizarAsync(int id, ActualizarAreaDto dto)
     {
-        var area = await _db.Areas.FindAsync(id)
+        using var db = await _dbFactory.CreateDbContextAsync();
+
+        var area = await db.Areas.FindAsync(id)
             ?? throw new KeyNotFoundException($"No se encontró el área con ID {id}.");
 
-        await ValidarNombreUnicoAsync(dto.Nombre, excludeId: id);
+        await ValidarNombreUnicoAsync(db, dto.Nombre, excludeId: id);
 
         if (dto.ResponsableId.HasValue)
-            await ValidarResponsableExisteAsync(dto.ResponsableId.Value);
+            await ValidarResponsableExisteAsync(db, dto.ResponsableId.Value);
 
         // Si cambia el responsable, limpiar AreaId del anterior
         if (area.ResponsableId.HasValue && area.ResponsableId != dto.ResponsableId)
         {
-            var anterior = await _db.Usuarios.FindAsync(area.ResponsableId.Value);
+            var anterior = await db.Usuarios.FindAsync(area.ResponsableId.Value);
             if (anterior is not null)
                 anterior.AreaId = null;
         }
@@ -180,44 +187,53 @@ public class AreaService : IAreaService
         // Asignar AreaId al nuevo responsable
         if (dto.ResponsableId.HasValue)
         {
-            var usuario = await _db.Usuarios.FindAsync(dto.ResponsableId.Value);
+            var usuario = await db.Usuarios.FindAsync(dto.ResponsableId.Value);
             if (usuario is not null)
                 usuario.AreaId = id;
         }
 
-        await _db.SaveChangesAsync();
+        await db.SaveChangesAsync();
 
         return (await ObtenerPorIdAsync(id))!;
     }
 
     public async Task CambiarEstadoAsync(int id, bool activa)
     {
-        var area = await _db.Areas.FindAsync(id)
+        using var db = await _dbFactory.CreateDbContextAsync();
+
+        var area = await db.Areas.FindAsync(id)
             ?? throw new KeyNotFoundException($"Área {id} no encontrada.");
 
         area.Activa = activa;
         area.FechaModificacion = DateTime.UtcNow;
 
-        await _db.SaveChangesAsync();
+        await db.SaveChangesAsync();
     }
 
     public async Task<bool> NombreExisteAsync(string nombre, int? excluirId = null)
     {
+        using var db = await _dbFactory.CreateDbContextAsync();
+        return await NombreExisteInternoAsync(db, nombre, excluirId);
+    }
+
+    private static async Task<bool> NombreExisteInternoAsync(ApplicationDbContext db, string nombre, int? excluirId)
+    {
         var normalizado = nombre.Trim().ToLower();
-        return await _db.Areas.AnyAsync(a =>
+        return await db.Areas.AnyAsync(a =>
             a.Nombre.ToLower() == normalizado &&
             (!excluirId.HasValue || a.Id != excluirId.Value));
     }
-    private async Task ValidarNombreUnicoAsync(string nombre, int? excludeId)
+
+    private static async Task ValidarNombreUnicoAsync(ApplicationDbContext db, string nombre, int? excludeId)
     {
-        if (await NombreExisteAsync(nombre, excludeId))
+        if (await NombreExisteInternoAsync(db, nombre, excludeId))
             throw new InvalidOperationException(
                 $"Ya existe un área con el nombre '{nombre.Trim()}'. Los nombres de área deben ser únicos.");
     }
 
-    private async Task ValidarResponsableExisteAsync(int responsableId)
+    private static async Task ValidarResponsableExisteAsync(ApplicationDbContext db, int responsableId)
     {
-        var existe = await _db.Usuarios.AnyAsync(u => u.Id == responsableId);
+        var existe = await db.Usuarios.AnyAsync(u => u.Id == responsableId);
         if (!existe)
             throw new InvalidOperationException(
                 $"El responsable con ID {responsableId} no existe en el sistema.");
