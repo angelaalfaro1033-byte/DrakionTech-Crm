@@ -46,6 +46,7 @@
                         <th>País</th>
                         <th>Email</th>
                         <th>Estado</th>
+                        <th>Última actualización</th>
                         <th class="text-end">Acciones</th>
                     </tr>
                 </thead>
@@ -65,6 +66,9 @@
                                 <span class="badge @(empresa.Activa ? "bg-success" : "bg-secondary")">
                                     @(empresa.Activa ? "Activa" : "Inactiva")
                                 </span>
+                            </td>
+                            <td>
+                                <AuditLastUpdated AuditInfo="empresa.AuditInfo" />
                             </td>
                             <td class="text-end">
                                 <div class="ui-actions">

@@ -20,6 +20,8 @@ public class ProyectoRepository : IProyectoRepository
             .Include(p => p.Responsable)
             .Include(p => p.SupervisorInterno)
             .Include(p => p.SupervisorExterno)
+            .Include(p => p.CreatedByUser)
+            .Include(p => p.ModifiedByUser)
             .Include(p => p.Oportunidad)
                 .ThenInclude(o => o!.Empresa)
             .AsQueryable();
@@ -32,6 +34,8 @@ public class ProyectoRepository : IProyectoRepository
             .Include(p => p.Responsable)
             .Include(p => p.SupervisorInterno)
             .Include(p => p.SupervisorExterno)
+            .Include(p => p.CreatedByUser)
+            .Include(p => p.ModifiedByUser)
             .Include(p => p.Oportunidad)
                 .ThenInclude(o => o!.Empresa)
             .AsNoTracking()
@@ -45,9 +49,14 @@ public class ProyectoRepository : IProyectoRepository
             .Include(p => p.Responsable)
             .Include(p => p.SupervisorInterno)
             .Include(p => p.SupervisorExterno)
+            .Include(p => p.CreatedByUser)
+            .Include(p => p.ModifiedByUser)
             .Include(p => p.Oportunidad)
                 .ThenInclude(o => o!.Empresa)
             .Include(p => p.Pagos.OrderBy(pg => pg.FechaProgramada))
+                .ThenInclude(pg => pg.CreatedByUser)
+            .Include(p => p.Pagos.OrderBy(pg => pg.FechaProgramada))
+                .ThenInclude(pg => pg.ModifiedByUser)
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 

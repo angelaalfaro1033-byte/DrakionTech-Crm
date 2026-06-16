@@ -43,6 +43,7 @@
                         <th>Descripción</th>
                         <th>Rol</th>
                         <th>Estado</th>
+                        <th>Última actualización</th>
                         <th class="text-end">Acciones</th>
                     </tr>
                 </thead>
@@ -57,6 +58,9 @@
                                 <span class="badge @(item.Activo ? "bg-success" : "bg-secondary")">
                                     @(item.Activo ? "Activo" : "Inactivo")
                                 </span>
+                            </td>
+                            <td>
+                                <AuditLastUpdated AuditInfo="item.AuditInfo" />
                             </td>
                             <td class="text-end">
                                 <div class="ui-actions">

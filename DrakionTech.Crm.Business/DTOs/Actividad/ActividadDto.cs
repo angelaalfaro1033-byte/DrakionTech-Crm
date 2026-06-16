@@ -1,4 +1,4 @@
-﻿public class ActividadDto
+﻿public class ActividadDto : DrakionTech.Crm.Business.DTOs.IHasAuditInfo
 {
     public int Id { get; set; }
     public int EmpresaId { get; set; }
@@ -24,4 +24,5 @@
 
     public int? ActividadPreviaId { get; set; }
     public string? ActividadPreviaNombre { get; set; }
+    public DrakionTech.Crm.Business.DTOs.AuditInfoDto? AuditInfo { get; set; }
 }

@@ -96,6 +96,8 @@ public class OportunidadService : IOportunidadService
         var oportunidades = await _context.Oportunidades
             .Include(o => o.Empresa)
             .Include(o => o.ContactoPrincipal)
+            .Include(o => o.CreatedByUser)
+            .Include(o => o.ModifiedByUser)
             .AsNoTracking()
             .ToListAsync(ct);
         return _mapper.Map<IEnumerable<OportunidadDto>>(oportunidades);

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DrakionTech.Crm.Business.DTOs.Empresa
 {
-    public class EmpresaDto
+    public class EmpresaDto : DrakionTech.Crm.Business.DTOs.IHasAuditInfo
     {
         public int Id { get; set; }
 
@@ -47,5 +47,6 @@ namespace DrakionTech.Crm.Business.DTOs.Empresa
         public bool HaTrabajadoAntes { get; set; }
         public DateTime FechaCreacion { get; set; }
         public List<EmpresaCorreoDto> Correos { get; set; } = new();
+        public DrakionTech.Crm.Business.DTOs.AuditInfoDto? AuditInfo { get; set; }
     }
 }

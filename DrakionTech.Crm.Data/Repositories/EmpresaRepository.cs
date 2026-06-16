@@ -22,6 +22,8 @@ namespace DrakionTech.Crm.Data.Repositories
                 .Include(e => e.Ciudad)
                 .Include(e => e.SectorEmpresa)
                 .Include(e => e.SubsectorEmpresa)
+                .Include(e => e.CreatedByUser)
+                .Include(e => e.ModifiedByUser)
                 .AsQueryable();
         }
 
@@ -36,6 +38,8 @@ namespace DrakionTech.Crm.Data.Repositories
                 .Include(e => e.Ciudad)
                 .Include(e => e.Correos)
                 .Include(e => e.Contactos)
+                .Include(e => e.CreatedByUser)
+                .Include(e => e.ModifiedByUser)
                 .FirstOrDefaultAsync(e => e.Id == empresaId, ct);
         }
 
@@ -67,6 +71,8 @@ namespace DrakionTech.Crm.Data.Repositories
                 .Include(e => e.Ciudad)
                 .Include(e => e.SectorEmpresa)
                 .Include(e => e.SubsectorEmpresa)
+                .Include(e => e.CreatedByUser)
+                .Include(e => e.ModifiedByUser)
                 .ToListAsync(ct);
         }
     }

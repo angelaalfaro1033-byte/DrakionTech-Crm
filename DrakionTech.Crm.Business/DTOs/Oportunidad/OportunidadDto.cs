@@ -2,7 +2,7 @@
 
 namespace DrakionTech.Crm.Business.DTOs.Oportunidad
 {
-    public class OportunidadDto
+    public class OportunidadDto : DrakionTech.Crm.Business.DTOs.IHasAuditInfo
     {
         public int Id { get; set; }
 
@@ -25,5 +25,6 @@ namespace DrakionTech.Crm.Business.DTOs.Oportunidad
         public int? ProyectoId { get; set; }
         public string EtapaTexto { get; set; } = string.Empty;
         public EtapaOportunidad Etapa { get; set; }
+        public DrakionTech.Crm.Business.DTOs.AuditInfoDto? AuditInfo { get; set; }
     }
 }

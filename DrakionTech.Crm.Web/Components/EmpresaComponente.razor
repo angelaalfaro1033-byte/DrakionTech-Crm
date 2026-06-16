@@ -12,6 +12,7 @@ else
     </div>
     <EmpresaDetalleTabs EmpresaId="@Empresa.Id" />
     <div class="empresa-content">
+        <AuditInfoCard AuditInfo="Empresa.AuditInfo" />
         @ChildContent
     </div>
 }

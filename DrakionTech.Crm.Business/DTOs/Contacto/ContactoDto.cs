@@ -1,6 +1,6 @@
 ﻿namespace DrakionTech.Crm.Business.DTOs.Contacto
 {
-    public class ContactoDto
+    public class ContactoDto : DrakionTech.Crm.Business.DTOs.IHasAuditInfo
     {
         public int Id { get; set; }
         public int EmpresaId { get; set; }
@@ -19,5 +19,6 @@
         public string? Cargo { get; set; }
         public bool EsPrincipal { get; set; }
         public DateTime FechaCreacion { get; set; }
+        public DrakionTech.Crm.Business.DTOs.AuditInfoDto? AuditInfo { get; set; }
     }
 }

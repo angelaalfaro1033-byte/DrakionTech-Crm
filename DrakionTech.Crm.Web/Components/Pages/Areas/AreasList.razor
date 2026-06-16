@@ -47,7 +47,7 @@
                     <th>Descripción</th>
                     <th>Responsable</th>
                     <th>Estado</th>
-                    <th>Creada</th>
+                    <th>Última actualización</th>
                     <th></th>
                 </tr>
             </thead>
@@ -83,8 +83,8 @@
                                 <span class="badge badge-danger">Inactiva</span>
                             }
                         </td>
-                        <td style="font-size:13px;color:var(--text-muted)">
-                            @a.FechaCreacion.ToString("dd/MM/yyyy")
+                        <td>
+                            <AuditLastUpdated AuditInfo="a.AuditInfo" />
                         </td>
                         <td>
                             <div class="ui-actions">

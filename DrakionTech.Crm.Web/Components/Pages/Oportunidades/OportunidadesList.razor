@@ -38,7 +38,7 @@ else
                             <th>Proyecto</th>
                             <th>Valor estimado</th>
                             <th>Etapa</th>
-                            <th>Creación</th>
+                            <th>Última actualización</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -53,7 +53,9 @@ else
                                         @o.EtapaNombre
                                     </span>
                                 </td>
-                                <td>@o.FechaCreacion.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    <AuditLastUpdated AuditInfo="o.AuditInfo" />
+                                </td>
                                 <td>
                                     <div class="ui-actions">
                                         <a class="oport-btn oport-btn--default"

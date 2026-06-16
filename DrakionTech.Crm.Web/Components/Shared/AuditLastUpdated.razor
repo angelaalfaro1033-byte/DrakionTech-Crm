@@ -1,0 +1,33 @@
+@using DrakionTech.Crm.Business.DTOs
+
+<span class="audit-last-updated" title="@Tooltip">
+    <i class="bi bi-clock-history"></i>
+    <span>@Texto</span>
+</span>
+
+@code {
+    [Parameter] public AuditInfoDto? AuditInfo { get; set; }
+
+    private string Texto
+    {
+        get
+        {
+            if (AuditInfo is null)
+            {
+                return "Sin registro";
+            }
+
+            var usuario = string.IsNullOrWhiteSpace(AuditInfo.LastUpdatedByName)
+                ? "Sin usuario registrado"
+                : AuditInfo.LastUpdatedByName;
+
+            var fecha = AuditInfo.LastUpdatedAt?.ToString("dd/MM/yyyy") ?? "Sin fecha";
+
+            return $"{usuario} · {fecha}";
+        }
+    }
+
+    private string Tooltip => AuditInfo?.ModifiedAt.HasValue == true
+        ? "Última modificación"
+        : "Creación del registro";
+}

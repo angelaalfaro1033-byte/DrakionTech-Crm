@@ -19,6 +19,8 @@ namespace DrakionTech.Crm.Data.Repositories
             return await _context.Oportunidades
                 .Include(o => o.Empresa)
                 .Include(o => o.ContactoPrincipal)
+                .Include(o => o.CreatedByUser)
+                .Include(o => o.ModifiedByUser)
                 .Include(o => o.Proyectos)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(o => o.Id == id, ct);
@@ -32,6 +34,8 @@ namespace DrakionTech.Crm.Data.Repositories
                 .Where(o => o.EmpresaId == empresaId)
                 .Include(o => o.Empresa)
                 .Include(o => o.ContactoPrincipal)
+                .Include(o => o.CreatedByUser)
+                .Include(o => o.ModifiedByUser)
                 .AsNoTracking()
                 .ToListAsync(ct);
         }
@@ -42,6 +46,8 @@ namespace DrakionTech.Crm.Data.Repositories
             return await _context.Oportunidades
                 .Include(o => o.Empresa)
                 .Include(o => o.ContactoPrincipal)
+                .Include(o => o.CreatedByUser)
+                .Include(o => o.ModifiedByUser)
                 .AsNoTracking()
                 .ToListAsync(ct);
         }

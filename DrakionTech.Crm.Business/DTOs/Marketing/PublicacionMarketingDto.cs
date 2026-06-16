@@ -2,7 +2,7 @@
 
 namespace DrakionTech.Crm.Business.DTOs.Marketing;
 
-public class PublicacionMarketingDto
+public class PublicacionMarketingDto : DrakionTech.Crm.Business.DTOs.IHasAuditInfo
 {
     public int Id { get; set; }
 
@@ -45,4 +45,5 @@ public class PublicacionMarketingDto
     public List<PublicacionRedSocialDto> RedesSociales { get; set; } = new();
     public List<MetricaPublicacionDto> Metricas { get; set; } = new();
     public List<ArchivoPublicacionDto> Archivos { get; set; } = new();
+    public DrakionTech.Crm.Business.DTOs.AuditInfoDto? AuditInfo { get; set; }
 }

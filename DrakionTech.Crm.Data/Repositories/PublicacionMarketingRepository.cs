@@ -17,6 +17,8 @@ public class PublicacionMarketingRepository : IPublicacionMarketingRepository
     {
         return _context.PublicacionesMarketing
             .Include(x => x.Responsable)
+            .Include(x => x.CreatedByUser)
+            .Include(x => x.ModifiedByUser)
             .Include(x => x.RedesSociales)
             .Include(x => x.Metricas)
             .Include(x => x.Archivos)

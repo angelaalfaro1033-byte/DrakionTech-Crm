@@ -18,26 +18,10 @@ namespace DrakionTech.Crm.Business.Services
 
         public async Task<ResultadoPaginacion<RolUsuarioDto>> ObtenerTodosConPaginacionAsync(string? busqueda = null, bool? soloActivos = null, int pagina = 1, int tamañoPagina = 10)
         {
-            var query = _db.RolesUsuario.AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(busqueda))
-            {
-                var term = busqueda.Trim().ToLower();
-                query = query.Where(r => r.Nombre.ToLower().Contains(term));
-            }
-
-            if (soloActivos.HasValue)
-                query = query.Where(r => r.Activo == soloActivos.Value);
-
-            return await query
-                .OrderBy(r => r.Nombre)
-                .Select(r => new RolUsuarioDto { Id = r.Id, Nombre = r.Nombre, Activo = r.Activo })
-                .PaginarAsync(pagina, tamañoPagina);
-        }
-
-        public async Task<List<RolUsuarioDto>> ObtenerTodosAsync(string? busqueda = null, bool? soloActivos = null)
-        {
-            var query = _db.RolesUsuario.AsQueryable();
+            var query = _db.RolesUsuario
+                .Include(r => r.CreatedByUser)
+                .Include(r => r.ModifiedByUser)
+                .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(busqueda))
             {
@@ -54,14 +38,46 @@ namespace DrakionTech.Crm.Business.Services
                 {
                     Id = r.Id,
                     Nombre = r.Nombre,
-                    Activo = r.Activo
+                    Activo = r.Activo,
+                    AuditInfo = AuditInfoFactory.FromEntity(r)
+                })
+                .PaginarAsync(pagina, tamañoPagina);
+        }
+
+        public async Task<List<RolUsuarioDto>> ObtenerTodosAsync(string? busqueda = null, bool? soloActivos = null)
+        {
+            var query = _db.RolesUsuario
+                .Include(r => r.CreatedByUser)
+                .Include(r => r.ModifiedByUser)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(busqueda))
+            {
+                var term = busqueda.Trim().ToLower();
+                query = query.Where(r => r.Nombre.ToLower().Contains(term));
+            }
+
+            if (soloActivos.HasValue)
+                query = query.Where(r => r.Activo == soloActivos.Value);
+
+            return await query
+                .OrderBy(r => r.Nombre)
+                .Select(r => new RolUsuarioDto
+                {
+                    Id = r.Id,
+                    Nombre = r.Nombre,
+                    Activo = r.Activo,
+                    AuditInfo = AuditInfoFactory.FromEntity(r)
                 })
                 .ToListAsync();
         }
 
         public async Task<RolUsuarioDto> ObtenerPorIdAsync(int id)
         {
-            var rol = await _db.RolesUsuario.FindAsync(id)
+            var rol = await _db.RolesUsuario
+                .Include(r => r.CreatedByUser)
+                .Include(r => r.ModifiedByUser)
+                .FirstOrDefaultAsync(r => r.Id == id)
                 ?? throw new Exception(MensajesError.RolNoEncontrado);
             return MapToDto(rol);
         }
@@ -121,7 +137,8 @@ namespace DrakionTech.Crm.Business.Services
         {
             Id = r.Id,
             Nombre = r.Nombre,
-            Activo = r.Activo
+            Activo = r.Activo,
+            AuditInfo = AuditInfoFactory.FromEntity(r)
         };
 
         private static string Normalizar(string texto) =>

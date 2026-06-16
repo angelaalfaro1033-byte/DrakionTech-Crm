@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DrakionTech.Crm.Business.DTOs.Especialidad
 {
-    public class EspecialidadDto
+    public class EspecialidadDto : DrakionTech.Crm.Business.DTOs.IHasAuditInfo
     {
         public int Id { get; set; }
 
@@ -19,5 +19,6 @@ namespace DrakionTech.Crm.Business.DTOs.Especialidad
 
         public string? RolUsuarioNombre { get; set; }
         public bool Activo { get; set; } = true;
+        public DrakionTech.Crm.Business.DTOs.AuditInfoDto? AuditInfo { get; set; }
     }
 }

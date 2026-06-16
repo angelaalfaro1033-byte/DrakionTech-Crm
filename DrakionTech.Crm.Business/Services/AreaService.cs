@@ -21,6 +21,8 @@ public class AreaService : IAreaService
     {
         var query = _db.Areas
             .Include(a => a.Responsable)
+            .Include(a => a.CreatedByUser)
+            .Include(a => a.ModifiedByUser)
             .AsQueryable();
 
         if (soloActivas.HasValue)
@@ -52,7 +54,8 @@ public class AreaService : IAreaService
                     ? $"{a.Responsable.Nombre} {a.Responsable.Apellido}"
                     : null,
                 FechaCreacion = a.FechaCreacion,
-                TotalUsuarios = a.Usuarios.Count()
+                TotalUsuarios = a.Usuarios.Count(),
+                AuditInfo = AuditInfoFactory.FromEntity(a)
             })
             .PaginarAsync(pagina, tamañoPagina);
     }
@@ -64,6 +67,8 @@ public class AreaService : IAreaService
     {
         var query = _db.Areas
             .Include(a => a.Responsable)
+            .Include(a => a.CreatedByUser)
+            .Include(a => a.ModifiedByUser)
             .AsQueryable();
 
         // Filtro por estado
@@ -93,7 +98,8 @@ public class AreaService : IAreaService
                     ? $"{a.Responsable.Nombre} {a.Responsable.Apellido}"
                     : null,
                 FechaCreacion = a.FechaCreacion,
-                TotalUsuarios = a.Usuarios.Count()
+                TotalUsuarios = a.Usuarios.Count(),
+                AuditInfo = AuditInfoFactory.FromEntity(a)
             })
             .ToListAsync();
     }
@@ -105,6 +111,8 @@ public class AreaService : IAreaService
     {
         var area = await _db.Areas
             .Include(a => a.Responsable)
+            .Include(a => a.CreatedByUser)
+            .Include(a => a.ModifiedByUser)
             .FirstOrDefaultAsync(a => a.Id == id);
 
         if (area is null) return null;
@@ -226,6 +234,7 @@ public class AreaService : IAreaService
             ? $"{a.Responsable.Nombre} {a.Responsable.Apellido}"
             : null,
         FechaCreacion = a.FechaCreacion,
-        FechaModificacion = a.FechaModificacion
+        FechaModificacion = a.FechaModificacion,
+        AuditInfo = AuditInfoFactory.FromEntity(a)
     };
 }

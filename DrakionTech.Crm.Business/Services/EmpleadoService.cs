@@ -61,7 +61,8 @@ namespace DrakionTech.Crm.Business.Services
                     Activo = e.Activo,
                     TipoDocumento = e.TipoDocumento,
                     NumeroDocumento = e.NumeroDocumento,
-                    Salario = e.Salario != null ? e.Salario.Salario : null
+                    Salario = e.Salario != null ? e.Salario.Salario : null,
+                    AuditInfo = AuditInfoFactory.FromEntity(e)
                 })
                 .PaginarAsync(pagina, tamañoPagina);
         }
@@ -79,7 +80,8 @@ namespace DrakionTech.Crm.Business.Services
                     Email = e.Email,
                     Especialidad = e.EspecialidadNavigation != null
                         ? e.EspecialidadNavigation.Nombre
-                        : null
+                        : null,
+                    AuditInfo = AuditInfoFactory.FromEntity(e)
                 })
                 .ToListAsync();
         }
@@ -202,7 +204,8 @@ namespace DrakionTech.Crm.Business.Services
             Activo = e.Activo,
             TipoDocumento = e.TipoDocumento,
             NumeroDocumento = e.NumeroDocumento,
-            Salario = e.Salario?.Salario
+            Salario = e.Salario?.Salario,
+            AuditInfo = AuditInfoFactory.FromEntity(e)
         };
 
         public async Task<EmpleadoListDto?> ObtenerPorEmailAsync(string email)

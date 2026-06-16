@@ -12,11 +12,21 @@ namespace DrakionTech.Crm.Data.Repositories
         {
         }
 
+        public override async Task<Propuesta?> ObtenerPorIdAsync(int id, CancellationToken ct = default)
+        {
+            return await _dbSet
+                .Include(p => p.CreatedByUser)
+                .Include(p => p.ModifiedByUser)
+                .FirstOrDefaultAsync(p => p.Id == id, ct);
+        }
+
         public async Task<IEnumerable<Propuesta>> ObtenerPorOportunidadIdAsync(
             int oportunidadId,
             CancellationToken ct = default)
         {
             return await _dbSet
+                .Include(p => p.CreatedByUser)
+                .Include(p => p.ModifiedByUser)
                 .Where(p => p.OportunidadId == oportunidadId)
                 .AsNoTracking()
                 .ToListAsync(ct);

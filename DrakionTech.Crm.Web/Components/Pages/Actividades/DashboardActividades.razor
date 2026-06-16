@@ -73,6 +73,7 @@
                         <th>Oportunidad</th>
                         <th>Vencimiento</th>
                         <th>Tiempo</th>
+                        <th>Última actualización</th>
                         <th class="text-end">Acciones</th>
                     </tr>
                 </thead>
@@ -129,6 +130,9 @@
                                 <span class="tiempo-@a.ClasificacionEstado?.ToLower()">
                                     @a.TiempoRelativo
                                 </span>
+                            </td>
+                            <td>
+                                <AuditLastUpdated AuditInfo="a.AuditInfo" />
                             </td>
                             <td>
                                 <div class="ui-actions">

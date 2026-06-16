@@ -35,12 +35,10 @@
                         </span>
                     </p>
 
-                    <p class="mb-0">
-                        <strong>Fecha creación:</strong>
-                        @oportunidad.FechaCreacion.ToString("dd/MM/yyyy")
-                    </p>
                 </div>
             </div>
+
+            <AuditInfoCard AuditInfo="oportunidad.AuditInfo" />
 
             <div class="etapa-form-card">
                 @if (_error is not null)

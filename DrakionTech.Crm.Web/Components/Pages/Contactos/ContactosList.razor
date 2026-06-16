@@ -59,7 +59,7 @@ else
                             <th>Email</th>
                             <th>Teléfono</th>
                             <th>Rol</th>
-                            <th>Creación</th>
+                            <th>Última actualización</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -88,8 +88,8 @@ else
                                         <span style="color:var(--text-muted);font-size:13px">—</span>
                                     }
                                 </td>
-                                <td style="font-size:13px;color:var(--text-muted)">
-                                    @contacto.FechaCreacion.ToString("dd/MM/yyyy")
+                                <td>
+                                    <AuditLastUpdated AuditInfo="contacto.AuditInfo" />
                                 </td>
                                 <td>
                                     <div class="ui-actions">
