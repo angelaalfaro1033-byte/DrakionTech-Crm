@@ -50,5 +50,6 @@ namespace DrakionTech.Crm.Data.Entities
         public ICollection<EmpresaCorreo> Correos { get; set; } = new List<EmpresaCorreo>();
         public ICollection<Oportunidad> Oportunidades { get; set; } = new List<Oportunidad>();
         public ICollection<Actividad> Actividades { get; set; } = new List<Actividad>();
+        public ICollection<HistorialEmpresa> HistorialesEmpresa { get; set; } = new List<HistorialEmpresa>();
     }
 }

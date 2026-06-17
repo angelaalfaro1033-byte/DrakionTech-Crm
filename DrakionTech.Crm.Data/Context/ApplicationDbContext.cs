@@ -69,6 +69,7 @@ namespace DrakionTech.Crm.Data.Context
         public DbSet<SubsectorEmpresa> SubsectoresEmpresa { get; set; } = null!;
         public DbSet<EmpresaCorreo> EmpresaCorreos { get; set; } = null!;
         public DbSet<HistorialEtapaProyecto> HistorialesEtapaProyecto => Set<HistorialEtapaProyecto>();
+        public DbSet<HistorialEmpresa> HistorialesEmpresa => Set<HistorialEmpresa>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -106,6 +107,7 @@ namespace DrakionTech.Crm.Data.Context
             modelBuilder.ApplyConfiguration(new PublicacionMarketingConfiguration());
             modelBuilder.ApplyConfiguration(new PublicacionRedSocialConfiguration());
             modelBuilder.ApplyConfiguration(new MetricaPublicacionConfiguration());
+            modelBuilder.ApplyConfiguration(new HistorialEmpresaConfiguration());
             modelBuilder.Entity<ArchivoPublicacionMarketing>().HasOne(x => x.PublicacionMarketing).WithMany(x => x.Archivos).HasForeignKey(x => x.PublicacionMarketingId).OnDelete(DeleteBehavior.Cascade);
 
             ConfigureAuditableEntities(modelBuilder);

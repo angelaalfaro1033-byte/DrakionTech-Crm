@@ -1,0 +1,216 @@
+﻿@page "/empresas/{EmpresaId:int}/historial"
+@attribute [Authorize]
+
+@inject IEmpresaService EmpresaService
+@inject IHistorialEmpresaService HistorialEmpresaService
+
+@if (empresa is null)
+{
+    <p>Cargando historial...</p>
+}
+else
+{
+    <EmpresaComponente Empresa="empresa">
+
+        <div class="empresa-section-header">
+            <div>
+                <h5>Historial</h5>
+                <small>Trazabilidad completa de la empresa</small>
+            </div>
+        </div>
+
+        <div class="ui-card mb-3">
+            <div class="row g-3">
+
+                <div class="col-md-3">
+                    <label>Fecha desde</label>
+
+                    <input type="date"
+                           class="form-control"
+                           @bind="fechaDesde"
+                           @bind:after="Buscar" />
+                </div>
+
+                <div class="col-md-3">
+                    <label>Fecha hasta</label>
+
+                    <input type="date"
+                           class="form-control"
+                           @bind="fechaHasta"
+                           @bind:after="Buscar" />
+                </div>
+
+                <div class="col-md-3">
+                    <label>Tipo evento</label>
+
+                    <select class="form-select"
+                            @bind="tipoEventoSeleccionado"
+                            @bind:after="Buscar">
+
+                        <option value="">Todos</option>
+
+                        @foreach (var tipo in tiposEvento)
+                        {
+                            <option value="@tipo.Valor">
+                                @tipo.Nombre
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label>Módulo</label>
+
+                    <select class="form-select"
+                            @bind="moduloSeleccionado"
+                            @bind:after="Buscar">
+
+                        <option value="">Todos</option>
+
+                        @foreach (var modulo in modulos)
+                        {
+                            <option value="@modulo.Valor">
+                                @modulo.Nombre
+                            </option>
+                        }
+                    </select>
+                </div>
+
+            </div>
+        </div>
+
+        @if (!historial.Any())
+        {
+            <div class="alert alert-info">
+                No existen registros de historial para esta empresa.
+            </div>
+        }
+        else
+        {
+            <div class="ui-card">
+                <table class="ui-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Evento</th>
+                            <th>Módulo</th>
+                            <th>Responsable</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var item in historial)
+                        {
+                            <tr>
+                                <td>
+                                    @item.FechaEvento.ToString("dd/MM/yyyy HH:mm")
+                                </td>
+
+                                <td>
+                                    <strong>@item.TituloEvento</strong>
+
+                                    @if (!string.IsNullOrWhiteSpace(item.DescripcionEvento))
+                                    {
+                                        <div class="text-muted small">
+                                            @item.DescripcionEvento
+                                        </div>
+                                    }
+                                </td>
+
+                                <td>
+                                    @item.ModuloOrigenNombre
+                                </td>
+
+                                <td>
+                                    @item.UsuarioResponsableNombre
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <Paginacion PaginaActual="@paginaActual"
+                        TotalPaginas="@totalPaginas"
+                        OnPaginaChanged="CambiarPagina" />
+        }
+
+    </EmpresaComponente>
+}
+@code {
+
+    [Parameter]
+    public int EmpresaId { get; set; }
+
+    private EmpresaDto? empresa;
+
+    private List<HistorialEmpresaDto> historial = [];
+
+    private int paginaActual = 1;
+    private int totalPaginas = 1;
+
+    private DateTime? fechaDesde;
+    private DateTime? fechaHasta;
+
+    private string? tipoEventoSeleccionado;
+    private string? moduloSeleccionado;
+
+    private readonly FiltroHistorialEmpresaDto filtro = new();
+
+    private IEnumerable<OpcionEnumDto> tiposEvento = [];
+    private IEnumerable<OpcionEnumDto> modulos = [];
+
+    private async Task Buscar()
+    {
+        paginaActual = 1;
+
+        await CargarHistorial();
+    }
+
+    private async Task CambiarPagina(int pagina)
+    {
+        paginaActual = pagina;
+
+        await CargarHistorial();
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        empresa = await EmpresaService.ObtenerPorIdAsync(EmpresaId);
+
+        await HistorialEmpresaService.SincronizarEmpresaAsync(EmpresaId);
+
+        tiposEvento = HistorialEmpresaService.ObtenerTiposEvento();
+        modulos = HistorialEmpresaService.ObtenerModulosOrigen();
+
+        await CargarHistorial();
+    }
+    private async Task CargarHistorial()
+    {
+        filtro.EmpresaId = EmpresaId;
+        filtro.Pagina = paginaActual;
+        filtro.FechaDesde = fechaDesde;
+        filtro.FechaHasta = fechaHasta;
+
+        filtro.TipoEvento =
+            Enum.TryParse<TipoEventoHistorialEmpresa>(
+                tipoEventoSeleccionado,
+                out var tipo)
+                ? tipo
+                : null;
+
+        filtro.ModuloOrigen =
+            Enum.TryParse<ModuloOrigenHistorialEmpresa>(
+                moduloSeleccionado,
+                out var modulo)
+                ? modulo
+                : null;
+
+        var resultado =
+            await HistorialEmpresaService.ObtenerPorEmpresaAsync(filtro);
+
+        historial = resultado.Items.ToList();
+
+        paginaActual = resultado.Pagina;
+        totalPaginas = resultado.TotalPaginas;
+    }
+}
