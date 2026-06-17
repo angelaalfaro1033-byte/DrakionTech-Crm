@@ -23,30 +23,30 @@ else
             <div class="row g-3">
 
                 <div class="col-md-3">
-                    <label>Buscar</label>
-                    <input class="form-control"
-                           @bind="filtro.Busqueda" />
-                </div>
-
-                <div class="col-md-2">
                     <label>Fecha desde</label>
+
                     <input type="date"
                            class="form-control"
-                           @bind="fechaDesde" />
+                           @bind="fechaDesde"
+                           @bind:after="Buscar" />
                 </div>
 
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <label>Fecha hasta</label>
+
                     <input type="date"
                            class="form-control"
-                           @bind="fechaHasta" />
+                           @bind="fechaHasta"
+                           @bind:after="Buscar" />
                 </div>
 
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <label>Tipo evento</label>
 
                     <select class="form-select"
-                            @bind="tipoEventoSeleccionado">
+                            @bind="tipoEventoSeleccionado"
+                            @bind:after="Buscar">
+
                         <option value="">Todos</option>
 
                         @foreach (var tipo in tiposEvento)
@@ -58,11 +58,13 @@ else
                     </select>
                 </div>
 
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <label>Módulo</label>
 
                     <select class="form-select"
-                            @bind="moduloSeleccionado">
+                            @bind="moduloSeleccionado"
+                            @bind:after="Buscar">
+
                         <option value="">Todos</option>
 
                         @foreach (var modulo in modulos)
@@ -72,13 +74,6 @@ else
                             </option>
                         }
                     </select>
-                </div>
-
-                <div class="col-md-1 d-flex align-items-end">
-                    <button class="btn btn-primary w-100"
-                            @onclick="Buscar">
-                        Buscar
-                    </button>
                 </div>
 
             </div>
