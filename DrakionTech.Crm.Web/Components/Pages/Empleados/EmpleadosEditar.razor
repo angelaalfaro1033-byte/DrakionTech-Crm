@@ -5,23 +5,18 @@
 @inject NavigationManager Nav
 
 <div class="empleados-container">
-
-    <div class="page-header">
-        <div>
-            <h1 class="page-title">Editar empleado</h1>
-            <p class="page-subtitle">Actualiza la información</p>
+    <div class="form-card">
+        <div class="form-header">
+            <h1>Editar empleado</h1>
+            <p>Actualiza la información</p>
         </div>
-    </div>
 
-    @if (cargando)
-    {
-        <div class="ui-card">
+        @if (cargando)
+        {
             <p>Cargando información...</p>
-        </div>
-    }
-    else
-    {
-        <div class="ui-card">
+        }
+        else
+        {
             @if (!string.IsNullOrEmpty(error))
             {
                 <ul class="validation-summary">
@@ -31,13 +26,13 @@
                     }
                 </ul>
             }
+
             <EmpleadoForm Model="empleado"
                           OnValidSubmit="Guardar"
                           OnCancel="Cancelar"
                           TextoBoton="Actualizar" />
-        </div>
-    }
-
+        }
+    </div>
 </div>
 
 @code {

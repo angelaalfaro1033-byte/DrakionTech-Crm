@@ -12,12 +12,11 @@
 @inject IUsuarioService UsuarioService
 @inject NavigationManager Nav
 
-<div class="page-header">
-    <div>
-        <h3 class="page-title">Editar Publicación</h3>
-        <p class="page-subtitle">Actualiza la información de la publicación de marketing</p>
+<div class="form-card">
+    <div class="form-header">
+        <h1>Editar Publicación</h1>
+        <p>Actualiza la información de la publicación de marketing</p>
     </div>
-</div>
 
 @if (!string.IsNullOrWhiteSpace(_error))
 {
@@ -31,10 +30,10 @@ else
 {
     <EditForm Model="_modelo" OnValidSubmit="ActualizarAsync">
         <DataAnnotationsValidator />
-        <ValidationSummary />
+            <ValidationSummary class="validation-summary" />
 
         <div class="form-section">
-            <p class="section-title">Información General</p>
+                <h3>Información General</h3>
 
             <div class="mb-3">
                 <label class="form-label">Nombre</label>
@@ -113,7 +112,7 @@ else
         </div>
 
         <div class="form-section">
-            <p class="section-title">Responsable y Programación</p>
+                <h3>Responsable y Programación</h3>
 
             <div class="grid-2col">
                 <div class="mb-3">
@@ -150,7 +149,7 @@ else
         </div>
 
         <div class="form-section">
-            <p class="section-title">Redes Sociales</p>
+                <h3>Redes Sociales</h3>
 
             @foreach (var red in _modelo.RedesSociales)
             {
@@ -208,8 +207,9 @@ else
                 Cancelar
             </button>
         </div>
-    </EditForm>
-}
+        </EditForm>
+        }
+</div>
 
 @code {
     [Parameter] public int Id { get; set; }

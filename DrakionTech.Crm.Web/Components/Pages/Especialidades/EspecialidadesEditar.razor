@@ -9,48 +9,49 @@
 @inject NavigationManager Nav
 
 <div class="roles-container">
-
-    <div class="page-header">
-        <div>
-            <h1 class="page-title">Editar especialidad</h1>
-            <p class="page-subtitle">Actualiza la información</p>
+    <div class="form-card">
+        <div class="form-header">
+            <h1>Editar especialidad</h1>
+            <p>Actualiza la información</p>
         </div>
-    </div>
 
-    @if (cargando)
-    {
-        <div class="ui-card"><p>Cargando información...</p></div>
-    }
-    else if (!string.IsNullOrEmpty(error))
-    {
-        <div class="ui-card"><p class="text-danger">@error</p></div>
-    }
-    else
-    {
-        <div class="ui-card">
+        @if (cargando)
+        {
+            <p>Cargando información...</p>
+        }
+        else if (!string.IsNullOrEmpty(error))
+        {
+            <p class="text-danger">@error</p>
+        }
+        else
+        {
             <EditForm Model="especialidad" OnValidSubmit="Guardar">
                 <DataAnnotationsValidator />
 
-                <div class="mb-3">
-                    <label class="form-label">Nombre</label>
-                    <InputText class="form-control" @bind-Value="especialidad.Nombre" />
-                    <ValidationMessage For="@(() => especialidad.Nombre)" />
-                </div>
+                <div class="form-section">
+                    <h3>Información de la especialidad</h3>
 
-                <div class="mb-3">
-                    <label class="form-label">Descripción</label>
-                    <InputTextArea class="form-control" @bind-Value="especialidad.Descripcion" rows="3" />
-                </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <InputText class="form-control" @bind-Value="especialidad.Nombre" />
+                        <ValidationMessage For="@(() => especialidad.Nombre)" class="validation-message" />
+                    </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Rol asociado</label>
-                    <InputSelect class="form-select" @bind-Value="especialidad.RolUsuarioId">
-                        <option value="0">-- Selecciona un rol --</option>
-                        @foreach (var rol in roles)
-                        {
-                            <option value="@rol.Id">@rol.Nombre</option>
-                        }
-                    </InputSelect>
+                    <div class="mb-3">
+                        <label class="form-label">Descripción</label>
+                        <InputTextArea class="form-control" @bind-Value="especialidad.Descripcion" rows="3" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Rol asociado</label>
+                        <InputSelect class="form-select" @bind-Value="especialidad.RolUsuarioId">
+                            <option value="0">-- Selecciona un rol --</option>
+                            @foreach (var rol in roles)
+                            {
+                                <option value="@rol.Id">@rol.Nombre</option>
+                            }
+                        </InputSelect>
+                    </div>
                 </div>
 
                 <div class="form-actions">
@@ -58,9 +59,8 @@
                     <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
                 </div>
             </EditForm>
-        </div>
-    }
-
+        }
+    </div>
 </div>
 
 @code {

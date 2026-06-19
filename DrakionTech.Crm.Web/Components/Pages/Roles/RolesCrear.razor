@@ -7,22 +7,23 @@
 @inject NavigationManager Nav
 
 <div class="roles-container">
-
-    <div class="page-header">
-        <div>
-            <h1 class="page-title">Crear rol</h1>
-            <p class="page-subtitle">Registra un nuevo rol</p>
+    <div class="form-card">
+        <div class="form-header">
+            <h1>Crear rol</h1>
+            <p>Registra un nuevo rol</p>
         </div>
-    </div>
 
-    <div class="ui-card">
         <EditForm Model="rol" OnValidSubmit="Guardar">
             <DataAnnotationsValidator />
 
-            <div class="mb-3">
-                <label class="form-label">Nombre</label>
-                <InputText class="form-control" @bind-Value="rol.Nombre" placeholder="Nombre del rol" />
-                <ValidationMessage For="@(() => rol.Nombre)" />
+            <div class="form-section">
+                <h3>Información del rol</h3>
+
+                <div class="mb-3">
+                    <label class="form-label">Nombre</label>
+                    <InputText class="form-control" @bind-Value="rol.Nombre" placeholder="Nombre del rol" />
+                    <ValidationMessage For="@(() => rol.Nombre)" class="validation-message" />
+                </div>
             </div>
 
             <div class="form-actions">
@@ -31,7 +32,6 @@
             </div>
         </EditForm>
     </div>
-
 </div>
 
 @code {

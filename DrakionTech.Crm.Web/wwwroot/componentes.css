@@ -73,6 +73,7 @@
     border-radius: var(--radius-lg);
     background: var(--bg-card);
     border: 1px solid var(--border-soft);
+    margin-top: 0.75rem;
     margin-bottom: 20px;
     align-items: center;
 }
@@ -329,5 +330,30 @@
 @media (max-width: 640px) {
     .audit-card__grid {
         grid-template-columns: 1fr;
+    }
+}
+
+.detail-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.detail-section-header__action {
+    width: auto !important;
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+    .detail-section-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .detail-section-header__action {
+        width: 100% !important;
     }
 }

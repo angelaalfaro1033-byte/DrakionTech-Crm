@@ -8,12 +8,11 @@
 @inject IPublicacionMarketingService MarketingService
 @inject NavigationManager Nav
 
-<div class="page-header">
-    <div>
-        <h3 class="page-title">Editar Métrica</h3>
-        <p class="page-subtitle">Actualiza el seguimiento de una publicación por canal</p>
+<div class="form-card">
+    <div class="form-header">
+        <h1>Editar Métrica</h1>
+        <p>Actualiza el seguimiento de una publicación por canal</p>
     </div>
-</div>
 
 @if (!string.IsNullOrWhiteSpace(_error))
 {
@@ -27,10 +26,10 @@ else
 {
     <EditForm Model="_modelo" OnValidSubmit="ActualizarAsync">
         <DataAnnotationsValidator />
-        <ValidationSummary />
+            <ValidationSummary class="validation-summary" />
 
         <div class="form-section">
-            <p class="section-title">Información de la métrica</p>
+                <h3>Información de la métrica</h3>
 
             <div class="grid-2col">
                 <div class="mb-3">
@@ -96,6 +95,7 @@ else
         </div>
     </EditForm>
 }
+</div>
 
 @code {
     [Parameter] public int Id { get; set; }

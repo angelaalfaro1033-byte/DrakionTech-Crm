@@ -8,13 +8,11 @@
 @inject NavigationManager Nav
 
 <div class="empleados-container">
-    <div class="page-header">
-        <div>
-            <h1 class="page-title">Crear usuario</h1>
-            <p class="page-subtitle">Registra un nuevo usuario</p>
+    <div class="form-card">
+        <div class="form-header">
+            <h1>Crear usuario</h1>
+            <p>Registra un nuevo usuario</p>
         </div>
-    </div>
-    <div class="ui-card">
         <UsuarioForm Model="usuario"
                      Roles="roles"
                      OnValidSubmit="Guardar"

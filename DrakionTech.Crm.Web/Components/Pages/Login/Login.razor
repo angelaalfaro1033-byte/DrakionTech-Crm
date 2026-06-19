@@ -1,6 +1,8 @@
 ﻿@page "/login"
 @layout EmptyLayout
 @attribute [AllowAnonymous]
+@using DrakionTech.Crm.Business.Interfaces
+@inject IUsuarioService UsuarioService
 @inject IMensajesService MensajesService
 
 <div class="login-wrapper">
@@ -56,10 +58,13 @@
                 </svg>
                 Continuar con Google
             </a>
-            <div class="login-footer">
-                <span>¿Primera vez aquí?</span>
-                <a href="/registro-inicial">Crea tu cuenta</a>
-            </div>
+            @if (_sistemaVacio)
+            {
+                <div class="login-footer">
+                    <span>¿Primera vez aquí?</span>
+                    <a href="/registro-inicial">Crea tu cuenta</a>
+                </div>
+            }
         </form>
     </div>
 </div>
@@ -70,4 +75,11 @@
 
     private string? TextoError => MensajesService.ObtenerMensajeError(error);
     private string? TextoMensaje => MensajesService.ObtenerMensajeExito(mensaje);
+
+    private bool _sistemaVacio = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _sistemaVacio = !await UsuarioService.ExisteAlgunUsuarioAsync();
+    }
 }

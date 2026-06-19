@@ -13,14 +13,13 @@
 @inject IContactoService ContactoService
 @inject NavigationManager Nav
 
-<div class="page-header">
-    <div>
-        <h3 class="page-title">Nuevo Proyecto</h3>
-        <p class="page-subtitle">Completa la información del proyecto</p>
+<div class="form-card">
+    <div class="form-header">
+        <h1>Nuevo Proyecto</h1>
+        <p>Completa la información del proyecto</p>
     </div>
-</div>
 
-<EditForm Model="_modelo" OnValidSubmit="GuardarAsync">
+    <EditForm Model="_modelo" OnValidSubmit="GuardarAsync">
     <DataAnnotationsValidator />
 
     @if (!string.IsNullOrWhiteSpace(_error))
@@ -29,7 +28,7 @@
     }
 
     <div class="form-section">
-        <p class="section-title">Información general</p>
+            <h3>Información general</h3>
         <div class="mb-3">
             <label class="form-label">Nombre</label>
             <InputText class="form-control" @bind-Value="_modelo.Nombre" />
@@ -63,7 +62,7 @@
     </div>
 
     <div class="form-section">
-        <p class="section-title">Asignación</p>
+            <h3>Asignación</h3>
         <div class="grid-2col">
             @* Área *@
             <div class="mb-3">
@@ -117,7 +116,7 @@
     </div>
 
     <div class="form-section">
-        <p class="section-title">Fechas</p>
+            <h3>Fechas</h3>
         <div class="grid-2col">
             <div class="mb-3">
                 <label class="form-label">Fecha Inicio</label>
@@ -159,6 +158,7 @@
         </button>
     </div>
 </EditForm>
+</div>
 
 @code {
     private CrearProyectoDto _modelo = new();

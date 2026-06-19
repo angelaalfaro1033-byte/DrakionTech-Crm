@@ -11,7 +11,6 @@
 @inherits PaginacionBase
 
 <div class="empleados-container">
-
     <div class="page-header">
         <div class="header-text">
             <h1 class="page-title">Marketing</h1>
@@ -19,15 +18,22 @@
                 Seguimiento mensual y métricas por canal
             </p>
         </div>
-
-        <div>
-            <a class="btn btn-primary" href="/marketing/crear-metrica">
-                + Agregar Métrica
-            </a>
-        </div>
     </div>
 
     <MarketingTabs />
+
+    <div class="detail-section-header mt-3">
+        <div>
+            <h5 class="oport-title">Métricas</h5>
+            <small>Seguimiento mensual y métricas por canal</small>
+        </div>
+
+        <a class="btn btn-primary detail-section-header__action"
+           href="/marketing/crear-metrica">
+            <i class="bi bi-plus-lg me-1"></i>
+            Agregar métrica
+        </a>
+    </div>
 
     <FiltroTabla TItem="MetricaPublicacionDto"
                  PlaceholderBusqueda="Buscar publicación o canal..."
