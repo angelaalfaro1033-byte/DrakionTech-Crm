@@ -7,36 +7,33 @@
 @inject NavigationManager Nav
 
 <div class="roles-container">
-
-    <div class="page-header">
-        <div>
-            <h1 class="page-title">Editar rol</h1>
-            <p class="page-subtitle">Actualiza la información</p>
+    <div class="form-card">
+        <div class="form-header">
+            <h1>Editar rol</h1>
+            <p>Actualiza la información</p>
         </div>
-    </div>
 
-    @if (cargando)
-    {
-        <div class="ui-card">
+        @if (cargando)
+        {
             <p>Cargando información...</p>
-        </div>
-    }
-    else if (!string.IsNullOrEmpty(error))
-    {
-        <div class="ui-card">
+        }
+        else if (!string.IsNullOrEmpty(error))
+        {
             <p class="text-danger">@error</p>
-        </div>
-    }
-    else
-    {
-        <div class="ui-card">
+        }
+        else
+        {
             <EditForm Model="rol" OnValidSubmit="Guardar">
                 <DataAnnotationsValidator />
 
-                <div class="mb-3">
-                    <label class="form-label">Nombre</label>
-                    <InputText class="form-control" @bind-Value="rol.Nombre" placeholder="Nombre del rol" />
-                    <ValidationMessage For="@(() => rol.Nombre)" />
+                <div class="form-section">
+                    <h3>Información del rol</h3>
+
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <InputText class="form-control" @bind-Value="rol.Nombre" placeholder="Nombre del rol" />
+                        <ValidationMessage For="@(() => rol.Nombre)" class="validation-message" />
+                    </div>
                 </div>
 
                 <div class="form-actions">
@@ -44,9 +41,8 @@
                     <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
                 </div>
             </EditForm>
-        </div>
-    }
-
+        }
+    </div>
 </div>
 
 @code {

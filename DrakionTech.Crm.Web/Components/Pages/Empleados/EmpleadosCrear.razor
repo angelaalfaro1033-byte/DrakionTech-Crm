@@ -5,15 +5,12 @@
 @inject NavigationManager Nav
 
 <div class="empleados-container">
-
-    <div class="page-header">
-        <div>
-            <h1 class="page-title">Crear empleado</h1>
-            <p class="page-subtitle">Registra un nuevo empleado</p>
+    <div class="form-card">
+        <div class="form-header">
+            <h1>Crear empleado</h1>
+            <p>Registra un nuevo empleado</p>
         </div>
-    </div>
 
-    <div class="ui-card">
         @if (!string.IsNullOrWhiteSpace(errorMensaje))
         {
             <ul class="validation-summary">
@@ -23,6 +20,7 @@
                 }
             </ul>
         }
+
         <EmpleadoForm Model="empleado"
                       OnValidSubmit="Guardar"
                       OnCancel="Cancelar"

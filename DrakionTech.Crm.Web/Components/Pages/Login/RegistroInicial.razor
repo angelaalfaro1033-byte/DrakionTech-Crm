@@ -155,6 +155,10 @@
     protected override async Task OnInitializedAsync()
     {
         SistemaConUsuarios = await UsuarioService.ExisteAlgunUsuarioAsync();
+        if (SistemaConUsuarios)
+        {
+            Nav.NavigateTo("/login", replace: true);
+        }
     }
 
     private bool TieneLongitud  => Password?.Length >= 8;

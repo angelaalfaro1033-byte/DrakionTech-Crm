@@ -8,12 +8,11 @@
 @inject IPublicacionMarketingService MarketingService
 @inject NavigationManager Nav
 
-<div class="page-header">
-    <div>
-        <h3 class="page-title">Agregar Métrica</h3>
-        <p class="page-subtitle">Registra el seguimiento de una publicación por canal</p>
+<div class="form-card">
+    <div class="form-header">
+        <h1>Agregar Métrica</h1>
+        <p>Registra el seguimiento de una publicación por canal</p>
     </div>
-</div>
 
 @if (!string.IsNullOrWhiteSpace(_error))
 {
@@ -22,10 +21,10 @@
 
 <EditForm Model="_modelo" OnValidSubmit="GuardarAsync">
     <DataAnnotationsValidator />
-    <ValidationSummary />
+        <ValidationSummary class="validation-summary" />
 
     <div class="form-section">
-        <p class="section-title">Información de la métrica</p>
+            <h3>Información de la métrica</h3>
 
         <div class="grid-2col">
             <div class="mb-3">
@@ -90,6 +89,7 @@
         </button>
     </div>
 </EditForm>
+</div>
 
 @code {
     private CrearMetricaPublicacionDto _modelo = new()

@@ -10,11 +10,13 @@
 else
 {
     <EmpresaComponente Empresa="empresa">
-        <div class="oport-header">
+        <div class="detail-section-header">
             <div>
                 <h5 class="oport-title">Contactos</h5>
+                <small>Gestión de contactos de la empresa</small>
             </div>
-            <a class="btn btn-primary d-flex align-items-center gap-2"
+
+            <a class="btn btn-primary detail-section-header__action d-flex align-items-center gap-2"
                href="/empresas/@EmpresaId/contactos/crear">
                 <i class="bi bi-plus-lg"></i>
                 Nuevo contacto
@@ -33,7 +35,7 @@ else
         }
         else
         {
-            <div class="ui-toolbar">
+            <div class="ui-toolbar detail-toolbar">
                 <div class="ui-search">
                     <i class="bi bi-search"></i>
                     <input class="form-control"

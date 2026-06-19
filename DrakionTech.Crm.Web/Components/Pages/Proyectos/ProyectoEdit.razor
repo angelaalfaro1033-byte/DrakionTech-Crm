@@ -14,15 +14,15 @@
 @inject IContactoService ContactoService
 @inject NavigationManager Nav
 
-<div class="page-header">
-    <div>
-        <h3 class="page-title">Editar Proyecto</h3>
-        <p class="page-subtitle">Actualiza la información, asignación y fases del proyecto</p>
+<div class="form-card">
+    <div class="form-header">
+        <h1>Editar Proyecto</h1>
+        <p>Modifica la información del proyecto</p>
     </div>
     <button type="button" class="btn btn-secondary" @onclick='() => Nav.NavigateTo("/proyectos")'>
         Volver
     </button>
-</div>
+
 
 @if (_cargando)
 {
@@ -54,7 +54,7 @@ else
             <div class="form-section project-section">
                 <div class="project-section-header">
                     <div>
-                        <p class="section-title">Información general</p>
+                            <h3>Información general</h3>
                         <h5>Datos principales</h5>
                     </div>
                 </div>
@@ -108,7 +108,7 @@ else
             <div class="form-section project-section">
                 <div class="project-section-header">
                     <div>
-                        <p class="section-title">Asignación</p>
+                            <h3>Asignación</h3>
                         <h5>Equipo y supervisión</h5>
                     </div>
                 </div>
@@ -189,7 +189,7 @@ else
             <div class="form-section project-section">
                 <div class="project-section-header">
                     <div>
-                        <p class="section-title">Planificación</p>
+                            <h3>Planificación</h3>
                         <h5>Fechas </h5>
                     </div>
                 </div>
@@ -211,7 +211,7 @@ else
             <div class="form-section project-section project-section-last">
                 <div class="project-section-header">
                     <div>
-                        <p class="section-title">Fases del proyecto</p>
+                            <h3>Fases del Proyecto</h3>
                         <h5>Secuencia de trabajo</h5>
                     </div>
                     <button type="button" class="btn btn-secondary" @onclick="AgregarFase">Agregar fase</button>
@@ -266,7 +266,8 @@ else
             </div>
         </div>
     </EditForm>
-}
+    }
+</div>
 
 @code {
     [Parameter] public int Id { get; set; }

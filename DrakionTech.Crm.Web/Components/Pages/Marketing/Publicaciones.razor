@@ -11,7 +11,6 @@
 @inherits PaginacionBase
 
 <div class="empleados-container">
-
     <div class="page-header">
         <div class="header-text">
             <h1 class="page-title">Marketing</h1>
@@ -19,15 +18,22 @@
                 Gestiona campañas, publicaciones y material publicitario
             </p>
         </div>
-
-        <div>
-            <a class="btn btn-primary" href="/marketing/crear-publicacion">
-                + Nueva Publicación
-            </a>
-        </div>
     </div>
 
     <MarketingTabs />
+
+    <div class="detail-section-header mt-3">
+        <div>
+            <h5 class="oport-title">Publicaciones</h5>
+            <small>Gestión de publicaciones</small>
+        </div>
+
+        <a class="btn btn-primary detail-section-header__action"
+           href="/marketing/crear-publicacion">
+            <i class="bi bi-plus-lg me-1"></i>
+            Nueva publicación
+        </a>
+    </div>
 
     <FiltroTabla TItem="PublicacionMarketingDto"
                  PlaceholderBusqueda="Buscar campaña o responsable..."
