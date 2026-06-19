@@ -83,6 +83,10 @@ namespace DrakionTech.Crm.Business.Mapping
             // ACTIVIDAD
             CreateMap<TipoActividad, TipoActividadDto>();
 
+            CreateMap<CrearActividadDto, Actividad>()
+                .ForMember(d => d.Inicio, o => o.MapFrom(s => s.Fecha))
+                .ForMember(d => d.Fin, o => o.MapFrom(s => s.FechaFin));
+
             CreateMap<Actividad, ActividadDto>()
                 .ForMember(d => d.AuditInfo,
                     o => o.MapFrom(s => MapAuditInfo(s)))
