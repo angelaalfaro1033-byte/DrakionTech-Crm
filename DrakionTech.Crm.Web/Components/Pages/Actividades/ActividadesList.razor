@@ -32,7 +32,7 @@ else
             }
             else
             {
-                <div class="ui-toolbar mt-3 mb-3">
+                <div class="ui-toolbar detail-toolbar mt-3 mb-3">
 
                     <div class="flex-fill">
                         <input type="date"
@@ -65,8 +65,8 @@ else
                     </div>
                 </div>
 
-                <div class="empresa-table">
-                    <table class="table table-hover align-middle">
+                <div class="ui-card">
+                    <table class="ui-table">
                         <thead>
                             <tr>
                                 <th>Tipo</th>
@@ -80,17 +80,18 @@ else
                             @foreach (var a in actividadesFiltradas!)
                             {
                                 <tr>
-                                    <td>@a.TipoActividadNombre</td>
-                                    <td>@a.Fecha.ToString("dd/MM/yyyy")</td>
-                                    <td>@a.Resultado</td>
+                                    <td style="font-weight:500;color:var(--text-main)">@a.TipoActividadNombre</td>
+                                    <td style="font-size:13px;color:var(--text-muted)">@a.Fecha.ToString("dd/MM/yyyy")</td>
+                                    <td style="font-size:13px">@(string.IsNullOrEmpty(a.Resultado) ? "—" : a.Resultado)</td>
                                     <td>
                                         <AuditLastUpdated AuditInfo="a.AuditInfo" />
                                     </td>
-                                    <td class="text-end">
-                                        <a class="btn btn-sm btn-outline-primary"
-                                           href="/empresas/@EmpresaId/actividades/editar/@a.Id">
-                                            Editar
-                                        </a>
+                                    <td>
+                                        <div class="ui-actions">
+                                            <a href="/empresas/@EmpresaId/actividades/editar/@a.Id" title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             }
