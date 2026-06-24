@@ -40,24 +40,19 @@ namespace DrakionTech.Crm.Business.Services
             _whatsapp = whatsapp;
         }
 
-        public async Task<IEnumerable<TipoActividadDto>> ObtenerTiposActividadAsync(
-    CancellationToken ct = default)
+        public async Task<IEnumerable<TipoActividadDto>> ObtenerTiposActividadAsync(CancellationToken ct = default)
         {
             var tipos = await _tipoActividadRepository.ObtenerTodosAsync(ct);
 
             return _mapper.Map<IEnumerable<TipoActividadDto>>(tipos);
         }
 
-        public async Task<IEnumerable<ActividadDto>> ObtenerCadenaAsync(
-    int actividadId,
-    CancellationToken ct = default)
+        public async Task<IEnumerable<ActividadDto>> ObtenerCadenaAsync(int actividadId, CancellationToken ct = default)
         {
             var cadena = await _actividadRepository.ObtenerCadenaAsync(actividadId, ct);
             return _mapper.Map<IEnumerable<ActividadDto>>(cadena);
         }
-        public async Task<int> CrearAsync(
-    CrearActividadDto dto,
-    CancellationToken ct = default)
+        public async Task<int> CrearAsync(CrearActividadDto dto, CancellationToken ct = default)
         {
             var actividad = _mapper.Map<Actividad>(dto);
 
@@ -101,12 +96,17 @@ namespace DrakionTech.Crm.Business.Services
             return _mapper.Map<ActividadDto>(actividad);
         }
 
-        public async Task<IEnumerable<ActividadDto>> ObtenerPorEmpresaAsync(
-            int empresaId,
-            CancellationToken ct = default)
+        public async Task<IEnumerable<ActividadDto>> ObtenerPorEmpresaAsync(int empresaId, CancellationToken ct = default)
         {
             var actividades = await _actividadRepository.ObtenerPorEmpresaIdAsync(empresaId, ct);
-            return _mapper.Map<IEnumerable<ActividadDto>>(actividades);
+            return actividades.Select(a =>
+            {
+                var dto = _mapper.Map<ActividadDto>(a);
+                dto.ClasificacionEstado = a.EstadoActividadId == EstadoCompletadaId
+                    ? "Completada"
+                    : "Programada";
+                return dto;
+            });
         }
 
         public async Task<IEnumerable<ActividadDto>> ObtenerPorOportunidadAsync(
@@ -118,10 +118,10 @@ namespace DrakionTech.Crm.Business.Services
         }
 
         public async Task<DashboardActividadDto> ObtenerDashboardAsync(
-     int UsuarioId,
-     string? busqueda = null,
-     string? filtroEstado = null,
-     CancellationToken ct = default)
+            int UsuarioId,
+            string? busqueda = null,
+            string? filtroEstado = null,
+            CancellationToken ct = default)
         {
             var entidades = await _actividadRepository
                 .ObtenerDashboardPorUsuarioAsync(UsuarioId, ct);
@@ -170,7 +170,6 @@ namespace DrakionTech.Crm.Business.Services
             };
         }
 
-        // Nuevo método
         public async Task CompletarAsync(int actividadId, CancellationToken ct = default)
         {
             var actividad = await _actividadRepository.ObtenerPorIdAsync(actividadId, ct)

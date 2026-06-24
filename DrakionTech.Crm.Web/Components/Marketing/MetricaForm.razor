@@ -1,0 +1,188 @@
+﻿@using DrakionTech.Crm.Business.DTOs.Marketing
+@using DrakionTech.Crm.Business.Interfaces
+@using DrakionTech.Crm.Data.Entities.Enums
+
+@inject IPublicacionMarketingService MarketingService
+@inject NavigationManager Nav
+
+@if (!string.IsNullOrWhiteSpace(_error))
+{
+    <div class="alert alert-danger">@_error</div>
+}
+
+@if (_cargando)
+{
+    <div class="ui-empty">
+        <div class="spinner-border spinner-border-sm mb-2"></div>
+        <p>Cargando métrica…</p>
+    </div>
+}
+else
+{
+    <EditForm Model="_modelo" OnValidSubmit="GuardarAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="validation-summary" />
+
+        <div class="form-section">
+            <h3>Información de la métrica</h3>
+
+            <div class="grid-2col">
+                <div class="mb-3">
+                    <label class="form-label">Publicación</label>
+                    <InputSelect class="form-select"
+                                 @bind-Value="_modelo.PublicacionMarketingId">
+                        <option value="0">-- Seleccione --</option>
+                        @foreach (var p in _publicaciones)
+                        {
+                            <option value="@p.Id">@p.Nombre</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Canal</label>
+                    <InputSelect class="form-select" @bind-Value="_modelo.RedSocial">
+                        @foreach (var red in Enum.GetValues<RedSocial>())
+                        {
+                            <option value="@red">@ObtenerNombreRed(red)</option>
+                        }
+                    </InputSelect>
+                </div>
+            </div>
+
+            <div class="grid-2col">
+                <div class="mb-3">
+                    <label class="form-label">Visualizaciones</label>
+                    <InputNumber class="form-control" @bind-Value="_modelo.Visualizaciones" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Reacciones</label>
+                    <InputNumber class="form-control" @bind-Value="_modelo.Reacciones" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Alcance</label>
+                    <InputNumber class="form-control" @bind-Value="_modelo.Alcance" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Fecha de registro</label>
+                    <InputDate class="form-control" @bind-Value="_modelo.FechaRegistro" />
+                </div>
+            </div>
+
+            <div class="form-check mb-3">
+                <InputCheckbox class="form-check-input"
+                               @bind-Value="_modelo.ContactoAreaComercial" />
+                <label class="form-check-label">
+                    Hubo contacto con el área comercial
+                </label>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Observaciones</label>
+                <InputTextArea class="form-control" rows="3"
+                               @bind-Value="_modelo.Observaciones" />
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" disabled="@_guardando">
+                @if (_guardando)
+                {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                }
+                @(EsEdicion ? "Actualizar" : "Guardar")
+            </button>
+            <a class="btn btn-secondary" href="/marketing/metricas">Cancelar</a>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public int? MetricaId { get; set; }
+
+    private bool EsEdicion => MetricaId.HasValue;
+
+    private MetricaPublicacionBaseDto _modelo = new CrearMetricaPublicacionDto();
+    private ActualizarMetricaPublicacionDto? _modeloEditar;
+
+    private List<PublicacionMarketingDto> _publicaciones = new();
+
+    private bool _cargando = true;
+    private bool _guardando;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _publicaciones = await MarketingService.ObtenerTodosAsync();
+
+        if (EsEdicion)
+            await CargarParaEdicionAsync();
+        else
+            _cargando = false;
+    }
+
+    private async Task CargarParaEdicionAsync()
+    {
+        var metrica = await MarketingService.ObtenerMetricaPorIdAsync(MetricaId!.Value);
+
+        if (metrica is null)
+        {
+            _error = "Métrica no encontrada.";
+            _cargando = false;
+            return;
+        }
+
+        _modeloEditar = new ActualizarMetricaPublicacionDto
+        {
+            Id = metrica.Id,
+            PublicacionMarketingId = metrica.PublicacionMarketingId,
+            RedSocial = metrica.RedSocial,
+            FechaRegistro = metrica.FechaRegistro,
+            Visualizaciones = metrica.Visualizaciones,
+            Reacciones = metrica.Reacciones,
+            Alcance = metrica.Alcance,
+            ContactoAreaComercial = metrica.ContactoAreaComercial,
+            Observaciones = metrica.Observaciones
+        };
+
+        _modelo = _modeloEditar;
+        _cargando = false;
+    }
+
+    private async Task GuardarAsync()
+    {
+        _guardando = true;
+        _error = null;
+
+        try
+        {
+            if (EsEdicion)
+                await MarketingService.ActualizarMetricaAsync(_modeloEditar!);
+            else
+                await MarketingService.CrearMetricaAsync((CrearMetricaPublicacionDto)_modelo);
+
+            Nav.NavigateTo("/marketing/metricas");
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _guardando = false;
+        }
+    }
+
+    private static string ObtenerNombreRed(RedSocial red) => red switch
+    {
+        RedSocial.WhatsAppBusiness => "WhatsApp Business",
+        RedSocial.Instagram => "Instagram",
+        RedSocial.LinkedIn => "LinkedIn",
+        RedSocial.PaginaWeb => "Página Web",
+        RedSocial.EventoFeria => "Evento / Feria",
+        _ => red.ToString()
+    };
+}

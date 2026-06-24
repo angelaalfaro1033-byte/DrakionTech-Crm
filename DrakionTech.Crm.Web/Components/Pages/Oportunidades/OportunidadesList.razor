@@ -45,7 +45,7 @@ else
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var o in oportunidades)
+                        @foreach (var o in _paginaActual)
                         {
                             <tr>
                                 <td class="col-primary">@o.NombreProyecto</td>
@@ -74,6 +74,9 @@ else
                         }
                     </tbody>
                 </table>
+                <Paginacion PaginaActual="_pagina"
+                            TotalPaginas="_totalPaginas"
+                            OnPaginaChanged="IrAPagina" />
             </div>
         }
     </EmpresaComponente>
@@ -85,9 +88,30 @@ else
     private EmpresaDto? empresa;
     private IEnumerable<OportunidadDto>? oportunidades;
 
+    private IEnumerable<OportunidadDto> _paginaActual = new List<OportunidadDto>();
+    private int _pagina = 1;
+    private const int TamañoPagina = 10;
+    private int _totalPaginas;
+
     protected override async Task OnInitializedAsync()
     {
         empresa = await EmpresaService.ObtenerPorIdAsync(EmpresaId);
         oportunidades = await OportunidadService.ObtenerPorEmpresaAsync(EmpresaId);
+        ActualizarPagina();
+    }
+
+    private void ActualizarPagina()
+    {
+        var total = oportunidades?.Count() ?? 0;
+        _totalPaginas = (int)Math.Ceiling((double)total / TamañoPagina);
+        _paginaActual = (oportunidades ?? Enumerable.Empty<OportunidadDto>())
+            .Skip((_pagina - 1) * TamañoPagina)
+            .Take(TamañoPagina);
+    }
+
+    private void IrAPagina(int pagina)
+    {
+        _pagina = pagina;
+        ActualizarPagina();
     }
 }
