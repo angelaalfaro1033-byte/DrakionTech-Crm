@@ -1,0 +1,524 @@
+﻿@using DrakionTech.Crm.Business.DTOs.Marketing
+@using DrakionTech.Crm.Business.DTOs.Usuario
+@using DrakionTech.Crm.Business.Interfaces
+@using DrakionTech.Crm.Data.Entities.Enums
+@using Microsoft.AspNetCore.Components.Forms
+
+@inject GoogleDriveService GoogleDriveService
+@inject IPublicacionMarketingService PublicacionMarketingService
+@inject IUsuarioService UsuarioService
+@inject NavigationManager Nav
+
+@if (!string.IsNullOrWhiteSpace(_error))
+{
+    <div class="alert alert-danger">@_error</div>
+}
+
+@if (_cargando)
+{
+    <div class="ui-empty">
+        <div class="spinner-border spinner-border-sm mb-2"></div>
+        <p>Cargando publicación…</p>
+    </div>
+}
+else
+{
+    <EditForm Model="_modelo" OnValidSubmit="GuardarAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="validation-summary" />
+
+        <div class="form-section">
+            <h3>Información General</h3>
+
+            <div class="mb-3">
+                <label class="form-label">Nombre</label>
+                <InputText class="form-control" @bind-Value="_modelo.Nombre" />
+                <ValidationMessage For="@(() => _modelo.Nombre)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Descripción Campaña</label>
+                <InputTextArea class="form-control" rows="3"
+                               @bind-Value="_modelo.DescripcionCampania" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Copy Utilizado</label>
+                <InputTextArea class="form-control" rows="4"
+                               @bind-Value="_modelo.CopyUtilizado" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Archivos</label>
+                <InputFile OnChange="SeleccionarArchivosAsync" multiple class="form-control" />
+
+                @if (_modelo.Archivos.Any() || _archivosSeleccionados.Any())
+                {
+                    <div class="mt-3 d-flex flex-wrap gap-2">
+                        @foreach (var archivo in _modelo.Archivos)
+                        {
+                            <div class="border rounded p-2" style="width:170px">
+                                @if (archivo.MimeType.StartsWith("image/") &&
+                                     _previewsExistentes.TryGetValue(archivo.ArchivoIdExterno, out var preview))
+                                {
+                                    <img src="@preview"
+                                         style="width:150px;height:150px;object-fit:cover"
+                                         class="img-thumbnail" />
+                                }
+                                else
+                                {
+                                    <div class="text-truncate">@archivo.Nombre</div>
+                                }
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger mt-2"
+                                        @onclick="() => _modelo.Archivos.Remove(archivo)">
+                                    Eliminar
+                                </button>
+                            </div>
+                        }
+
+                        @foreach (var archivo in _archivosSeleccionados)
+                        {
+                            <div class="border rounded p-2" style="width:170px">
+                                @if (!string.IsNullOrWhiteSpace(archivo.PreviewUrl))
+                                {
+                                    <img src="@archivo.PreviewUrl"
+                                         style="width:150px;height:150px;object-fit:cover"
+                                         class="img-thumbnail" />
+                                }
+                                else
+                                {
+                                    <div class="text-truncate">@archivo.Nombre</div>
+                                }
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger mt-2"
+                                        @onclick="() => _archivosSeleccionados.Remove(archivo)">
+                                    Eliminar
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Observaciones</label>
+                <InputTextArea class="form-control" rows="3" @bind-Value="_modelo.Observaciones" />
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Responsable y Programación</h3>
+
+            <div class="grid-2col">
+                <div class="mb-3">
+                    <label class="form-label">Responsable</label>
+                    <InputSelect class="form-select" @bind-Value="_modelo.ResponsableId">
+                        <option value="0">-- Seleccione --</option>
+                        @foreach (var usuario in _usuarios)
+                        {
+                            <option value="@usuario.Id">@usuario.Nombre @usuario.Apellido</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Fecha Publicación Programada</label>
+                    <InputDate class="form-control"
+                               @bind-Value="_modelo.FechaPublicacionProgramada" />
+                </div>
+            </div>
+
+            @if (EsEdicion)
+            {
+                <div class="mb-3">
+                    <label class="form-label">Estado</label>
+                    <InputSelect class="form-select" @bind-Value="_modeloEdicion!.Estado">
+                        @foreach (var estado in Enum.GetValues<EstadoPublicacionMarketing>())
+                        {
+                            <option value="@estado">@estado</option>
+                        }
+                    </InputSelect>
+                </div>
+            }
+
+            <div class="form-check mt-2">
+                <InputCheckbox class="form-check-input" @bind-Value="_modelo.EnvioAutomatico" />
+                <label class="form-check-label">Envío automático</label>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Redes Sociales</h3>
+
+            @foreach (var red in _modelo.RedesSociales)
+            {
+                <div class="border rounded p-3 mb-3">
+                    <div class="grid-2col">
+                        <div>
+                            <label class="form-label">Red Social</label>
+                            <InputSelect class="form-select" @bind-Value="red.RedSocial">
+                                @foreach (var rs in Enum.GetValues<RedSocial>())
+                                {
+                                    <option value="@rs">@rs</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="d-flex align-items-end">
+                            <button type="button" class="btn btn-outline-danger"
+                                    @onclick="() => _modelo.RedesSociales.Remove(red)">
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-check mt-3">
+                        <InputCheckbox class="form-check-input" @bind-Value="red.TienePauta" />
+                        <label class="form-check-label">Tiene pauta</label>
+                    </div>
+
+                    @if (red.TienePauta)
+                    {
+                        <div class="grid-2col mt-3">
+                            <div>
+                                <label class="form-label">Costo pauta</label>
+                                <InputNumber class="form-control" @bind-Value="red.CostoPauta" />
+                            </div>
+                            <div>
+                                <label class="form-label">Días pauta</label>
+                                <InputNumber class="form-control" @bind-Value="red.DiasPauta" />
+                            </div>
+                        </div>
+                    }
+
+                    <hr class="my-3" />
+
+                    <div class="form-check">
+                        <InputCheckbox class="form-check-input" @bind-Value="red.RegistrarMetrica" />
+                        <label class="form-check-label">Registrar métrica para esta red</label>
+                    </div>
+
+                    @if (red.RegistrarMetrica)
+                    {
+                        <div class="grid-2col mt-3">
+                            <div>
+                                <label class="form-label">Visualizaciones</label>
+                                <InputNumber class="form-control"
+                                             @bind-Value="red.Metrica.Visualizaciones" />
+                            </div>
+                            <div>
+                                <label class="form-label">Reacciones</label>
+                                <InputNumber class="form-control"
+                                             @bind-Value="red.Metrica.Reacciones" />
+                            </div>
+                            <div>
+                                <label class="form-label">Alcance</label>
+                                <InputNumber class="form-control"
+                                             @bind-Value="red.Metrica.Alcance" />
+                            </div>
+                            <div>
+                                <label class="form-label">Fecha de registro</label>
+                                <InputDate class="form-control"
+                                           @bind-Value="red.Metrica.FechaRegistro" />
+                            </div>
+                        </div>
+
+                        <div class="form-check mt-3">
+                            <InputCheckbox class="form-check-input"
+                                           @bind-Value="red.Metrica.ContactoAreaComercial" />
+                            <label class="form-check-label">
+                                Hubo contacto con el área comercial
+                            </label>
+                        </div>
+
+                        <div class="mt-3">
+                            <label class="form-label">Observaciones</label>
+                            <InputTextArea class="form-control" rows="2"
+                                           @bind-Value="red.Metrica.Observaciones" />
+                        </div>
+                    }
+                </div>
+            }
+
+            <button type="button" class="btn btn-outline-primary"
+                    @onclick="() => _modelo.RedesSociales.Add(new RedSocialPublicacionDto())">
+                + Agregar Red Social
+            </button>
+        </div>
+
+        @if (EsEdicion && _metricasExistentes.Any())
+        {
+            <div class="form-section">
+                <h3>Métricas registradas</h3>
+                <div class="ui-card">
+                    <table class="ui-table">
+                        <thead>
+                            <tr>
+                                <th>Red social</th>
+                                <th>Fecha</th>
+                                <th>Visualizaciones</th>
+                                <th>Reacciones</th>
+                                <th>Alcance</th>
+                                <th>Contacto comercial</th>
+                                <th>Observaciones</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var m in _metricasExistentes)
+                            {
+                                <tr>
+                                    <td class="col-primary">@m.RedSocialNombre</td>
+                                    <td class="col-secondary">
+                                        @m.FechaRegistro.ToString("dd/MM/yyyy")
+                                    </td>
+                                    <td class="col-secondary">@m.Visualizaciones</td>
+                                    <td class="col-secondary">@m.Reacciones</td>
+                                    <td class="col-secondary">@m.Alcance</td>
+                                    <td>
+                                        @if (m.ContactoAreaComercial)
+                                        {
+                                            <span class="badge badge-success">Sí</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-danger">No</span>
+                                        }
+                                    </td>
+                                    <td class="col-secondary">
+                                        @(string.IsNullOrEmpty(m.Observaciones) ? "—" : m.Observaciones)
+                                    </td>
+                                    <td>
+                                        <div class="ui-actions">
+                                            <a href="/marketing/editar-metrica/@m.Id" title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" disabled="@_guardando">
+                @if (_guardando)
+                {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                }
+                @(EsEdicion ? "Actualizar" : "Guardar")
+            </button>
+            <a class="btn btn-secondary" href="/marketing">Cancelar</a>
+        </div>
+
+    </EditForm>
+}
+
+@code {
+    [Parameter] public int? PublicacionId { get; set; }
+
+    private bool EsEdicion => PublicacionId.HasValue;
+
+    private PublicacionMarketingBaseDto _modelo = new CrearPublicacionMarketingDto();
+    private ActualizarPublicacionMarketingDto? _modeloEdicion;
+
+    private List<UsuarioListDto> _usuarios = new();
+    private List<MetricaPublicacionDto> _metricasExistentes = new();
+    private List<ArchivoSeleccionado> _archivosSeleccionados = new();
+    private Dictionary<string, string> _previewsExistentes = new();
+    private const long MaxFileSize = 50 * 1024 * 1024;
+
+    private bool _cargando = true;
+    private bool _guardando;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _usuarios = await UsuarioService.ObtenerTodosAsync(soloActivos: true);
+
+        if (EsEdicion)
+        {
+            await CargarParaEdicionAsync();
+        }
+        else
+        {
+            if (!_modelo.RedesSociales.Any())
+                _modelo.RedesSociales.Add(new RedSocialPublicacionDto());
+
+            _cargando = false;
+        }
+    }
+
+    private async Task CargarParaEdicionAsync()
+    {
+        var publicacion = await PublicacionMarketingService.ObtenerPorIdAsync(PublicacionId!.Value);
+
+        if (publicacion is null)
+        {
+            _error = "Publicación no encontrada.";
+            _cargando = false;
+            return;
+        }
+
+        _modeloEdicion = new ActualizarPublicacionMarketingDto
+        {
+            Id = publicacion.Id,
+            Nombre = publicacion.Nombre,
+            DescripcionCampania = publicacion.DescripcionCampania,
+            CopyUtilizado = publicacion.CopyUtilizado,
+            Observaciones = publicacion.Observaciones,
+            ResponsableId = publicacion.ResponsableId,
+            FechaPublicacionProgramada = publicacion.FechaPublicacionProgramada,
+            FechaPublicacionReal = publicacion.FechaPublicacionReal,
+            EnvioAutomatico = publicacion.EnvioAutomatico,
+            Estado = publicacion.Estado,
+            RedesSociales = publicacion.RedesSociales
+                .Select(r => new RedSocialPublicacionDto
+                {
+                    RedSocial = r.RedSocial,
+                    TienePauta = r.TienePauta,
+                    CostoPauta = r.CostoPauta,
+                    DiasPauta = r.DiasPauta
+                })
+                .ToList(),
+            Archivos = publicacion.Archivos
+                .Select(a => new ArchivoPublicacionDto
+                {
+                    Nombre = a.Nombre,
+                    MimeType = a.MimeType,
+                    ArchivoIdExterno = a.ArchivoIdExterno,
+                    Url = a.Url
+                })
+                .ToList()
+        };
+
+        _modelo = _modeloEdicion;
+
+        var todasMetricas = await PublicacionMarketingService.ObtenerMetricasAsync();
+        _metricasExistentes = todasMetricas
+            .Where(m => m.PublicacionMarketingId == PublicacionId!.Value)
+            .OrderByDescending(m => m.FechaRegistro)
+            .ToList();
+
+        await CargarPreviewsExistentesAsync();
+
+        if (!_modelo.RedesSociales.Any())
+            _modelo.RedesSociales.Add(new RedSocialPublicacionDto());
+
+        _cargando = false;
+    }
+
+    private async Task GuardarAsync()
+    {
+        _guardando = true;
+        _error = null;
+
+        try
+        {
+            await SubirArchivosPendientesAsync();
+
+            int publicacionId;
+
+            if (EsEdicion)
+            {
+                await PublicacionMarketingService.ActualizarAsync(_modeloEdicion!);
+                publicacionId = PublicacionId!.Value;
+            }
+            else
+            {
+                publicacionId = await PublicacionMarketingService.CrearAsync((CrearPublicacionMarketingDto)_modelo);
+            }
+
+            foreach (var red in _modelo.RedesSociales.Where(r => r.RegistrarMetrica))
+            {
+                await PublicacionMarketingService.CrearMetricaAsync(new CrearMetricaPublicacionDto
+                {
+                    PublicacionMarketingId = publicacionId,
+                    RedSocial = red.RedSocial,
+                    FechaRegistro = red.Metrica.FechaRegistro,
+                    Visualizaciones = red.Metrica.Visualizaciones,
+                    Reacciones = red.Metrica.Reacciones,
+                    Alcance = red.Metrica.Alcance,
+                    ContactoAreaComercial = red.Metrica.ContactoAreaComercial,
+                    Observaciones = red.Metrica.Observaciones
+                });
+            }
+
+            Nav.NavigateTo("/marketing");
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _guardando = false;
+        }
+    }
+
+    private async Task SeleccionarArchivosAsync(InputFileChangeEventArgs e)
+    {
+        foreach (var archivo in e.GetMultipleFiles())
+        {
+            using var ms = new MemoryStream();
+            await archivo.OpenReadStream(MaxFileSize).CopyToAsync(ms);
+            var bytes = ms.ToArray();
+
+            _archivosSeleccionados.Add(new ArchivoSeleccionado
+            {
+                Nombre = archivo.Name,
+                MimeType = archivo.ContentType,
+                Contenido = bytes,
+                PreviewUrl = archivo.ContentType.StartsWith("image/")
+                    ? $"data:{archivo.ContentType};base64,{Convert.ToBase64String(bytes)}"
+                    : null
+            });
+        }
+    }
+
+    private async Task SubirArchivosPendientesAsync()
+    {
+        foreach (var archivo in _archivosSeleccionados)
+        {
+            await using var stream = new MemoryStream(archivo.Contenido);
+
+            var resultado = await GoogleDriveService.SubirArchivoAsync(
+                archivo.Nombre, archivo.MimeType, stream);
+
+            _modelo.Archivos.Add(new ArchivoPublicacionDto
+            {
+                Nombre = archivo.Nombre,
+                MimeType = archivo.MimeType,
+                ArchivoIdExterno = resultado.fileId,
+                Url = resultado.webViewLink
+            });
+        }
+    }
+
+    private async Task CargarPreviewsExistentesAsync()
+    {
+        foreach (var archivo in _modelo.Archivos.Where(x => x.MimeType.StartsWith("image/")))
+        {
+            try
+            {
+                var resultado = await GoogleDriveService.DescargarArchivoAsync(
+                    archivo.ArchivoIdExterno, archivo.Url);
+
+                _previewsExistentes[archivo.ArchivoIdExterno] =
+                    $"data:{resultado.contentType};base64,{Convert.ToBase64String(resultado.bytes)}";
+            }
+            catch { }
+        }
+    }
+
+    private sealed class ArchivoSeleccionado
+    {
+        public string Nombre { get; set; } = string.Empty;
+        public string MimeType { get; set; } = string.Empty;
+        public byte[] Contenido { get; set; } = [];
+        public string? PreviewUrl { get; set; }
+    }
+}

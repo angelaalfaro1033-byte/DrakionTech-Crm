@@ -68,8 +68,7 @@ public class PublicacionMarketingService : IPublicacionMarketingService
             ? null
             : _mapper.Map<PublicacionMarketingDto>(publicacion);
     }
-
-    public async Task CrearAsync(CrearPublicacionMarketingDto dto)
+    public async Task<int> CrearAsync(CrearPublicacionMarketingDto dto)
     {
         var publicacion = _mapper.Map<PublicacionMarketing>(dto);
 
@@ -94,6 +93,7 @@ public class PublicacionMarketingService : IPublicacionMarketingService
             .ToList();
 
         await _repository.AgregarAsync(publicacion);
+        return publicacion.Id;
     }
 
     public async Task ActualizarAsync(ActualizarPublicacionMarketingDto dto)

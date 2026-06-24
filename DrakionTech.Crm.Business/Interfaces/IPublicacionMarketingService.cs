@@ -14,7 +14,7 @@ public interface IPublicacionMarketingService
 
     Task<PublicacionMarketingDto?> ObtenerPorIdAsync(int id);
 
-    Task CrearAsync(CrearPublicacionMarketingDto dto);
+    Task<int> CrearAsync(CrearPublicacionMarketingDto dto);
 
     Task ActualizarAsync(ActualizarPublicacionMarketingDto dto);
 

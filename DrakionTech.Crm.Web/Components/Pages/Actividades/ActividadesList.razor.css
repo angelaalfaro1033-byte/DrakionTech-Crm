@@ -1,9 +1,44 @@
-﻿/* Contenedor específico */
-.empresa-actividades {
+﻿.empresa-actividades {
     margin-top: 1rem;
 }
 
-/* Resultado puede crecer más */
 .actividades-table td:nth-child(3) {
     max-width: 320px;
 }
+
+.badge-estado {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.badge-pendiente,
+.badge-programada {
+    background: #fff0f5;
+    color: #FF004F;
+}
+
+.badge-completada {
+    background: #e8eafd;
+    color: #2A3EF4;
+}
+
+.btn-completar {
+    background: none;
+    border: none;
+    color: #2A3EF4;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0 4px;
+    transition: color 0.15s;
+}
+
+    .btn-completar:hover {
+        color: #071947;
+    }
+
+    .btn-completar:disabled {
+        color: #a5b0f8;
+        cursor: wait;
+    }

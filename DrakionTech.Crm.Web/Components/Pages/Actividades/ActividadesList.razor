@@ -2,6 +2,7 @@
 @using DrakionTech.Crm.Data.Entities.Enums
 @inject IEmpresaService EmpresaService
 @inject IActividadService ActividadService
+@inject NavigationManager Nav
 @attribute [Authorize]
 
 @if (empresa is null || actividades is null)
@@ -63,23 +64,38 @@ else
                     <table class="ui-table">
                         <thead>
                             <tr>
+                                <th>Estado</th>
                                 <th>Tipo</th>
                                 <th>Fecha</th>
                                 <th>Resultado</th>
                                 <th>Última actualización</th>
-                                <th></th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var a in actividadesFiltradas!)
+                            @foreach (var a in _paginaActual)
                             {
                                 <tr>
+                                    <td>
+                                        <span class="badge badge-estado badge-@a.ClasificacionEstado?.ToLower()">
+                                            @a.ClasificacionEstado
+                                        </span>
+                                    </td>
                                     <td class="col-primary">@a.TipoActividadNombre</td>
                                     <td class="col-secondary">@a.Fecha.ToString("dd/MM/yyyy")</td>
                                     <td class="col-secondary">@(string.IsNullOrEmpty(a.Resultado) ? "—" : a.Resultado)</td>
                                     <td><AuditLastUpdated AuditInfo="a.AuditInfo" /></td>
                                     <td>
                                         <div class="ui-actions">
+                                            @if (a.ClasificacionEstado == "Programada")
+                                            {
+                                                <button type="button" class="btn-completar"
+                                                        title="Marcar como completada"
+                                                        @onclick="() => CompletarAsync(a.Id)"
+                                                        disabled="@_completando.Contains(a.Id)">
+                                                    <i class="bi bi-check-circle"></i>
+                                                </button>
+                                            }
                                             <a href="/empresas/@EmpresaId/actividades/editar/@a.Id" title="Editar">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
@@ -89,6 +105,9 @@ else
                             }
                         </tbody>
                     </table>
+                    <Paginacion PaginaActual="_pagina"
+                                TotalPaginas="_totalPaginas"
+                                OnPaginaChanged="IrAPagina" />
                 </div>
             }
         </div>
@@ -100,10 +119,17 @@ else
 
     private EmpresaDto? empresa;
 
+    private HashSet<int> _completando = [];
+
     private IEnumerable<ActividadDto>? actividades;
     private IEnumerable<ActividadDto>? actividadesFiltradas;
     private List<string> tipos = new();
     private List<string> oportunidades = new();
+
+    private int _pagina = 1;
+    private const int TamañoPagina = 10;
+    private int _totalPaginas;
+    private IEnumerable<ActividadDto> _paginaActual = new List<ActividadDto>();
 
     private DateTime? _fechaSeleccionada;
     private string? _tipoSeleccionado;
@@ -159,6 +185,8 @@ else
             .Distinct()
             .OrderBy(o => o)
             .ToList();
+
+        ActualizarPagina();
     }
 
     private void AplicarFiltros()
@@ -186,5 +214,32 @@ else
         }
 
         actividadesFiltradas = query.ToList();
+        _pagina = 1;
+        ActualizarPagina();
+    }
+
+    private void ActualizarPagina()
+    {
+        var total = actividadesFiltradas?.Count() ?? 0;
+        _totalPaginas = (int)Math.Ceiling((double)total / TamañoPagina);
+        _paginaActual = (actividadesFiltradas ?? Enumerable.Empty<ActividadDto>())
+            .Skip((_pagina - 1) * TamañoPagina)
+            .Take(TamañoPagina);
+    }
+
+    private void IrAPagina(int pagina)
+    {
+        _pagina = pagina;
+        ActualizarPagina();
+    }
+
+    private async Task CompletarAsync(int id)
+    {
+        _completando.Add(id);
+        await ActividadService.CompletarAsync(id);
+        _completando.Remove(id);
+
+        actividades = await ActividadService.ObtenerPorEmpresaAsync(EmpresaId);
+        AplicarFiltros();
     }
 }
