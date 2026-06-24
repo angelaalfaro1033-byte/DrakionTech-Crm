@@ -70,6 +70,7 @@ namespace DrakionTech.Crm.Data.Context
         public DbSet<EmpresaCorreo> EmpresaCorreos { get; set; } = null!;
         public DbSet<HistorialEtapaProyecto> HistorialesEtapaProyecto => Set<HistorialEtapaProyecto>();
         public DbSet<HistorialEmpresa> HistorialesEmpresa => Set<HistorialEmpresa>();
+        public DbSet<EmpleadoProyectoAsignacion> EmpleadoProyectoAsignaciones => Set<EmpleadoProyectoAsignacion>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -94,6 +95,7 @@ namespace DrakionTech.Crm.Data.Context
             modelBuilder.ApplyConfiguration(new ActividadUsuarioConfiguration());
             modelBuilder.ApplyConfiguration(new GoogleEventoConfiguration());
             modelBuilder.ApplyConfiguration(new EmpleadoConfiguration());
+            modelBuilder.ApplyConfiguration(new EmpleadoProyectoAsignacionConfiguration());
             modelBuilder.ApplyConfiguration(new EmailTemplateConfiguration());
             modelBuilder.ApplyConfiguration(new UsuarioConfiguration());
             modelBuilder.ApplyConfiguration(new EmpleadoSalarioConfiguration());

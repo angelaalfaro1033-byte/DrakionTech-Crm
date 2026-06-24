@@ -1,0 +1,317 @@
+@page "/asignaciones-proyecto"
+@attribute [Authorize]
+@using DrakionTech.Crm.Business.DTOs.AsignacionProyecto
+@using DrakionTech.Crm.Business.DTOs.Empleado
+@using DrakionTech.Crm.Business.DTOs.Proyecto
+@using DrakionTech.Crm.Business.Interfaces
+@using DrakionTech.Crm.Web.Components
+@using DrakionTech.Crm.Web.Shared
+@inject IEmpleadoProyectoAsignacionService AsignacionService
+@inject IEmpleadoService EmpleadoService
+@inject IProyectoService ProyectoService
+@inherits PaginacionBase
+
+<div class="list-header">
+    <div>
+        <h2>Asignaciones de proyectos</h2>
+        <p>Gestiona empleados asignados a proyectos</p>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(_error))
+{
+    <div class="alert alert-danger">@_error</div>
+}
+
+<div class="ui-card mb-3">
+    <div class="form-section">
+        <p class="section-title">@(_editandoAsignacionId.HasValue ? "Editar asignación" : "Nueva asignación")</p>
+        <EditForm Model="_modelo" OnValidSubmit="GuardarAsync">
+            <DataAnnotationsValidator />
+            <div class="grid-2col">
+                @if (_editandoAsignacion is not null)
+                {
+                    <p><strong>Empleado:</strong> @_editandoAsignacion.EmpleadoNombre</p>
+                    <p><strong>Proyecto:</strong> @_editandoAsignacion.ProyectoNombre</p>
+                }
+                else
+                {
+                    <div class="mb-3">
+                        <label class="form-label">Empleado</label>
+                        <InputSelect class="form-select" @bind-Value="_modelo.EmpleadoId">
+                            <option value="0">-- Selecciona un empleado --</option>
+                            @foreach (var empleado in _empleados)
+                            {
+                                <option value="@empleado.Id">@empleado.Nombre @empleado.Apellido</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Proyecto</label>
+                        <InputSelect class="form-select" @bind-Value="_modelo.ProyectoId">
+                            <option value="0">-- Selecciona un proyecto --</option>
+                            @foreach (var proyecto in _proyectos)
+                            {
+                                <option value="@proyecto.Id">@proyecto.Nombre</option>
+                            }
+                        </InputSelect>
+                    </div>
+                }
+                <div class="mb-3">
+                    <label class="form-label">Fecha inicio</label>
+                    <InputDate class="form-control" @bind-Value="_modelo.FechaInicio" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Rol en proyecto</label>
+                    <InputText class="form-control" @bind-Value="_modelo.RolEnProyecto" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Observaciones</label>
+                    <InputTextArea class="form-control" @bind-Value="_modelo.Observaciones" rows="2" />
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    @(_editandoAsignacionId.HasValue ? "Guardar cambios" : "Crear asignación")
+                </button>
+                @if (_editandoAsignacionId.HasValue)
+                {
+                    <button type="button" class="btn btn-secondary" @onclick="CancelarEdicion">Cancelar edición</button>
+                }
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+<FiltroTabla TItem="AsignacionProyectoListDto"
+             PlaceholderBusqueda="Buscar empleado, proyecto o rol..."
+             MostrarFiltroEstado="true"
+             OnFiltroChanged="AplicarFiltro" />
+
+<div class="ui-card">
+    @if (_cargando)
+    {
+        <div class="ui-empty">
+            <div class="spinner-border spinner-border-sm mb-2"></div>
+            <p>Cargando asignaciones...</p>
+        </div>
+    }
+    else if (!_asignaciones.Any())
+    {
+        <div class="ui-empty">
+            <i class="bi bi-people"></i>
+            <p>No hay asignaciones registradas.</p>
+        </div>
+    }
+    else
+    {
+        <table class="ui-table">
+            <thead>
+                <tr>
+                    <th>Empleado</th>
+                    <th>Proyecto</th>
+                    <th>Rol</th>
+                    <th>Inicio</th>
+                    <th>Fin</th>
+                    <th>Estado</th>
+                    <th>Última actualización</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var asignacion in _asignaciones)
+                {
+                    <tr>
+                        <td class="col-primary">@asignacion.EmpleadoNombre</td>
+                        <td class="col-secondary">@asignacion.ProyectoNombre</td>
+                        <td class="col-secondary">@(asignacion.RolEnProyecto ?? "-")</td>
+                        <td>@asignacion.FechaInicio.ToShortDateString()</td>
+                        <td>@(asignacion.FechaFin?.ToShortDateString() ?? "-")</td>
+                        <td>
+                            <span class="badge @(asignacion.Activa ? "badge-success" : "badge-secondary")">@asignacion.Estado</span>
+                        </td>
+                        <td><AuditLastUpdated AuditInfo="asignacion.AuditInfo" /></td>
+                        <td>
+                            <div class="ui-actions">
+                                <button class="btn btn-sm btn-outline-primary" @onclick="() => Editar(asignacion)">Editar</button>
+                                @if (asignacion.Activa)
+                                {
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => FinalizarAsync(asignacion.Id)">Finalizar</button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-sm btn-outline-primary" @onclick="() => ReactivarAsync(asignacion.Id)">Reactivar</button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <Paginacion PaginaActual="paginaActual"
+                    TotalPaginas="totalPaginas"
+                    OnPaginaChanged="IrAPagina" />
+    }
+</div>
+
+@code {
+    private CrearAsignacionProyectoDto _modelo = NuevoModelo();
+    private AsignacionProyectoListDto? _editandoAsignacion;
+    private List<EmpleadoListDto> _empleados = new();
+    private List<ProyectoDto> _proyectos = new();
+    private List<AsignacionProyectoListDto> _asignacionesTodas = new();
+    private List<AsignacionProyectoListDto> _asignaciones = new();
+    private int? _editandoAsignacionId;
+    private bool _cargando = true;
+    private string? _error;
+    private string? _busqueda;
+    private bool? _soloActivas;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarAsync();
+    }
+
+    private async Task CargarAsync()
+    {
+        _cargando = true;
+        _empleados = await EmpleadoService.ObtenerTodosAsync();
+        _proyectos = await ProyectoService.ObtenerTodosAsync();
+        _asignacionesTodas = await AsignacionService.ObtenerTodosAsync();
+        AplicarFiltroYPaginacion();
+        _cargando = false;
+    }
+
+    private async Task GuardarAsync()
+    {
+        try
+        {
+            _error = null;
+
+            if (_editandoAsignacionId.HasValue)
+            {
+                await AsignacionService.ActualizarAsync(new ActualizarAsignacionProyectoDto
+                {
+                    Id = _editandoAsignacionId.Value,
+                    FechaInicio = _modelo.FechaInicio,
+                    RolEnProyecto = _modelo.RolEnProyecto,
+                    Observaciones = _modelo.Observaciones
+                });
+            }
+            else
+            {
+                await AsignacionService.CrearAsync(_modelo);
+            }
+
+            CancelarEdicion();
+            await CargarAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private void Editar(AsignacionProyectoListDto asignacion)
+    {
+        _editandoAsignacionId = asignacion.Id;
+        _editandoAsignacion = asignacion;
+        _modelo = new CrearAsignacionProyectoDto
+        {
+            EmpleadoId = asignacion.EmpleadoId,
+            ProyectoId = asignacion.ProyectoId,
+            FechaInicio = asignacion.FechaInicio,
+            RolEnProyecto = asignacion.RolEnProyecto,
+            Observaciones = asignacion.Observaciones
+        };
+    }
+
+    private async Task FinalizarAsync(int id)
+    {
+        try
+        {
+            _error = null;
+            await AsignacionService.FinalizarAsync(id);
+            await CargarAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private async Task ReactivarAsync(int id)
+    {
+        try
+        {
+            _error = null;
+            await AsignacionService.ReactivarAsync(id);
+            await CargarAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private void CancelarEdicion()
+    {
+        _editandoAsignacionId = null;
+        _editandoAsignacion = null;
+        _modelo = NuevoModelo();
+    }
+
+    private Task AplicarFiltro(Dictionary<string, string?> filtros)
+    {
+        _busqueda = filtros.GetValueOrDefault("busqueda");
+        var estado = filtros.GetValueOrDefault("estado");
+        _soloActivas = string.IsNullOrWhiteSpace(estado) ? null : bool.Parse(estado);
+        paginaActual = 1;
+        AplicarFiltroYPaginacion();
+        return Task.CompletedTask;
+    }
+
+    private void AplicarFiltroYPaginacion()
+    {
+        var query = _asignacionesTodas.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(_busqueda))
+        {
+            var term = _busqueda.Trim();
+            query = query.Where(a =>
+                a.EmpleadoNombre.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                a.ProyectoNombre.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                (!string.IsNullOrWhiteSpace(a.RolEnProyecto) &&
+                 a.RolEnProyecto.Contains(term, StringComparison.OrdinalIgnoreCase)));
+        }
+
+        if (_soloActivas.HasValue)
+            query = query.Where(a => a.Activa == _soloActivas.Value);
+
+        var filtradas = query.ToList();
+        totalRegistros = filtradas.Count;
+        totalPaginas = Math.Max(1, (int)Math.Ceiling(totalRegistros / (double)tamañoPagina));
+
+        if (paginaActual > totalPaginas)
+            paginaActual = totalPaginas;
+
+        _asignaciones = filtradas
+            .Skip((paginaActual - 1) * tamañoPagina)
+            .Take(tamañoPagina)
+            .ToList();
+    }
+
+    private async Task IrAPagina(int pagina)
+    {
+        await CambiarPaginaAsync(pagina, () =>
+        {
+            AplicarFiltroYPaginacion();
+            return Task.CompletedTask;
+        });
+    }
+
+    private static CrearAsignacionProyectoDto NuevoModelo() => new()
+    {
+        FechaInicio = DateTime.UtcNow
+    };
+}

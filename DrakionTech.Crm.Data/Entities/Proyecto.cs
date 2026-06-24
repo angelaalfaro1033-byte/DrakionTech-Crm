@@ -44,6 +44,7 @@ public class Proyecto : DrakionTech.Crm.Data.Entities.Base.AuditableEntity
     public int? OportunidadId { get; set; }
     public Oportunidad? Oportunidad { get; set; }
     public ICollection<PagoProyecto> Pagos { get; set; } = new List<PagoProyecto>();
+    public ICollection<EmpleadoProyectoAsignacion> AsignacionesEmpleado { get; set; } = new List<EmpleadoProyectoAsignacion>();
 
     public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
     public DateTime? FechaUltimaModificacion { get; set; }
