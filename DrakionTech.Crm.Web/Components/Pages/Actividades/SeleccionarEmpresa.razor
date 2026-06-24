@@ -5,13 +5,14 @@
 @inject NavigationManager Navigation
 @using Microsoft.AspNetCore.Components.Authorization
 
-<div class="actividad-form-container">
-    <div class="actividad-form-card">
+<div class="form-card">
+    <div class="form-header">
 
-        <h3 class="actividad-form-title">Nueva actividad</h3>
-        <p class="actividad-form-subtitle">Selecciona la empresa para continuar</p>
+        <h2>Nueva actividad</h2>
+        <p>Selecciona la empresa para continuar</p>
+    </div>
 
-        <div class="mb-3">
+        <div class="ui-card">
             <label class="form-label">Empresa <span class="text-danger">*</span></label>
             <select class="form-control" @onchange="OnEmpresaChanged">
                 <option value="">-- Seleccione empresa --</option>
@@ -22,6 +23,7 @@
             </select>
         </div>
 
+    <div class="form-actions">
         <a class="btn btn-secondary" href="/dashboardActividades">Cancelar</a>
     </div>
 </div>
