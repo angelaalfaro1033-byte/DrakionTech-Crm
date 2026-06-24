@@ -3,16 +3,12 @@
 @inject IOportunidadService OportunidadService
 @inject NavigationManager Navigation
 
-<div class="oportunidad-form-container">
-    <div class="oportunidad-form-card">
+<div class="form-card">
 
-        <h3 class="oportunidad-form-title">
-            Editar Oportunidad
-        </h3>
-
-        <p class="oportunidad-form-subtitle">
-            Completa la información del proyecto comercial
-        </p>
+    <div class="form-header">
+        <h1>Editar Oportunidad</h1>
+        <p>Completa la información del proyecto comercial</p>
+    </div>
 
             @if (modelo is null)
             {
@@ -51,17 +47,12 @@
                                         @bind-Value="modelo.Descripcion" />
                     </div>
 
-                    <button type="submit" class="btn btn-primary">
-                        Guardar cambios
-                    </button>
-
-                    <a class="btn btn-secondary ms-2"
-                        href="/empresas/@EmpresaId/oportunidades">
-                        Cancelar
-                    </a>
+            <div class="form-actions">
+                <a class="btn btn-secondary" href="/empresas/@EmpresaId/oportunidades">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+            </div>
                 </EditForm>
             }
-    </div>
 </div>
 
 @code {

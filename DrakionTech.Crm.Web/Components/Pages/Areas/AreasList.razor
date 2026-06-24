@@ -8,9 +8,9 @@
 
 <PageTitle>Áreas – DrakionTech CRM</PageTitle>
 
-<div class="d-flex align-items-center justify-content-between mb-4">
+<div class="list-header">
     <div>
-        <h2 class="mb-0">Áreas organizacionales</h2>
+        <h2>Áreas organizacionales</h2>
     </div>
     <a href="/areas/nueva" class="btn btn-primary d-flex align-items-center gap-2">
         <i class="bi bi-plus-lg"></i> Nueva área
@@ -26,16 +26,16 @@
 
     @if (cargando)
     {
-        <div class="text-center py-5 text-muted">
-            <div class="spinner-border spinner-border-sm me-2"></div>
-            Cargando áreas…
+        <div class="ui-empty">
+            <div class="spinner-border spinner-border-sm mb-2"></div>
+            <p>Cargando áreas…</p>
         </div>
     }
     else if (!areas.Any())
     {
-        <div class="text-center py-5 text-muted">
-            <i class="bi bi-diagram-3 fs-2 d-block mb-2"></i>
-            No se encontraron áreas con los filtros aplicados.
+        <div class="ui-empty">
+            <i class="bi bi-diagram-3"></i>
+            <p>No se encontraron áreas con los filtros aplicados.</p>
         </div>
     }
     else
@@ -55,23 +55,12 @@
                 @foreach (var a in areas)
                 {
                     <tr>
-                        <td>
-                            <span style="font-weight:500;color:var(--text-main)">
-                                @a.Nombre
-                            </span>
-                        </td>
-                        <td style="color:var(--text-muted);font-size:13px;max-width:220px">
+                        <td class="col-primary">@a.Nombre</td>
+                        <td class="col-secondary">
                             @(string.IsNullOrEmpty(a.Descripcion) ? "—" : a.Descripcion)
                         </td>
-                        <td style="font-size:13px">
-                            @if (string.IsNullOrEmpty(a.ResponsableNombre))
-                            {
-                                <span class="text-muted">Sin asignar</span>
-                            }
-                            else
-                            {
-                                <span>@a.ResponsableNombre</span>
-                            }
+                        <td class="col-secondary">
+                            @(string.IsNullOrEmpty(a.ResponsableNombre) ? "Sin asignar" : a.ResponsableNombre)
                         </td>
                         <td>
                             @if (a.Activa)

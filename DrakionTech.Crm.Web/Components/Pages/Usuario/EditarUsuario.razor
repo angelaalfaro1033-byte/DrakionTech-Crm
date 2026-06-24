@@ -7,30 +7,28 @@
 @inject IRolUsuarioService RolUsuarioService
 @inject NavigationManager Nav
 
-<div class="empleados-container">
-    <div class="form-card">
-        <div class="form-header">
-            <h1>Editar usuario</h1>
-            <p>Actualiza la información</p>
-        </div>
-
-        @if (cargando)
-        {
-            <p>Cargando información...</p>
-        }
-        else if (!string.IsNullOrEmpty(error))
-        {
-            <p class="text-danger">@error</p>
-        }
-        else
-        {
-            <UsuarioForm Model="usuarioForm"
-                         Roles="roles"
-                         OnValidSubmit="Guardar"
-                         OnCancel="Cancelar"
-                         TextoBoton="Actualizar" />
-        }
+<div class="form-card">
+    <div class="form-header">
+        <h1>Editar usuario</h1>
+        <p>Actualiza la información</p>
     </div>
+
+    @if (cargando)
+    {
+        <p>Cargando información...</p>
+    }
+    else if (!string.IsNullOrEmpty(error))
+    {
+        <p class="text-danger">@error</p>
+    }
+    else
+    {
+        <UsuarioForm Model="usuarioForm"
+                     Roles="roles"
+                     OnValidSubmit="Guardar"
+                     OnCancel="Cancelar"
+                     TextoBoton="Actualizar" />
+    }
 </div>
 
 @code {

@@ -10,123 +10,87 @@
 
 @inherits PaginacionBase
 
-<div class="empleados-container">
-    <div class="page-header">
-        <div class="header-text">
-            <h1 class="page-title">Marketing</h1>
-            <p class="page-subtitle">
-                Gestiona campañas, publicaciones y material publicitario
-            </p>
-        </div>
+<div class="list-header">
+    <div>
+        <h2>Marketing</h2>
+        <p>Gestiona campañas, publicaciones y material publicitario</p>
     </div>
+</div>
 
-    <MarketingTabs />
+<MarketingTabs />
 
-    <div class="detail-section-header mt-3">
-        <div>
-            <h5 class="oport-title">Publicaciones</h5>
-            <small>Gestión de publicaciones</small>
-        </div>
-
-        <a class="btn btn-primary detail-section-header__action"
-           href="/marketing/crear-publicacion">
-            <i class="bi bi-plus-lg me-1"></i>
-            Nueva publicación
-        </a>
+<div class="detail-section-header mt-3">
+    <div>
+        <h2 class="section-title mb-0">Publicaciones</h2>
+        <small class="text-muted">Gestión de publicaciones</small>
     </div>
+    <a class="btn btn-primary d-flex align-items-center gap-2 detail-section-header__action"
+       href="/marketing/crear-publicacion">
+        <i class="bi bi-plus-lg"></i> Nueva publicación
+    </a>
+</div>
 
-    <FiltroTabla TItem="PublicacionMarketingDto"
-                 PlaceholderBusqueda="Buscar campaña o responsable..."
-                 MostrarFiltroEstado="false"
-                 OnFiltroChanged="OnFiltroChanged" />
+<FiltroTabla TItem="PublicacionMarketingDto"
+             PlaceholderBusqueda="Buscar campaña o responsable..."
+             MostrarFiltroEstado="false"
+             OnFiltroChanged="OnFiltroChanged" />
 
+<div class="ui-card">
     @if (cargando)
     {
-        <p>Cargando publicaciones...</p>
+        <div class="ui-empty">
+            <div class="spinner-border spinner-border-sm mb-2"></div>
+            <p>Cargando publicaciones…</p>
+        </div>
     }
     else if (!publicaciones.Any())
     {
-        <div class="alert alert-info">
-            No hay publicaciones registradas.
+        <div class="ui-empty">
+            <i class="bi bi-megaphone"></i>
+            <p>No hay publicaciones registradas.</p>
         </div>
     }
     else
     {
-        <div class="ui-card">
-
-            <table class="ui-table">
-
-                <thead>
+        <table class="ui-table">
+            <thead>
+                <tr>
+                    <th>Campaña</th>
+                    <th>Responsable</th>
+                    <th>Programada</th>
+                    <th>Estado</th>
+                    <th>Redes</th>
+                    <th>Última actualización</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in publicaciones)
+                {
                     <tr>
-                        <th>Campaña</th>
-                        <th>Responsable</th>
-                        <th>Programada</th>
-                        <th>Estado</th>
-                        <th>Redes</th>
-                        <th>Última actualización</th>
-                        <th class="text-end">Acciones</th>
+                        <td class="col-primary">@item.Nombre</td>
+                        <td class="col-secondary">@item.ResponsableNombre</td>
+                        <td class="col-secondary">@item.FechaPublicacionProgramada.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            <span class="badge badge-success">@item.EstadoTexto</span>
+                        </td>
+                        <td class="col-secondary">@(item.RedesSociales?.Count ?? 0)</td>
+                        <td><AuditLastUpdated AuditInfo="item.AuditInfo" /></td>
+                        <td>
+                            <div class="ui-actions">
+                                <a href="/marketing/editar-publicacion/@item.Id" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            </div>
+                        </td>
                     </tr>
-                </thead>
-
-                <tbody>
-
-                    @foreach (var item in publicaciones)
-                    {
-                        <tr>
-
-                            <td>
-                                <strong>@item.Nombre</strong>
-                            </td>
-
-                            <td>
-                                @item.ResponsableNombre
-                            </td>
-
-                            <td>
-                                @item.FechaPublicacionProgramada.ToString("dd/MM/yyyy")
-                            </td>
-
-                            <td>
-                                <span class="badge badge-success">
-                                    @item.EstadoTexto
-                                </span>
-                            </td>
-
-                            <td>
-                                @(item.RedesSociales?.Count ?? 0)
-                            </td>
-
-                            <td>
-                                <AuditLastUpdated AuditInfo="item.AuditInfo" />
-                            </td>
-
-                            <td class="text-end">
-
-                                <div class="ui-actions">
-
-                                    <a href="/marketing/editar-publicacion/@item.Id"
-                                       title="Editar">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-
-                                </div>
-
-                            </td>
-
-                        </tr>
-                    }
-
-                </tbody>
-
-            </table>
-
-            <Paginacion PaginaActual="paginaActual"
-                        TotalPaginas="totalPaginas"
-                        OnPaginaChanged="IrAPagina" />
-
-        </div>
+                }
+            </tbody>
+        </table>
+        <Paginacion PaginaActual="paginaActual"
+                    TotalPaginas="totalPaginas"
+                    OnPaginaChanged="IrAPagina" />
     }
-
 </div>
 
 @code {

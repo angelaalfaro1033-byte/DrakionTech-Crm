@@ -7,15 +7,13 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @using DrakionTech.Crm.Web.Extensions
 @using Microsoft.AspNetCore.Components.Authorization
-<div class="actividad-form-container">
-    <div class="actividad-form-card">
-        <h3 class="actividad-form-title">
-            Editar actividad
-        </h3>
 
-        <p class="actividad-form-subtitle">
-            Registra una interacción realizada con la empresa
-        </p>
+<div class="form-card">
+
+    <div class="form-header">
+        <h1>Editar actividad</h1>
+        <p>Registra una interacción realizada con la empresa</p>
+    </div>
 
         @if (modelo is null)
         {
@@ -93,17 +91,12 @@
                                    @bind-Value="modelo.Notas" />
                 </div>
 
-                <button type="submit" class="btn btn-primary">
-                    Guardar cambios
-                </button>
-
-                <a class="btn btn-secondary ms-2"
-                   href="/empresas/@EmpresaId/actividades">
-                    Cancelar
-                </a>
+            <div class="form-actions">
+                <a class="btn btn-secondary" href="/empresas/@EmpresaId/actividades">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+            </div>
             </EditForm>
         }
-    </div>
 </div>
 
 @code {

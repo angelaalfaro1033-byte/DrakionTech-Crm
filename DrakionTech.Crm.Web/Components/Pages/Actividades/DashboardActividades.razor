@@ -14,149 +14,150 @@
 @using DrakionTech.Crm.Business.DTOs.Contacto
 @using DrakionTech.Crm.Business.DTOs.Oportunidad
 
-<div class="dashboard-container">
-
-    <!-- Resumen -->
-    <div class="dashboard-resumen">
-        <div class="resumen-card programada">
-            <span class="resumen-numero">@dashboard?.TotalPendientes</span>
-            <span class="resumen-label">Programadas</span>
-        </div>
-        <div class="resumen-card completada">
-            <span class="resumen-numero">@dashboard?.TotalCompletadas</span>
-            <span class="resumen-label">Completadas</span>
-        </div>
+<div class="list-header">
+    <div>
+        <h2>Actividades</h2>
+        <p>Seguimiento y gestión de actividades</p>
     </div>
+    <a class="btn btn-primary d-flex align-items-center gap-2" href="/actividades/crear">
+        <i class="bi bi-plus-lg"></i> Nueva actividad
+    </a>
+</div>
 
-    <!-- Toolbar -->
-    <div class="ui-toolbar">
-        <div class="ui-search">
-            <i class="bi bi-search"></i>
-            <input class="form-control"
-                   placeholder="Buscar por actividad, cliente u oportunidad..."
-                   value="@textoBusqueda"
-                   @oninput="OnBusquedaChanged" />
-        </div>
-
-        <select class="form-select" @bind="filtroEstado" @bind:after="OnFiltroChanged">
-            <option value="Todas">Todas</option>
-            <option value="Programada">Programadas</option>
-            <option value="Completada">Completadas</option>
-        </select>
-
-        <!-- Botón nueva actividad -->
-        <a class="btn btn-primary" href="/actividades/crear">
-            <i class="bi bi-plus-circle me-1"></i>
-            Nueva actividad
-        </a>
+<!-- Resumen -->
+<div class="dashboard-resumen">
+    <div class="resumen-card programada">
+        <span class="resumen-numero">@dashboard?.TotalPendientes</span>
+        <span class="resumen-label">Programadas</span>
     </div>
+    <div class="resumen-card completada">
+        <span class="resumen-numero">@dashboard?.TotalCompletadas</span>
+        <span class="resumen-label">Completadas</span>
+    </div>
+</div>
 
-    <!-- Tabla -->
-    <div class="ui-card">
-        @if (cargando)
-        {
-            <p class="dashboard-empty">Cargando actividades...</p>
-        }
-        else if (dashboard is null || !dashboard.Actividades.Any())
-        {
-            <p class="dashboard-empty">No hay actividades disponibles.</p>
-        }
-        else
-        {
-            <table class="ui-table">
-                <thead>
+<!-- Toolbar -->
+<div class="ui-toolbar">
+    <div class="ui-search">
+        <i class="bi bi-search"></i>
+        <input class="form-control"
+               placeholder="Buscar por actividad, cliente u oportunidad..."
+               value="@textoBusqueda"
+               @oninput="OnBusquedaChanged" />
+    </div>
+    <select class="form-select" @bind="filtroEstado" @bind:after="OnFiltroChanged">
+        <option value="Todas">Todas</option>
+        <option value="Programada">Programadas</option>
+        <option value="Completada">Completadas</option>
+    </select>
+</div>
+
+<!-- Tabla -->
+<div class="ui-card">
+    @if (cargando)
+    {
+        <div class="ui-empty">
+            <div class="spinner-border spinner-border-sm mb-2"></div>
+            <p>Cargando actividades…</p>
+        </div>
+    }
+    else if (dashboard is null || !dashboard.Actividades.Any())
+    {
+        <div class="ui-empty">
+            <i class="bi bi-calendar-check"></i>
+            <p>No hay actividades disponibles.</p>
+        </div>
+    }
+    else
+    {
+        <table class="ui-table">
+            <thead>
+                <tr>
+                    <th>Estado</th>
+                    <th>Actividad</th>
+                    <th>Cliente</th>
+                    <th>Contacto principal</th>
+                    <th>Oportunidad</th>
+                    <th>Vencimiento</th>
+                    <th>Tiempo</th>
+                    <th>Última actualización</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var a in dashboard.Actividades)
+                {
                     <tr>
-                        <th>Estado</th>
-                        <th>Actividad</th>
-                        <th>Cliente</th>
-                        <th>Contacto principal</th>
-                        <th>Oportunidad</th>
-                        <th>Vencimiento</th>
-                        <th>Tiempo</th>
-                        <th>Última actualización</th>
-                        <th class="text-end">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var a in dashboard.Actividades)
-                    {
-                        <tr>
-                            <td>
-                                <span class="badge badge-estado badge-@a.ClasificacionEstado?.ToLower()">
-                                    @a.ClasificacionEstado
-                                </span>
-                            </td>
-                            <td>
-                                @a.TipoActividadNombre
-                                @if (a.ActividadPreviaId.HasValue)
+                        <td>
+                            <span class="badge badge-estado badge-@a.ClasificacionEstado?.ToLower()">
+                                @a.ClasificacionEstado
+                            </span>
+                        </td>
+                        <td class="col-primary">
+                            @a.TipoActividadNombre
+                            @if (a.ActividadPreviaId.HasValue)
+                            {
+                                <br />
+                                <small class="text-muted">
+                                    <i class="bi bi-arrow-return-right"></i>
+                                    Seguimiento de: @(a.ActividadPreviaNombre ?? "actividad anterior")
+                                </small>
+                            }
+                        </td>
+                        <td class="col-secondary">
+                            @if (a.EmpresaId > 0)
+                            {
+                                <a class="link-tabla" href="/empresas/@a.EmpresaId">@a.EmpresaNombre</a>
+                            }
+                            else
+                            {
+                                <span>—</span>
+                            }
+                        </td>
+                        <td class="col-secondary">
+                            @if (!string.IsNullOrEmpty(a.ContactoNombre))
+                            {
+                                <span>@a.ContactoNombre</span>
+                                @if (!string.IsNullOrEmpty(a.ContactoTelefono))
                                 {
                                     <br />
-                                    <small class="text-muted">
-                                        <i class="bi bi-arrow-return-right"></i>
-                                        Seguimiento de: @(a.ActividadPreviaNombre ?? "actividad anterior")
-                                    </small>
+                                    <small class="text-muted">@a.ContactoTelefono</small>
                                 }
-                            </td>
-                            <td>
-                                @if (a.EmpresaId > 0)
+                            }
+                            else
+                            {
+                                <span>—</span>
+                            }
+                        </td>
+                        <td class="col-secondary">@(a.OportunidadNombre ?? "—")</td>
+                        <td class="col-secondary">@(a.FechaVencimiento?.ToString("dd/MM/yyyy") ?? "—")</td>
+                        <td>
+                            <span class="tiempo-@a.ClasificacionEstado?.ToLower()">
+                                @a.TiempoRelativo
+                            </span>
+                        </td>
+                        <td><AuditLastUpdated AuditInfo="a.AuditInfo" /></td>
+                        <td>
+                            <div class="ui-actions">
+                                @if (a.ClasificacionEstado == "Programada")
                                 {
-                                    <a class="link-tabla" href="/empresas/@a.EmpresaId">
-                                        @a.EmpresaNombre
-                                    </a>
+                                    <button type="button" class="btn-completar"
+                                            title="Marcar como completada"
+                                            @onclick="() => IniciarCompletar(a.Id, a.EmpresaId)"
+                                            disabled="@completando.Contains(a.Id)">
+                                        <i class="bi bi-check-circle"></i>
+                                    </button>
                                 }
-                                else
-                                {
-                                    <span>—</span>
-                                }
-                            </td>
-                            <td>
-                                @if (!string.IsNullOrEmpty(a.ContactoNombre))
-                                {
-                                    <span>@a.ContactoNombre</span>
-                                    @if (!string.IsNullOrEmpty(a.ContactoTelefono))
-                                    {
-                                        <br />
-                                        <small class="text-muted">@a.ContactoTelefono</small>
-                                    }
-                                }
-                                else
-                                {
-                                    <span>—</span>
-                                }
-                            </td>
-                            <td>@(a.OportunidadNombre ?? "—")</td>
-                            <td>@(a.FechaVencimiento?.ToString("dd/MM/yyyy") ?? "—")</td>
-                            <td>
-                                <span class="tiempo-@a.ClasificacionEstado?.ToLower()">
-                                    @a.TiempoRelativo
-                                </span>
-                            </td>
-                            <td>
-                                <AuditLastUpdated AuditInfo="a.AuditInfo" />
-                            </td>
-                            <td>
-                                <div class="ui-actions">
-                                    @if (a.ClasificacionEstado == "Programada")
-                                    {
-                                        <button class="btn-completar"
-                                                title="Marcar como completada"
-                                                @onclick="() => IniciarCompletar(a.Id, a.EmpresaId)"
-                                                disabled="@completando.Contains(a.Id)">
-                                            <i class="bi bi-check-circle"></i>
-                                        </button>
-                                    }
-                                    <a href="/empresas/@a.EmpresaId/actividades/editar/@a.Id"
-                                       title="Editar">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
-    </div>
+                                <a href="/empresas/@a.EmpresaId/actividades/editar/@a.Id" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 </div>
 
 <!-- Modal: actividad completada → seguimiento -->

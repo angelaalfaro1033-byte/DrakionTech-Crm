@@ -5,31 +5,36 @@
 
 @if (empresa is null)
 {
-    <p>Cargando...</p>
+    <div class="ui-empty">
+        <div class="spinner-border spinner-border-sm mb-2"></div>
+        <p>Cargando…</p>
+    </div>
 }
 else
 {
     <EmpresaComponente Empresa="empresa">
         <div class="detail-section-header">
             <div>
-                <h5 class="oport-title">Contactos</h5>
-                <small>Gestión de contactos de la empresa</small>
+                <h5>Contactos</h5>
+                <small class="text-muted">Gestión de contactos de la empresa</small>
             </div>
-
             <a class="btn btn-primary detail-section-header__action d-flex align-items-center gap-2"
                href="/empresas/@EmpresaId/contactos/crear">
-                <i class="bi bi-plus-lg"></i>
-                Nuevo contacto
+                <i class="bi bi-plus-lg"></i> Nuevo contacto
             </a>
         </div>
 
         @if (contactos is null)
         {
-            <p class="text-muted small">Cargando contactos...</p>
+            <div class="ui-empty">
+                <div class="spinner-border spinner-border-sm mb-2"></div>
+                <p>Cargando contactos…</p>
+            </div>
         }
         else if (!contactos.Any())
         {
-            <div class="oport-empty">
+            <div class="ui-empty">
+                <i class="bi bi-person-x"></i>
                 <p>Esta empresa no tiene contactos registrados.</p>
             </div>
         }
@@ -43,8 +48,7 @@ else
                            @bind="busqueda"
                            @bind:event="oninput" />
                 </div>
-                <select class="form-select"
-                        @bind="rolSeleccionado">
+                <select class="form-select" @bind="rolSeleccionado">
                     <option value="">-- Todos los roles --</option>
                     @foreach (var rol in roles)
                     {
@@ -62,37 +66,29 @@ else
                             <th>Teléfono</th>
                             <th>Rol</th>
                             <th>Última actualización</th>
-                            <th class="text-end">Acciones</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var contacto in contactosFiltrados!)
                         {
                             <tr>
-                                <td style="font-weight:500;color:var(--text-main)">
-                                    @contacto.NombreCompleto
-                                </td>
-                                <td style="font-size:13px;color:var(--text-muted)">
-                                    @contacto.Email
-                                </td>
-                                <td style="font-size:13px">
+                                <td class="col-primary">@contacto.NombreCompleto</td>
+                                <td class="col-secondary">@contacto.Email</td>
+                                <td class="col-secondary">
                                     @(string.IsNullOrEmpty(contacto.Telefono) ? "—" : contacto.Telefono)
                                 </td>
                                 <td>
                                     @if (!string.IsNullOrEmpty(contacto.RolNombre))
                                     {
-                                        <span class="oport-badge oport-badge--rol">
-                                            @contacto.RolNombre
-                                        </span>
+                                        <span class="badge badge-secondary">@contacto.RolNombre</span>
                                     }
                                     else
                                     {
-                                        <span style="color:var(--text-muted);font-size:13px">—</span>
+                                        <span class="col-secondary">—</span>
                                     }
                                 </td>
-                                <td>
-                                    <AuditLastUpdated AuditInfo="contacto.AuditInfo" />
-                                </td>
+                                <td><AuditLastUpdated AuditInfo="contacto.AuditInfo" /></td>
                                 <td>
                                     <div class="ui-actions">
                                         <a href="/contactos/editar/@contacto.Id" title="Editar">

@@ -9,25 +9,20 @@
 @using DrakionTech.Crm.Web.Extensions
 @using Microsoft.AspNetCore.Components.Authorization
 
-<div class="actividad-form-container">
-    <div class="actividad-form-card">
+<div class="form-card">
 
-        @* Indicador visual si es actividad de seguimiento *@
-        @if (modelo.ActividadPreviaId.HasValue)
-        {
-            <div class="seguimiento-banner">
-                <i class="bi bi-arrow-return-right"></i>
-                Actividad de seguimiento — vinculada a actividad #@modelo.ActividadPreviaId
-            </div>
-        }
+    <div class="form-header">
+        <h1>@(modelo.ActividadPreviaId.HasValue ? "Nueva actividad de seguimiento" : "Nueva actividad")</h1>
+        <p>Registra una interacción realizada con la empresa</p>
+    </div>
 
-        <h3 class="actividad-form-title">
-            @(modelo.ActividadPreviaId.HasValue ? "Nueva actividad de seguimiento" : "Nueva actividad")
-        </h3>
-
-        <p class="actividad-form-subtitle">
-            Registra una interacción realizada con la empresa
-        </p>
+    @if (modelo.ActividadPreviaId.HasValue)
+    {
+        <div class="seguimiento-banner">
+            <i class="bi bi-arrow-return-right"></i>
+            Actividad de seguimiento — vinculada a actividad #@modelo.ActividadPreviaId
+        </div>
+    }
 
         <EditForm Model="@modelo"
                   OnValidSubmit="Guardar"
@@ -102,11 +97,12 @@
                 <InputTextArea class="form-control" rows="4" @bind-Value="modelo.Notas" />
             </div>
 
+        <div class="form-actions">
+            <a class="btn btn-secondary" href="/dashboardActividades">Cancelar</a>
             <button type="submit" class="btn btn-primary">Guardar</button>
-            <a class="btn btn-secondary ms-2" href="/dashboardActividades">Cancelar</a>
+        </div>
 
         </EditForm>
-    </div>
 </div>
 
 @code {

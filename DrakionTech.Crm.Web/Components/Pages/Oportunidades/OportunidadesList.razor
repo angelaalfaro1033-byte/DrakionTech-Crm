@@ -5,7 +5,10 @@
 
 @if (empresa is null || oportunidades is null)
 {
-    <p>Cargando oportunidades...</p>
+    <div class="ui-empty">
+        <div class="spinner-border spinner-border-sm mb-2"></div>
+        <p>Cargando oportunidades…</p>
+    </div>
 }
 else
 {
@@ -13,20 +16,19 @@ else
         <div class="detail-section-header">
             <div>
                 <h5>Oportunidades</h5>
-                <small>Gestión de oportunidades comerciales</small>
+                <small class="text-muted">Gestión de oportunidades comerciales</small>
             </div>
-
             <a class="btn btn-primary detail-section-header__action"
                href="/empresas/@EmpresaId/oportunidades/crear">
-                <i class="bi bi-plus-lg me-1"></i>
-                Nueva oportunidad
+                <i class="bi bi-plus-lg me-1"></i> Nueva oportunidad
             </a>
         </div>
 
         @if (!oportunidades.Any())
         {
-            <div class="alert alert-info">
-                Esta empresa no tiene oportunidades registradas.
+            <div class="ui-empty">
+                <i class="bi bi-briefcase"></i>
+                <p>Esta empresa no tiene oportunidades registradas.</p>
             </div>
         }
         else
@@ -39,23 +41,23 @@ else
                             <th>Valor estimado</th>
                             <th>Etapa</th>
                             <th>Última actualización</th>
-                            <th class="text-end">Acciones</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var o in oportunidades)
                         {
                             <tr>
-                                <td>@o.NombreProyecto</td>
-                                <td>@o.ValorEstimado.ToString("C0", new System.Globalization.CultureInfo("es-CO"))</td>
+                                <td class="col-primary">@o.NombreProyecto</td>
+                                <td class="col-secondary">
+                                    @o.ValorEstimado.ToString("C0", new System.Globalization.CultureInfo("es-CO"))
+                                </td>
                                 <td>
                                     <span class="oport-badge oport-badge--@o.EtapaNombre.ToLower()">
                                         @o.EtapaNombre
                                     </span>
                                 </td>
-                                <td>
-                                    <AuditLastUpdated AuditInfo="o.AuditInfo" />
-                                </td>
+                                <td><AuditLastUpdated AuditInfo="o.AuditInfo" /></td>
                                 <td>
                                     <div class="ui-actions">
                                         <a class="oport-btn oport-btn--default"

@@ -8,106 +8,103 @@
 @using DrakionTech.Crm.Web.Shared
 @inherits PaginacionBase
 
-<div class="empresas-container">
-
-    <div class="page-header">
-        <div>
-            <h1 class="page-title">Empresas</h1>
-            <p class="page-subtitle">Gestiona las empresas de tu CRM</p>
-        </div>
-        <a class="btn btn-primary" href="/empresas/crear">
-            + Nueva Empresa
-        </a>
+<div class="list-header">
+    <div>
+        <h2>Empresas</h2>
+        <p>Gestiona las empresas de tu CRM</p>
     </div>
+    <a class="btn btn-primary d-flex align-items-center gap-2" href="/empresas/crear">
+        <i class="bi bi-plus-lg"></i> Nueva Empresa
+    </a>
+</div>
 
-    <FiltroTabla TItem="EmpresaDto"
-                 PlaceholderBusqueda="Buscar por nombre, NIT o correo..."
-                 MostrarFiltroEstado="true"
-                 OnFiltroChanged="OnFiltroChanged" />
+<FiltroTabla TItem="EmpresaDto"
+             PlaceholderBusqueda="Buscar por nombre, NIT o correo..."
+             MostrarFiltroEstado="true"
+             OnFiltroChanged="OnFiltroChanged" />
 
+<div class="ui-card">
     @if (cargando)
     {
-        <p>Cargando empresas...</p>
+        <div class="ui-empty">
+            <div class="spinner-border spinner-border-sm mb-2"></div>
+            <p>Cargando empresas…</p>
+        </div>
     }
     else if (!empresas.Any())
     {
-        <div class="alert alert-info">
-            No hay empresas registradas.
+        <div class="ui-empty">
+            <i class="bi bi-building"></i>
+            <p>No hay empresas registradas.</p>
         </div>
     }
     else
     {
-        <div class="ui-card">
-            <table class="ui-table">
-                <thead>
+        <table class="ui-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>NIT</th>
+                    <th>País</th>
+                    <th>Email</th>
+                    <th>Estado</th>
+                    <th>Última actualización</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var empresa in empresas)
+                {
                     <tr>
-                        <th>Nombre</th>
-                        <th>NIT</th>
-                        <th>País</th>
-                        <th>Email</th>
-                        <th>Estado</th>
-                        <th>Última actualización</th>
-                        <th class="text-end">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var empresa in empresas)
-                    {
-                        <tr>
-                            <td class="fw-semibold">
-                                <a href="/empresas/@empresa.Id" class="link-tabla">
-                                    @empresa.Nombre
+                        <td class="col-primary">
+                            <a href="/empresas/@empresa.Id">@empresa.Nombre</a>
+                        </td>
+                        <td class="col-secondary">@empresa.NumeroDocumento</td>
+                        <td class="col-secondary">@empresa.PaisNombre</td>
+                        <td class="col-secondary">@empresa.Correo</td>
+                        <td>
+                            @if (empresa.Activa)
+                            {
+                                <span class="badge badge-success">Activa</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-danger">Inactiva</span>
+                            }
+                        </td>
+                        <td><AuditLastUpdated AuditInfo="empresa.AuditInfo" /></td>
+                        <td>
+                            <div class="ui-actions">
+                                <a href="/empresas/@empresa.Id" title="Ver">
+                                    <i class="bi bi-eye"></i>
                                 </a>
-                            </td>
-                            <td>@empresa.NumeroDocumento</td>
-                            <td>@empresa.PaisNombre</td>
-                            <td>@empresa.Correo</td>
-                            <td>
-                                <span class="badge @(empresa.Activa ? "bg-success" : "bg-secondary")">
-                                    @(empresa.Activa ? "Activa" : "Inactiva")
-                                </span>
-                            </td>
-                            <td>
-                                <AuditLastUpdated AuditInfo="empresa.AuditInfo" />
-                            </td>
-                            <td class="text-end">
-                                <div class="ui-actions">
-                                    <a href="/empresas/@empresa.Id" title="Ver">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                    <a href="/empresas/editar/@empresa.Id" title="Editar">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    @if (empresa.Activa)
-                                    {
-                                        <button type="button"
-                                                class="btn btn-sm btn-success"
-                                                title="Desactivar"
-                                                @onclick="() => Desactivar(empresa.Id)">
-                                            <i class="bi bi-toggle-on"></i>
-                                        </button>
-                                    }
-                                    else
-                                    {
-                                        <button type="button"
-                                                class="btn btn-sm btn-secondary"
-                                                title="Activar"
-                                                @onclick="() => Activar(empresa.Id)">
-                                            <i class="bi bi-toggle-off"></i>
-                                        </button>
-                                    }
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-            <Paginacion PaginaActual="paginaActual"
-                        TotalPaginas="totalPaginas"
-                        OnPaginaChanged="IrAPagina" />
-        </div>
+                                <a href="/empresas/editar/@empresa.Id" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                @if (empresa.Activa)
+                                {
+                                    <button type="button" class="btn btn-sm btn-success btn-toggle"
+                                            title="Desactivar" @onclick="() => Desactivar(empresa.Id)">
+                                        <i class="bi bi-toggle-on"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-sm btn-secondary btn-toggle"
+                                            title="Activar" @onclick="() => Activar(empresa.Id)">
+                                        <i class="bi bi-toggle-off"></i>
+                                    </button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <Paginacion PaginaActual="paginaActual"
+                    TotalPaginas="totalPaginas"
+                    OnPaginaChanged="IrAPagina" />
     }
-
 </div>
 
 @code {

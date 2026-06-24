@@ -1,12 +1,14 @@
 ﻿@page "/empresas/{EmpresaId:int}/historial"
 @attribute [Authorize]
-
 @inject IEmpresaService EmpresaService
 @inject IHistorialEmpresaService HistorialEmpresaService
 
 @if (empresa is null)
 {
-    <p>Cargando historial...</p>
+    <div class="ui-empty">
+        <div class="spinner-border spinner-border-sm mb-2"></div>
+        <p>Cargando historial…</p>
+    </div>
 }
 else
 {
@@ -15,74 +17,52 @@ else
         <div class="empresa-section-header">
             <div>
                 <h5>Historial</h5>
-                <small>Trazabilidad completa de la empresa</small>
+                <small class="text-muted">Trazabilidad completa de la empresa</small>
             </div>
         </div>
 
         <div class="ui-card mb-3">
             <div class="row g-3">
-
                 <div class="col-md-3">
-                    <label>Fecha desde</label>
-
-                    <input type="date"
-                           class="form-control"
-                           @bind="fechaDesde"
-                           @bind:after="Buscar" />
+                    <label class="form-label">Fecha desde</label>
+                    <input type="date" class="form-control"
+                           @bind="fechaDesde" @bind:after="Buscar" />
                 </div>
-
                 <div class="col-md-3">
-                    <label>Fecha hasta</label>
-
-                    <input type="date"
-                           class="form-control"
-                           @bind="fechaHasta"
-                           @bind:after="Buscar" />
+                    <label class="form-label">Fecha hasta</label>
+                    <input type="date" class="form-control"
+                           @bind="fechaHasta" @bind:after="Buscar" />
                 </div>
-
                 <div class="col-md-3">
-                    <label>Tipo evento</label>
-
+                    <label class="form-label">Tipo evento</label>
                     <select class="form-select"
-                            @bind="tipoEventoSeleccionado"
-                            @bind:after="Buscar">
-
+                            @bind="tipoEventoSeleccionado" @bind:after="Buscar">
                         <option value="">Todos</option>
-
                         @foreach (var tipo in tiposEvento)
                         {
-                            <option value="@tipo.Valor">
-                                @tipo.Nombre
-                            </option>
+                            <option value="@tipo.Valor">@tipo.Nombre</option>
                         }
                     </select>
                 </div>
-
                 <div class="col-md-3">
-                    <label>Módulo</label>
-
+                    <label class="form-label">Módulo</label>
                     <select class="form-select"
-                            @bind="moduloSeleccionado"
-                            @bind:after="Buscar">
-
+                            @bind="moduloSeleccionado" @bind:after="Buscar">
                         <option value="">Todos</option>
-
                         @foreach (var modulo in modulos)
                         {
-                            <option value="@modulo.Valor">
-                                @modulo.Nombre
-                            </option>
+                            <option value="@modulo.Valor">@modulo.Nombre</option>
                         }
                     </select>
                 </div>
-
             </div>
         </div>
 
         @if (!historial.Any())
         {
-            <div class="alert alert-info">
-                No existen registros de historial para esta empresa.
+            <div class="ui-empty">
+                <i class="bi bi-clock-history"></i>
+                <p>No existen registros de historial para esta empresa.</p>
             </div>
         }
         else
@@ -97,33 +77,22 @@ else
                             <th>Responsable</th>
                         </tr>
                     </thead>
-
                     <tbody>
                         @foreach (var item in historial)
                         {
                             <tr>
-                                <td>
+                                <td class="col-secondary">
                                     @item.FechaEvento.ToString("dd/MM/yyyy HH:mm")
                                 </td>
-
                                 <td>
-                                    <strong>@item.TituloEvento</strong>
-
+                                    <span class="col-primary">@item.TituloEvento</span>
                                     @if (!string.IsNullOrWhiteSpace(item.DescripcionEvento))
                                     {
-                                        <div class="text-muted small">
-                                            @item.DescripcionEvento
-                                        </div>
+                                        <div class="text-muted small">@item.DescripcionEvento</div>
                                     }
                                 </td>
-
-                                <td>
-                                    @item.ModuloOrigenNombre
-                                </td>
-
-                                <td>
-                                    @item.UsuarioResponsableNombre
-                                </td>
+                                <td class="col-secondary">@item.ModuloOrigenNombre</td>
+                                <td class="col-secondary">@item.UsuarioResponsableNombre</td>
                             </tr>
                         }
                     </tbody>
@@ -137,6 +106,7 @@ else
 
     </EmpresaComponente>
 }
+
 @code {
 
     [Parameter]

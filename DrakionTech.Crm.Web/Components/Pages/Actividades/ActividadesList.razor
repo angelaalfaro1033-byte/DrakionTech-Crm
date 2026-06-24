@@ -3,9 +3,13 @@
 @inject IEmpresaService EmpresaService
 @inject IActividadService ActividadService
 @attribute [Authorize]
+
 @if (empresa is null || actividades is null)
 {
-    <p>Cargando actividades...</p>
+    <div class="ui-empty">
+        <div class="spinner-border spinner-border-sm mb-2"></div>
+        <p>Cargando actividades…</p>
+    </div>
 }
 else
 {
@@ -14,49 +18,39 @@ else
             <div class="detail-section-header">
                 <div>
                     <h5>Actividades</h5>
-                    <small>Historial de interacciones</small>
+                    <small class="text-muted">Historial de interacciones</small>
                 </div>
-
                 <a class="btn btn-primary detail-section-header__action"
                    href="/empresas/@EmpresaId/actividades/crear">
-                    <i class="bi bi-plus-lg me-1"></i>
-                    Nueva actividad
+                    <i class="bi bi-plus-lg me-1"></i> Nueva actividad
                 </a>
             </div>
 
             @if (!actividades.Any())
             {
-                <div class="alert alert-info">
-                    No hay actividades registradas.
+                <div class="ui-empty">
+                    <i class="bi bi-calendar-x"></i>
+                    <p>No hay actividades registradas.</p>
                 </div>
             }
             else
             {
                 <div class="ui-toolbar detail-toolbar mt-3 mb-3">
-
                     <div class="flex-fill">
-                        <input type="date"
-                               class="form-control"
-                               @bind="fechaSeleccionada" />
+                        <input type="date" class="form-control" @bind="fechaSeleccionada" />
                     </div>
-
                     <div class="flex-fill">
-                        <select class="form-control"
-                                @bind="tipoSeleccionado">
+                        <select class="form-control" @bind="tipoSeleccionado">
                             <option value="">-- Todos los tipos --</option>
-
                             @foreach (var tipo in tipos)
                             {
                                 <option value="@tipo">@tipo</option>
                             }
                         </select>
                     </div>
-
                     <div class="flex-fill">
-                        <select class="form-control"
-                                @bind="oportunidadSeleccionada">
+                        <select class="form-control" @bind="oportunidadSeleccionada">
                             <option value="">-- Todas las oportunidades --</option>
-
                             @foreach (var op in oportunidades)
                             {
                                 <option value="@op">@op</option>
@@ -73,19 +67,17 @@ else
                                 <th>Fecha</th>
                                 <th>Resultado</th>
                                 <th>Última actualización</th>
-                                <th class="text-end">Acciones</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var a in actividadesFiltradas!)
                             {
                                 <tr>
-                                    <td style="font-weight:500;color:var(--text-main)">@a.TipoActividadNombre</td>
-                                    <td style="font-size:13px;color:var(--text-muted)">@a.Fecha.ToString("dd/MM/yyyy")</td>
-                                    <td style="font-size:13px">@(string.IsNullOrEmpty(a.Resultado) ? "—" : a.Resultado)</td>
-                                    <td>
-                                        <AuditLastUpdated AuditInfo="a.AuditInfo" />
-                                    </td>
+                                    <td class="col-primary">@a.TipoActividadNombre</td>
+                                    <td class="col-secondary">@a.Fecha.ToString("dd/MM/yyyy")</td>
+                                    <td class="col-secondary">@(string.IsNullOrEmpty(a.Resultado) ? "—" : a.Resultado)</td>
+                                    <td><AuditLastUpdated AuditInfo="a.AuditInfo" /></td>
                                     <td>
                                         <div class="ui-actions">
                                             <a href="/empresas/@EmpresaId/actividades/editar/@a.Id" title="Editar">

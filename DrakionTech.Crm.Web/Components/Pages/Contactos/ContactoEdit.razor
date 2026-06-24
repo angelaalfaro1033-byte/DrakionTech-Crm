@@ -3,13 +3,11 @@
 @inject IContactoService ContactoService
 @inject NavigationManager Navigation
 
-<div class="contacto-form">
+<div class="form-card">
 
-    <div class="contacto-form-header">
-        <h3>Editar Contacto</h3>
-        <p class="contacto-form-subtitle">
-            Actualiza la información del contacto
-        </p>
+    <div class="form-header">
+        <h1>Editar Contacto</h1>
+        <p>Actualiza la información del contacto</p>
     </div>
 
     @if (modelo is null)
@@ -67,14 +65,10 @@
                 </InputSelect>
             </div>
 
-            <button type="submit" class="btn btn-primary">
-                Guardar cambios
-            </button>
-
-            <a class="btn btn-link"
-               href="/empresas/@empresaId/contactos">
-                Cancelar
-            </a>
+            <div class="form-actions">
+                <a class="btn btn-secondary" href="/empresas/@empresaId/contactos">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+            </div>
         </EditForm>
     }
 </div>
