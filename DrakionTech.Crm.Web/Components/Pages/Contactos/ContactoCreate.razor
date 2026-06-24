@@ -3,13 +3,11 @@
 @inject IContactoService ContactoService
 @inject NavigationManager Navigation
 
-<div class="contacto-form">
+<div class="form-card">
 
-    <div class="contacto-form-header">
-        <h3>Nuevo Contacto</h3>
-        <p class="contacto-form-subtitle">
-            Completa la información del contacto
-        </p>
+    <div class="form-header">
+        <h1>Nuevo Contacto</h1>
+        <p>Completa la información del contacto</p>
     </div>
 
     @if (!roles.Any())
@@ -58,14 +56,10 @@
                 </InputSelect>
             </div>
 
-            <button type="submit" class="btn btn-primary">
-                Guardar
-            </button>
-
-            <a class="btn btn-secondary ms-2"
-               href="/empresas/@EmpresaId/contactos">
-                Cancelar
-            </a>
+            <div class="form-actions">
+                <a class="btn btn-secondary" href="/empresas/@EmpresaId/contactos">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
         </EditForm>
     }
 </div>

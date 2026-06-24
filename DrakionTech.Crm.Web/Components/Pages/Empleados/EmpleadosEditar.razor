@@ -4,35 +4,33 @@
 @inject IEmpleadoService EmpleadoService
 @inject NavigationManager Nav
 
-<div class="empleados-container">
-    <div class="form-card">
-        <div class="form-header">
-            <h1>Editar empleado</h1>
-            <p>Actualiza la información</p>
-        </div>
-
-        @if (cargando)
-        {
-            <p>Cargando información...</p>
-        }
-        else
-        {
-            @if (!string.IsNullOrEmpty(error))
-            {
-                <ul class="validation-summary">
-                    @foreach (var err in error.Split(" | "))
-                    {
-                        <li>@err</li>
-                    }
-                </ul>
-            }
-
-            <EmpleadoForm Model="empleado"
-                          OnValidSubmit="Guardar"
-                          OnCancel="Cancelar"
-                          TextoBoton="Actualizar" />
-        }
+<div class="form-card">
+    <div class="form-header">
+        <h1>Editar empleado</h1>
+        <p>Actualiza la información</p>
     </div>
+
+    @if (cargando)
+    {
+        <p>Cargando información...</p>
+    }
+    else
+    {
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <ul class="validation-summary">
+                @foreach (var err in error.Split(" | "))
+                {
+                    <li>@err</li>
+                }
+            </ul>
+        }
+
+        <EmpleadoForm Model="empleado"
+                      OnValidSubmit="Guardar"
+                      OnCancel="Cancelar"
+                      TextoBoton="Actualizar" />
+    }
 </div>
 
 @code {

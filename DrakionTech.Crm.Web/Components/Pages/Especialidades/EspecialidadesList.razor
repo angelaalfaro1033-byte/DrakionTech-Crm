@@ -8,93 +8,96 @@
 
 @inject IEspecialidadService EspecialidadService
 
-<div class="especialidades-container">
-
-    <div class="page-header">
-        <div>
-            <h1 class="page-title">Especialidades</h1>
-            <p class="page-subtitle">Gestiona las especialidades del sistema</p>
-        </div>
-        <a class="btn btn-primary" href="/especialidades/crear">
-            + Nueva Especialidad
-        </a>
+<div class="list-header">
+    <div>
+        <h2>Especialidades</h2>
+        <p>Gestiona las especialidades del sistema</p>
     </div>
+    <a class="btn btn-primary d-flex align-items-center gap-2" href="/especialidades/crear">
+        <i class="bi bi-plus-lg"></i> Nueva Especialidad
+    </a>
+</div>
 
-    <FiltroTabla TItem="EspecialidadDto"
-                 PlaceholderBusqueda="Buscar por nombre..."
-                 MostrarFiltroEstado="true"
-                 OnFiltroChanged="OnFiltroChanged" />
+<FiltroTabla TItem="EspecialidadDto"
+             PlaceholderBusqueda="Buscar por nombre..."
+             MostrarFiltroEstado="true"
+             OnFiltroChanged="OnFiltroChanged" />
 
+<div class="ui-card">
     @if (cargando)
     {
-        <p>Cargando especialidades...</p>
+        <div class="ui-empty">
+            <div class="spinner-border spinner-border-sm mb-2"></div>
+            <p>Cargando especialidades…</p>
+        </div>
     }
     else if (!lista.Any())
     {
-        <div class="alert alert-info">No hay especialidades registradas.</div>
+        <div class="ui-empty">
+            <i class="bi bi-journal-medical"></i>
+            <p>No hay especialidades registradas.</p>
+        </div>
     }
     else
     {
-        <div class="ui-card">
-            <table class="ui-table">
-                <thead>
+        <table class="ui-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th>Última actualización</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in lista)
+                {
                     <tr>
-                        <th>Nombre</th>
-                        <th>Descripción</th>
-                        <th>Rol</th>
-                        <th>Estado</th>
-                        <th>Última actualización</th>
-                        <th class="text-end">Acciones</th>
+                        <td class="col-primary">@item.Nombre</td>
+                        <td class="col-secondary">@item.Descripcion</td>
+                        <td class="col-secondary">@item.RolUsuarioNombre</td>
+                        <td>
+                            @if (item.Activo)
+                            {
+                                <span class="badge badge-success">Activo</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-danger">Inactivo</span>
+                            }
+                        </td>
+                        <td><AuditLastUpdated AuditInfo="item.AuditInfo" /></td>
+                        <td>
+                            <div class="ui-actions">
+                                <a href="/especialidades/editar/@item.Id" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                @if (item.Activo)
+                                {
+                                    <button type="button" class="btn btn-sm btn-success btn-toggle"
+                                            title="Desactivar" @onclick="() => Desactivar(item.Id)">
+                                        <i class="bi bi-toggle-on"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-sm btn-secondary btn-toggle"
+                                            title="Activar" @onclick="() => Activar(item.Id)">
+                                        <i class="bi bi-toggle-off"></i>
+                                    </button>
+                                }
+                            </div>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in lista)
-                    {
-                        <tr>
-                            <td class="fw-semibold">@item.Nombre</td>
-                            <td>@item.Descripcion</td>
-                            <td>@item.RolUsuarioNombre</td>
-                            <td>
-                                <span class="badge @(item.Activo ? "bg-success" : "bg-secondary")">
-                                    @(item.Activo ? "Activo" : "Inactivo")
-                                </span>
-                            </td>
-                            <td>
-                                <AuditLastUpdated AuditInfo="item.AuditInfo" />
-                            </td>
-                            <td class="text-end">
-                                <div class="ui-actions">
-                                    <a href="/especialidades/editar/@item.Id" title="Editar">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    @if (item.Activo)
-                                    {
-                                        <button class="btn btn-sm btn-success"
-                                                @onclick="() => Desactivar(item.Id)"
-                                                title="Desactivar">
-                                            <i class="bi bi-toggle-on"></i>
-                                        </button>
-                                    }
-                                    else
-                                    {
-                                        <button class="btn btn-sm btn-secondary"
-                                                @onclick="() => Activar(item.Id)"
-                                                title="Activar">
-                                            <i class="bi bi-toggle-off"></i>
-                                        </button>
-                                    }
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-            <Paginacion PaginaActual="paginaActual"
-                        TotalPaginas="totalPaginas"
-                        OnPaginaChanged="IrAPagina" />
-        </div>
+                }
+            </tbody>
+        </table>
+        <Paginacion PaginaActual="paginaActual"
+                    TotalPaginas="totalPaginas"
+                    OnPaginaChanged="IrAPagina" />
     }
-
 </div>
 
 @code {

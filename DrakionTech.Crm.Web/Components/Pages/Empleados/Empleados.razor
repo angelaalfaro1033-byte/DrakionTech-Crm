@@ -7,99 +7,103 @@
 @using DrakionTech.Crm.Web.Shared
 @inherits PaginacionBase
 
-<div class="empleados-container">
-
-    <div class="page-header">
-        <div class="header-text">
-            <h1 class="page-title">Empleados</h1>
-            <p class="page-subtitle">Gestiona los empleados del CRM</p>
-        </div>
-        <div>
-            <a class="btn btn-primary" href="/empleados/crear">
-                + Nuevo Empleado
-            </a>
-            <a class="btn btn-secondary" href="/empleados/importar">
-                <i class="bi bi-file-earmark-excel"></i> Importar Excel
-            </a>
-        </div>
+<div class="list-header">
+    <div>
+        <h2>Empleados</h2>
+        <p>Gestiona los empleados del CRM</p>
     </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-primary d-flex align-items-center gap-2" href="/empleados/crear">
+            <i class="bi bi-plus-lg"></i> Nuevo Empleado
+        </a>
+        <a class="btn btn-secondary d-flex align-items-center gap-2" href="/empleados/importar">
+            <i class="bi bi-file-earmark-excel"></i> Importar Excel
+        </a>
+    </div>
+</div>
 
-    <FiltroTabla TItem="EmpleadoListDto"
-                 PlaceholderBusqueda="Buscar por nombre, email o cargo..."
-                 MostrarFiltroEstado="true"
-                 OnFiltroChanged="OnFiltroChanged" />
+<FiltroTabla TItem="EmpleadoListDto"
+             PlaceholderBusqueda="Buscar por nombre, email o cargo..."
+             MostrarFiltroEstado="true"
+             OnFiltroChanged="OnFiltroChanged" />
 
+<div class="ui-card">
     @if (cargando)
     {
-        <p>Cargando empleados...</p>
+        <div class="ui-empty">
+            <div class="spinner-border spinner-border-sm mb-2"></div>
+            <p>Cargando empleados…</p>
+        </div>
     }
     else if (!empleados.Any())
     {
-        <div class="alert alert-info">No hay empleados registrados.</div>
+        <div class="ui-empty">
+            <i class="bi bi-people"></i>
+            <p>No hay empleados registrados.</p>
+        </div>
     }
     else
     {
-        <div class="ui-card">
-            <table class="ui-table">
-                <thead>
+        <table class="ui-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Especialidad</th>
+                    <th>Estado</th>
+                    <th>Última actualización</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in empleados)
+                {
                     <tr>
-                        <th>Nombre</th>
-                        <th>Email</th>
-                        <th>Especialidad</th>
-                        <th>Estado</th>
-                        <th>Última actualización</th>
-                        <th class="text-end">Acciones</th>
+                        <td class="col-primary">@item.Nombre @item.Apellido</td>
+                        <td class="col-secondary">@item.Email</td>
+                        <td class="col-secondary">@item.Especialidad</td>
+                        <td>
+                            @if (item.Activo)
+                            {
+                                <span class="badge badge-success">Activo</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-danger">Inactivo</span>
+                            }
+                        </td>
+                        <td><AuditLastUpdated AuditInfo="item.AuditInfo" /></td>
+                        <td>
+                            <div class="ui-actions">
+                                <a href="/empleados/editar/@item.Id" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                @if (item.Activo)
+                                {
+                                    <button type="button" class="btn btn-sm btn-success btn-toggle"
+                                            title="Desactivar"
+                                            @onclick="() => CambiarEstado(item.Id, EmpleadoService.DesactivarAsync)">
+                                        <i class="bi bi-toggle-on"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-sm btn-secondary btn-toggle"
+                                            title="Activar"
+                                            @onclick="() => CambiarEstado(item.Id, EmpleadoService.ActivarAsync)">
+                                        <i class="bi bi-toggle-off"></i>
+                                    </button>
+                                }
+                            </div>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in empleados)
-                    {
-                        <tr>
-                            <td>@item.Nombre @item.Apellido</td>
-                            <td class="email-cell" title="@item.Email">@item.Email</td>
-                            <td>@item.Especialidad</td>
-                            <td>
-                                <span class="badge @(item.Activo ? "badge-success" : "badge-danger")">
-                                    @(item.Activo ? "Activo" : "Inactivo")
-                                </span>
-                            </td>
-                            <td>
-                                <AuditLastUpdated AuditInfo="item.AuditInfo" />
-                            </td>
-                            <td class="text-end">
-                                <div class="ui-actions">
-                                    <a href="/empleados/editar/@item.Id" title="Editar">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    @if (item.Activo)
-                                    {
-                                        <button class="btn btn-sm btn-success"
-                                                @onclick="() => CambiarEstado(item.Id, EmpleadoService.DesactivarAsync)"
-                                                title="Desactivar">
-                                            <i class="bi bi-toggle-on"></i>
-                                        </button>
-                                    }
-                                    else
-                                    {
-                                        <button class="btn btn-sm btn-secondary"
-                                                @onclick="() => CambiarEstado(item.Id, EmpleadoService.ActivarAsync)"
-                                                title="Activar">
-                                            <i class="bi bi-toggle-off"></i>
-                                        </button>
-                                    }
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-            <Paginacion PaginaActual="paginaActual"
-                        TotalPaginas="totalPaginas"
-                        OnPaginaChanged="IrAPagina" />
-
-            </div>
+                }
+            </tbody>
+        </table>
+        <Paginacion PaginaActual="paginaActual"
+                    TotalPaginas="totalPaginas"
+                    OnPaginaChanged="IrAPagina" />
     }
-
 </div>
 
 @code {

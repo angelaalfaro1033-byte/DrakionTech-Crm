@@ -7,18 +7,16 @@
 @inject IRolUsuarioService RolUsuarioService
 @inject NavigationManager Nav
 
-<div class="empleados-container">
-    <div class="form-card">
-        <div class="form-header">
-            <h1>Crear usuario</h1>
-            <p>Registra un nuevo usuario</p>
-        </div>
-        <UsuarioForm Model="usuario"
-                     Roles="roles"
-                     OnValidSubmit="Guardar"
-                     OnCancel="Cancelar"
-                     TextoBoton="Crear" />
+<div class="form-card">
+    <div class="form-header">
+        <h1>Crear usuario</h1>
+        <p>Registra un nuevo usuario</p>
     </div>
+    <UsuarioForm Model="usuario"
+                 Roles="roles"
+                 OnValidSubmit="Guardar"
+                 OnCancel="Cancelar"
+                 TextoBoton="Crear" />
 </div>
 
 @code {

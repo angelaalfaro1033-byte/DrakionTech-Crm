@@ -1,23 +1,4 @@
-﻿.oport-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1.25rem;
-}
-
-.oport-title {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text-main);
-    margin: 0 0 2px;
-}
-
-.oport-subtitle {
-    font-size: 12px;
-    color: var(--text-muted);
-}
-
-/* Badges por etapa — colores semánticos */
+﻿/* Badges por etapa — colores semánticos */
 .oport-badge {
     display: inline-flex;
     align-items: center;
@@ -73,28 +54,9 @@
 .oport-btn--primary {
     background: white;
     color: #2A3EF4;
-    border-color: rgba(42,62,244,0.25);
+    border-color: rgba(42, 62, 244, 0.25);
 }
 
     .oport-btn--primary:hover {
         background: #f0f2ff;
-    }
-
-/* Estado vacío */
-.oport-empty {
-    text-align: center;
-    padding: 3rem 1rem;
-    color: var(--text-muted);
-}
-
-    .oport-empty i {
-        font-size: 2rem;
-        display: block;
-        margin-bottom: 0.5rem;
-        opacity: 0.4;
-    }
-
-    .oport-empty p {
-        font-size: 13px;
-        margin: 0;
     }

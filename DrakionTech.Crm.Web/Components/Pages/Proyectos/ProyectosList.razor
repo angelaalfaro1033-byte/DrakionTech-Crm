@@ -8,13 +8,14 @@
 @using DrakionTech.Crm.Web.Shared
 @inherits PaginacionBase
 
-<div class="page-header">
+<div class="list-header">
     <div>
-        <h3 class="page-title">Proyectos</h3>
-        <p class="page-subtitle">Gestión de proyectos asociados a áreas</p>
+        <h2>Proyectos</h2>
+        <p>Gestión de proyectos asociados a áreas</p>
     </div>
-    <button class="btn btn-primary" @onclick='() => Nav.NavigateTo("/proyectos/crear")'>
-        + Nuevo Proyecto
+    <button type="button" class="btn btn-primary d-flex align-items-center gap-2"
+            @onclick='() => Nav.NavigateTo("/proyectos/crear")'>
+        <i class="bi bi-plus-lg"></i> Nuevo Proyecto
     </button>
 </div>
 
@@ -23,17 +24,23 @@
              MostrarFiltroEstado="false"
              OnFiltroChanged="AplicarFiltro" />
 
-@if (_cargando)
-{
-    <div class="ui-card" style="position:relative; min-height:120px;">
-        <div class="card-loading">
-            <div class="spinner small"></div>
+<div class="ui-card">
+    @if (_cargando)
+    {
+        <div class="ui-empty">
+            <div class="spinner-border spinner-border-sm mb-2"></div>
+            <p>Cargando proyectos…</p>
         </div>
-    </div>
-}
-else
-{
-    <div class="ui-card">
+    }
+    else if (!_proyectos.Any())
+    {
+        <div class="ui-empty">
+            <i class="bi bi-kanban"></i>
+            <p>No hay proyectos registrados.</p>
+        </div>
+    }
+    else
+    {
         <table class="ui-table">
             <thead>
                 <tr>
@@ -52,58 +59,47 @@ else
                 @foreach (var p in _proyectos)
                 {
                     <tr>
-                        <td>@p.Nombre</td>
-                        <td>@(p.EmpresaNombre ?? "-")</td>
-                        <td>@p.AreaNombre</td>
-                        <td>@p.ResponsableNombre</td>
+                        <td class="col-primary">@p.Nombre</td>
+                        <td class="col-secondary">@(p.EmpresaNombre ?? "—")</td>
+                        <td class="col-secondary">@p.AreaNombre</td>
+                        <td class="col-secondary">@p.ResponsableNombre</td>
                         <td>
-                            <span class="badge badge-secondary">
-                                @p.EtapaTexto
-                            </span>
+                            <span class="badge badge-secondary">@p.EtapaTexto</span>
                         </td>
                         <td>
-                            <span class="badge @ObtenerBadge(p.Estado)">
-                                @p.EstadoTexto
-                            </span>
+                            <span class="badge @ObtenerBadge(p.Estado)">@p.EstadoTexto</span>
                         </td>
-                        <td>@p.FechaInicio.ToShortDateString()</td>
-                        <td>
-                            <AuditLastUpdated AuditInfo="p.AuditInfo" />
-                        </td>
+                        <td class="col-secondary">@p.FechaInicio.ToShortDateString()</td>
+                        <td><AuditLastUpdated AuditInfo="p.AuditInfo" /></td>
                         <td>
                             <div class="ui-actions">
-                                <button class="btn btn-sm btn-outline-primary"
+                                <button type="button" class="btn btn-sm btn-outline-primary"
                                         @onclick="() => AbrirModal(p)"
                                         title="Cambiar etapa">
                                     Cambiar etapa
                                 </button>
-
                                 <a href="/proyectos/detalle/@p.Id" title="Detalle">
-                                    Detalle
+                                    <i class="bi bi-eye"></i>
                                 </a>
-
                                 <a href="/proyectos/editar/@p.Id" title="Editar">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-
-                                <a href="#"
-                                   title="Eliminar"
-                                   @onclick="() => EliminarAsync(p.Id)"
-                                @onclick:preventDefault>
+                                <button type="button" class="btn btn-sm btn-link p-0 text-muted"
+                                        @onclick="() => EliminarAsync(p.Id)"
+                                        title="Eliminar">
                                     <i class="bi bi-trash"></i>
-                                </a>
+                                </button>
                             </div>
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
-
         <Paginacion PaginaActual="paginaActual"
                     TotalPaginas="totalPaginas"
                     OnPaginaChanged="IrAPagina" />
-    </div>
-}
+    }
+</div>
 
 @if (_mostrarModal && _proyectoSeleccionado is not null)
 {
@@ -120,65 +116,48 @@ else
 
             @if (_errorModal is not null)
             {
-                <div class="alert alert-danger">
-                    @_errorModal
-                </div>
+                <div class="alert alert-danger">@_errorModal</div>
             }
 
-            <p>
-                Etapa actual:
-                <strong>@_proyectoSeleccionado.EtapaTexto</strong>
-            </p>
+            <p>Etapa actual: <strong>@_proyectoSeleccionado.EtapaTexto</strong></p>
 
             @if (siguiente is not null)
             {
                 <p class="modal-etapa-siguiente">
-                    Siguiente etapa:
-                    <strong>@ObtenerDescripcionEtapa(siguiente.Value)</strong>
+                    Siguiente etapa: <strong>@ObtenerDescripcionEtapa(siguiente.Value)</strong>
                 </p>
 
                 <div class="mb-3">
                     <label class="form-label">% IVA</label>
-                    <input type="number"
-                           class="form-control"
-                           @bind="_ivaNueva" />
+                    <input type="number" class="form-control" @bind="_ivaNueva" />
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Valor calculado</label>
-                    <input type="number"
-                           class="form-control"
-                           @bind="_valorCalculado" />
+                    <input type="number" class="form-control" @bind="_valorCalculado" />
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Observaciones</label>
-                    <textarea class="form-control"
-                              rows="3"
-                              @bind="_observacionesModal">
-                            </textarea>
+                    <textarea class="form-control" rows="3" @bind="_observacionesModal"></textarea>
                 </div>
             }
             else
             {
                 <div class="alert alert-success">
-                    El proyecto ya está en la etapa final:
-                    <strong>Cierre del proyecto</strong>.
+                    El proyecto ya está en la etapa final: <strong>Cierre del proyecto</strong>.
                 </div>
             }
 
         </div>
 
         <div class="modal-custom-footer">
-            <button class="btn btn-secondary"
-                    @onclick="CerrarModal">
+            <button type="button" class="btn btn-secondary" @onclick="CerrarModal">
                 Cancelar
             </button>
-
             @if (siguiente is not null)
             {
-                <button class="btn btn-primary"
-                        @onclick="ConfirmarCambioEtapa">
+                <button type="button" class="btn btn-primary" @onclick="ConfirmarCambioEtapa">
                     Confirmar
                 </button>
             }

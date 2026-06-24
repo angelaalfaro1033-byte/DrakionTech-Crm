@@ -10,94 +10,87 @@
 
 @inherits PaginacionBase
 
-<div class="empleados-container">
-    <div class="page-header">
-        <div class="header-text">
-            <h1 class="page-title">Marketing</h1>
-            <p class="page-subtitle">
-                Seguimiento mensual y métricas por canal
-            </p>
-        </div>
+<div class="list-header">
+    <div>
+        <h2>Marketing</h2>
+        <p>Seguimiento mensual y métricas por canal</p>
     </div>
+</div>
 
-    <MarketingTabs />
+<MarketingTabs />
 
-    <div class="detail-section-header mt-3">
-        <div>
-            <h5 class="oport-title">Métricas</h5>
-            <small>Seguimiento mensual y métricas por canal</small>
-        </div>
-
-        <a class="btn btn-primary detail-section-header__action"
-           href="/marketing/crear-metrica">
-            <i class="bi bi-plus-lg me-1"></i>
-            Agregar métrica
-        </a>
+<div class="detail-section-header mt-3">
+    <div>
+        <h2 class="section-title mb-0">Métricas</h2>
+        <small class="text-muted">Seguimiento mensual y métricas por canal</small>
     </div>
+    <a class="btn btn-primary d-flex align-items-center gap-2 detail-section-header__action"
+       href="/marketing/crear-metrica">
+        <i class="bi bi-plus-lg"></i> Agregar métrica
+    </a>
+</div>
 
-    <FiltroTabla TItem="MetricaPublicacionDto"
-                 PlaceholderBusqueda="Buscar publicación o canal..."
-                 MostrarFiltroEstado="false"
-                 OnFiltroChanged="OnFiltroChanged" />
+<FiltroTabla TItem="MetricaPublicacionDto"
+             PlaceholderBusqueda="Buscar publicación o canal..."
+             MostrarFiltroEstado="false"
+             OnFiltroChanged="OnFiltroChanged" />
 
+<div class="ui-card">
     @if (_cargando)
     {
-        <p>Cargando métricas...</p>
+        <div class="ui-empty">
+            <div class="spinner-border spinner-border-sm mb-2"></div>
+            <p>Cargando métricas…</p>
+        </div>
     }
     else if (!_metricas.Any())
     {
-        <div class="alert alert-info">
-            No hay métricas registradas.
+        <div class="ui-empty">
+            <i class="bi bi-bar-chart"></i>
+            <p>No hay métricas registradas.</p>
         </div>
     }
     else
     {
-        <div class="ui-card">
-            <table class="ui-table">
-                <thead>
+        <table class="ui-table">
+            <thead>
+                <tr>
+                    <th>Publicación</th>
+                    <th>Canal</th>
+                    <th>Fecha</th>
+                    <th>Visualizaciones</th>
+                    <th>Reacciones</th>
+                    <th>Alcance</th>
+                    <th>Comercial</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var metrica in _metricas)
+                {
                     <tr>
-                        <th>Publicación</th>
-                        <th>Canal</th>
-                        <th>Fecha</th>
-                        <th>Visualizaciones</th>
-                        <th>Reacciones</th>
-                        <th>Alcance</th>
-                        <th>Comercial</th>
-                        <th class="text-end">Acciones</th>
+                        <td class="col-primary">@metrica.PublicacionNombre</td>
+                        <td class="col-secondary">@metrica.RedSocialNombre</td>
+                        <td class="col-secondary">@metrica.FechaRegistro.ToString("dd/MM/yyyy")</td>
+                        <td class="col-secondary">@metrica.Visualizaciones</td>
+                        <td class="col-secondary">@metrica.Reacciones</td>
+                        <td class="col-secondary">@metrica.Alcance</td>
+                        <td class="col-secondary">@(metrica.ContactoAreaComercial ? "Sí" : "No")</td>
+                        <td>
+                            <div class="ui-actions">
+                                <a href="/marketing/editar-metrica/@metrica.Id" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            </div>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach (var metrica in _metricas)
-                    {
-                        <tr>
-                            <td>
-                                <strong>@metrica.PublicacionNombre</strong>
-                            </td>
-                            <td>@metrica.RedSocialNombre</td>
-                            <td>@metrica.FechaRegistro.ToString("dd/MM/yyyy")</td>
-                            <td>@metrica.Visualizaciones</td>
-                            <td>@metrica.Reacciones</td>
-                            <td>@metrica.Alcance</td>
-                            <td>@(metrica.ContactoAreaComercial ? "Sí" : "No")</td>
-                            <td class="text-end">
-                                <div class="ui-actions">
-                                    <a href="/marketing/editar-metrica/@metrica.Id"
-                                       title="Editar">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-
-            <Paginacion PaginaActual="paginaActual"
-                        TotalPaginas="totalPaginas"
-                        OnPaginaChanged="IrAPagina" />
-        </div>
+                }
+            </tbody>
+        </table>
+        <Paginacion PaginaActual="paginaActual"
+                    TotalPaginas="totalPaginas"
+                    OnPaginaChanged="IrAPagina" />
     }
-
 </div>
 
 @code {
