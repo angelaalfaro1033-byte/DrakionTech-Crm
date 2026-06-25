@@ -38,6 +38,7 @@ namespace DrakionTech.Crm.Business
             services.AddScoped<ISectorEmpresaService, SectorEmpresaService>();
             services.AddScoped<IPublicacionMarketingService, PublicacionMarketingService>();
             services.AddScoped<IHistorialEmpresaService, HistorialEmpresaService>();
+            services.AddScoped<IEmpleadoProyectoAsignacionService, EmpleadoProyectoAsignacionService>();
 
             return services;
         }

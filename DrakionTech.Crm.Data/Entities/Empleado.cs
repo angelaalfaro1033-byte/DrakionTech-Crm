@@ -22,5 +22,6 @@ namespace DrakionTech.Crm.Data.Entities
         public EmpleadoSalario? Salario { get; set; }
         public RolUsuario? RolUsuario { get; set; }
         public Especialidad? EspecialidadNavigation { get; set; }
+        public ICollection<EmpleadoProyectoAsignacion> AsignacionesProyecto { get; set; } = new List<EmpleadoProyectoAsignacion>();
     }
 }

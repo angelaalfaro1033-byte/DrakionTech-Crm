@@ -76,6 +76,8 @@ builder.Services.AddScoped<IAreaService, AreaService>();
 // Proyectos
 builder.Services.AddScoped<IProyectoRepository, ProyectoRepository>();
 builder.Services.AddScoped<IProyectoService, ProyectoService>();
+builder.Services.AddScoped<IEmpleadoProyectoAsignacionRepository, EmpleadoProyectoAsignacionRepository>();
+builder.Services.AddScoped<IEmpleadoProyectoAsignacionService, EmpleadoProyectoAsignacionService>();
 
 //MARKETING
 builder.Services.AddScoped<IPublicacionMarketingRepository, PublicacionMarketingRepository>();
