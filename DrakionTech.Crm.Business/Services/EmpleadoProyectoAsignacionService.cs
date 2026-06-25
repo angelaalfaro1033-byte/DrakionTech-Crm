@@ -56,6 +56,77 @@ public class EmpleadoProyectoAsignacionService : IEmpleadoProyectoAsignacionServ
         return MapToDto(asignacion);
     }
 
+    public async Task<List<ReporteAsignacionProyectoDto>> ObtenerSinAsignacionAsync()
+    {
+        var empleados = await _repository.ObtenerEmpleadosActivosSinAsignacionActivaAsync();
+
+        return empleados
+            .Select(e => new ReporteAsignacionProyectoDto
+            {
+                EmpleadoId = e.Id,
+                EmpleadoNombre = $"{e.Nombre} {e.Apellido}".Trim(),
+                Rol = ObtenerRolEmpleado(e),
+                CantidadProyectos = 0,
+                Estado = "Disponible"
+            })
+            .ToList();
+    }
+
+    public async Task<List<ReporteAsignacionProyectoDto>> ObtenerMultiplesProyectosAsync()
+    {
+        var asignaciones = await _repository.ObtenerAsignacionesActivasAsync();
+
+        return asignaciones
+            .GroupBy(a => a.Empleado)
+            .Where(g => g.Count() > 1)
+            .Select(g => new ReporteAsignacionProyectoDto
+            {
+                EmpleadoId = g.Key.Id,
+                EmpleadoNombre = $"{g.Key.Nombre} {g.Key.Apellido}".Trim(),
+                Rol = ObtenerRolEmpleado(g.Key),
+                CantidadProyectos = g.Count(),
+                Proyectos = string.Join(", ", g.Select(a => a.Proyecto.Nombre).OrderBy(nombre => nombre)),
+                Estado = ClasificarCarga(g.Count())
+            })
+            .OrderByDescending(r => r.CantidadProyectos)
+            .ThenBy(r => r.EmpleadoNombre)
+            .ToList();
+    }
+
+    public async Task<List<ReporteAsignacionProyectoDto>> ObtenerDistribucionCargaAsync()
+    {
+        var empleados = await _context.Empleados
+            .Include(e => e.RolUsuario)
+            .Include(e => e.EspecialidadNavigation)
+            .Where(e => e.Activo)
+            .OrderBy(e => e.Nombre)
+            .ThenBy(e => e.Apellido)
+            .ToListAsync();
+
+        var asignacionesActivas = await _repository.ObtenerAsignacionesActivasAsync();
+        var asignacionesPorEmpleado = asignacionesActivas
+            .GroupBy(a => a.EmpleadoId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        return empleados
+            .Select(e =>
+            {
+                var asignacionesEmpleado = asignacionesPorEmpleado.GetValueOrDefault(e.Id) ?? new List<EmpleadoProyectoAsignacion>();
+                var cantidad = asignacionesEmpleado.Count;
+
+                return new ReporteAsignacionProyectoDto
+                {
+                    EmpleadoId = e.Id,
+                    EmpleadoNombre = $"{e.Nombre} {e.Apellido}".Trim(),
+                    Rol = ObtenerRolEmpleado(e),
+                    CantidadProyectos = cantidad,
+                    Proyectos = string.Join(", ", asignacionesEmpleado.Select(a => a.Proyecto.Nombre).OrderBy(nombre => nombre)),
+                    Estado = ClasificarCarga(cantidad)
+                };
+            })
+            .ToList();
+    }
+
     public async Task CrearAsync(CrearAsignacionProyectoDto dto)
     {
         await ValidarEmpleadoYProyectoAsync(dto.EmpleadoId, dto.ProyectoId);
@@ -175,5 +246,19 @@ public class EmpleadoProyectoAsignacionService : IEmpleadoProyectoAsignacionServ
         RolEnProyecto = a.RolEnProyecto,
         Observaciones = a.Observaciones,
         AuditInfo = AuditInfoFactory.FromEntity(a)
+    };
+
+    private static string? ObtenerRolEmpleado(Empleado empleado)
+    {
+        return empleado.EspecialidadNavigation?.Nombre
+            ?? empleado.RolUsuario?.Nombre;
+    }
+
+    private static string ClasificarCarga(int cantidadProyectos) => cantidadProyectos switch
+    {
+        0 => "Disponible",
+        1 => "Baja",
+        2 => "Media",
+        _ => "Alta"
     };
 }

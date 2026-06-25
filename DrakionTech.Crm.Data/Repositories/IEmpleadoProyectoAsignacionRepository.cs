@@ -7,6 +7,8 @@ public interface IEmpleadoProyectoAsignacionRepository
     IQueryable<EmpleadoProyectoAsignacion> Query();
     Task<EmpleadoProyectoAsignacion?> ObtenerPorIdAsync(int id);
     Task<EmpleadoProyectoAsignacion?> ObtenerActivaAsync(int empleadoId, int proyectoId);
+    Task<List<Empleado>> ObtenerEmpleadosActivosSinAsignacionActivaAsync();
+    Task<List<EmpleadoProyectoAsignacion>> ObtenerAsignacionesActivasAsync();
     Task AgregarAsync(EmpleadoProyectoAsignacion asignacion);
     Task ActualizarAsync(EmpleadoProyectoAsignacion asignacion);
 }

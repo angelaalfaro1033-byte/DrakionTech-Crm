@@ -83,9 +83,21 @@
     </div>
 </div>
 
+<div class="ui-toolbar">
+    <div>
+        <label class="form-label">Tipo de reporte</label>
+        <select class="form-select" value="@_tipoReporte" @onchange="CambiarTipoReporte">
+            <option value="@TipoReporteTodas">Todas las asignaciones</option>
+            <option value="@TipoReporteSinAsignacion">Sin asignación</option>
+            <option value="@TipoReporteMultiples">Múltiples proyectos</option>
+            <option value="@TipoReporteDistribucion">Distribución de carga</option>
+        </select>
+    </div>
+</div>
+
 <FiltroTabla TItem="AsignacionProyectoListDto"
              PlaceholderBusqueda="Buscar empleado, proyecto o rol..."
-             MostrarFiltroEstado="true"
+             MostrarFiltroEstado="@EsReporteTodas"
              OnFiltroChanged="AplicarFiltro" />
 
 <div class="ui-card">
@@ -96,11 +108,11 @@
             <p>Cargando asignaciones...</p>
         </div>
     }
-    else if (!_asignaciones.Any())
+    else if (!TieneRegistros)
     {
         <div class="ui-empty">
             <i class="bi bi-people"></i>
-            <p>No hay asignaciones registradas.</p>
+            <p>@MensajeSinRegistros</p>
         </div>
     }
     else
@@ -109,42 +121,71 @@
             <thead>
                 <tr>
                     <th>Empleado</th>
-                    <th>Proyecto</th>
                     <th>Rol</th>
-                    <th>Inicio</th>
-                    <th>Fin</th>
+                    @if (EsReporteTodas)
+                    {
+                        <th>Proyecto</th>
+                        <th>Inicio</th>
+                        <th>Fin</th>
+                    }
+                    else
+                    {
+                        <th>Proyectos activos</th>
+                        <th>Proyectos</th>
+                    }
                     <th>Estado</th>
-                    <th>Última actualización</th>
-                    <th></th>
+                    @if (EsReporteTodas)
+                    {
+                        <th>Última actualización</th>
+                        <th></th>
+                    }
                 </tr>
             </thead>
             <tbody>
-                @foreach (var asignacion in _asignaciones)
+                @if (EsReporteTodas)
                 {
-                    <tr>
-                        <td class="col-primary">@asignacion.EmpleadoNombre</td>
-                        <td class="col-secondary">@asignacion.ProyectoNombre</td>
-                        <td class="col-secondary">@(asignacion.RolEnProyecto ?? "-")</td>
-                        <td>@asignacion.FechaInicio.ToShortDateString()</td>
-                        <td>@(asignacion.FechaFin?.ToShortDateString() ?? "-")</td>
-                        <td>
-                            <span class="badge @(asignacion.Activa ? "badge-success" : "badge-secondary")">@asignacion.Estado</span>
-                        </td>
-                        <td><AuditLastUpdated AuditInfo="asignacion.AuditInfo" /></td>
-                        <td>
-                            <div class="ui-actions">
-                                <button class="btn btn-sm btn-outline-primary" @onclick="() => Editar(asignacion)">Editar</button>
-                                @if (asignacion.Activa)
-                                {
-                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => FinalizarAsync(asignacion.Id)">Finalizar</button>
-                                }
-                                else
-                                {
-                                    <button class="btn btn-sm btn-outline-primary" @onclick="() => ReactivarAsync(asignacion.Id)">Reactivar</button>
-                                }
-                            </div>
-                        </td>
-                    </tr>
+                    @foreach (var asignacion in _asignaciones)
+                    {
+                        <tr>
+                            <td class="col-primary">@asignacion.EmpleadoNombre</td>
+                            <td class="col-secondary">@(asignacion.RolEnProyecto ?? "-")</td>
+                            <td class="col-secondary">@asignacion.ProyectoNombre</td>
+                            <td>@asignacion.FechaInicio.ToShortDateString()</td>
+                            <td>@(asignacion.FechaFin?.ToShortDateString() ?? "-")</td>
+                            <td>
+                                <span class="badge @(asignacion.Activa ? "badge-success" : "badge-secondary")">@asignacion.Estado</span>
+                            </td>
+                            <td><AuditLastUpdated AuditInfo="asignacion.AuditInfo" /></td>
+                            <td>
+                                <div class="ui-actions">
+                                    <button class="btn btn-sm btn-outline-primary" @onclick="() => Editar(asignacion)">Editar</button>
+                                    @if (asignacion.Activa)
+                                    {
+                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => FinalizarAsync(asignacion.Id)">Finalizar</button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-sm btn-outline-primary" @onclick="() => ReactivarAsync(asignacion.Id)">Reactivar</button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    @foreach (var reporte in _reportes)
+                    {
+                        <tr>
+                            <td class="col-primary">@reporte.EmpleadoNombre</td>
+                            <td class="col-secondary">@(reporte.Rol ?? "-")</td>
+                            <td>@reporte.CantidadProyectos</td>
+                            <td class="col-secondary">@(string.IsNullOrWhiteSpace(reporte.Proyectos) ? "-" : reporte.Proyectos)</td>
+                            <td>
+                                <span class="badge @ObtenerBadgeReporte(reporte.Estado)">@reporte.Estado</span>
+                            </td>
+                        </tr>
+                    }
                 }
             </tbody>
         </table>
@@ -155,17 +196,31 @@
 </div>
 
 @code {
+    private const string TipoReporteTodas = "Todas";
+    private const string TipoReporteSinAsignacion = "SinAsignacion";
+    private const string TipoReporteMultiples = "Multiples";
+    private const string TipoReporteDistribucion = "Distribucion";
+
     private CrearAsignacionProyectoDto _modelo = NuevoModelo();
     private AsignacionProyectoListDto? _editandoAsignacion;
     private List<EmpleadoListDto> _empleados = new();
     private List<ProyectoDto> _proyectos = new();
     private List<AsignacionProyectoListDto> _asignacionesTodas = new();
     private List<AsignacionProyectoListDto> _asignaciones = new();
+    private List<ReporteAsignacionProyectoDto> _reportesTodos = new();
+    private List<ReporteAsignacionProyectoDto> _reportes = new();
     private int? _editandoAsignacionId;
     private bool _cargando = true;
     private string? _error;
     private string? _busqueda;
     private bool? _soloActivas;
+    private string _tipoReporte = TipoReporteTodas;
+
+    private bool EsReporteTodas => _tipoReporte == TipoReporteTodas;
+    private bool TieneRegistros => EsReporteTodas ? _asignaciones.Any() : _reportes.Any();
+    private string MensajeSinRegistros => EsReporteTodas
+        ? "No hay asignaciones registradas."
+        : "No hay registros para el reporte seleccionado.";
 
     protected override async Task OnInitializedAsync()
     {
@@ -177,9 +232,28 @@
         _cargando = true;
         _empleados = await EmpleadoService.ObtenerTodosAsync();
         _proyectos = await ProyectoService.ObtenerTodosAsync();
-        _asignacionesTodas = await AsignacionService.ObtenerTodosAsync();
+        await CargarDatosTablaAsync();
         AplicarFiltroYPaginacion();
         _cargando = false;
+    }
+
+    private async Task CargarDatosTablaAsync()
+    {
+        if (EsReporteTodas)
+        {
+            _asignacionesTodas = await AsignacionService.ObtenerTodosAsync();
+            _reportesTodos = new();
+            return;
+        }
+
+        _asignacionesTodas = new();
+        _reportesTodos = _tipoReporte switch
+        {
+            TipoReporteSinAsignacion => await AsignacionService.ObtenerSinAsignacionAsync(),
+            TipoReporteMultiples => await AsignacionService.ObtenerMultiplesProyectosAsync(),
+            TipoReporteDistribucion => await AsignacionService.ObtenerDistribucionCargaAsync(),
+            _ => new List<ReporteAsignacionProyectoDto>()
+        };
     }
 
     private async Task GuardarAsync()
@@ -265,7 +339,9 @@
     {
         _busqueda = filtros.GetValueOrDefault("busqueda");
         var estado = filtros.GetValueOrDefault("estado");
-        _soloActivas = string.IsNullOrWhiteSpace(estado) ? null : bool.Parse(estado);
+        _soloActivas = EsReporteTodas && !string.IsNullOrWhiteSpace(estado)
+            ? bool.Parse(estado)
+            : null;
         paginaActual = 1;
         AplicarFiltroYPaginacion();
         return Task.CompletedTask;
@@ -273,6 +349,12 @@
 
     private void AplicarFiltroYPaginacion()
     {
+        if (!EsReporteTodas)
+        {
+            AplicarFiltroYPaginacionReportes();
+            return;
+        }
+
         var query = _asignacionesTodas.AsEnumerable();
 
         if (!string.IsNullOrWhiteSpace(_busqueda))
@@ -301,6 +383,47 @@
             .ToList();
     }
 
+    private void AplicarFiltroYPaginacionReportes()
+    {
+        var query = _reportesTodos.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(_busqueda))
+        {
+            var term = _busqueda.Trim();
+            query = query.Where(r =>
+                r.EmpleadoNombre.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                r.Estado.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                (!string.IsNullOrWhiteSpace(r.Rol) &&
+                 r.Rol.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                (!string.IsNullOrWhiteSpace(r.Proyectos) &&
+                 r.Proyectos.Contains(term, StringComparison.OrdinalIgnoreCase)));
+        }
+
+        var filtrados = query.ToList();
+        totalRegistros = filtrados.Count;
+        totalPaginas = Math.Max(1, (int)Math.Ceiling(totalRegistros / (double)tamañoPagina));
+
+        if (paginaActual > totalPaginas)
+            paginaActual = totalPaginas;
+
+        _reportes = filtrados
+            .Skip((paginaActual - 1) * tamañoPagina)
+            .Take(tamañoPagina)
+            .ToList();
+    }
+
+    private async Task CambiarTipoReporte(ChangeEventArgs e)
+    {
+        _tipoReporte = e.Value?.ToString() ?? TipoReporteTodas;
+        _soloActivas = null;
+        paginaActual = 1;
+        CancelarEdicion();
+        _cargando = true;
+        await CargarDatosTablaAsync();
+        AplicarFiltroYPaginacion();
+        _cargando = false;
+    }
+
     private async Task IrAPagina(int pagina)
     {
         await CambiarPaginaAsync(pagina, () =>
@@ -313,5 +436,14 @@
     private static CrearAsignacionProyectoDto NuevoModelo() => new()
     {
         FechaInicio = DateTime.UtcNow
+    };
+
+    private static string ObtenerBadgeReporte(string estado) => estado switch
+    {
+        "Disponible" => "badge-success",
+        "Baja" => "badge-secondary",
+        "Media" => "badge-secondary",
+        "Alta" => "badge-danger",
+        _ => "badge-secondary"
     };
 }

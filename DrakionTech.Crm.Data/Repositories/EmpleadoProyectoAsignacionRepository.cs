@@ -38,6 +38,32 @@ public class EmpleadoProyectoAsignacionRepository : IEmpleadoProyectoAsignacionR
                 a.Activa);
     }
 
+    public async Task<List<Empleado>> ObtenerEmpleadosActivosSinAsignacionActivaAsync()
+    {
+        return await _context.Empleados
+            .Include(e => e.RolUsuario)
+            .Include(e => e.EspecialidadNavigation)
+            .Where(e => e.Activo && !e.AsignacionesProyecto.Any(a => a.Activa))
+            .OrderBy(e => e.Nombre)
+            .ThenBy(e => e.Apellido)
+            .ToListAsync();
+    }
+
+    public async Task<List<EmpleadoProyectoAsignacion>> ObtenerAsignacionesActivasAsync()
+    {
+        return await _context.EmpleadoProyectoAsignaciones
+            .Include(a => a.Empleado)
+                .ThenInclude(e => e.RolUsuario)
+            .Include(a => a.Empleado)
+                .ThenInclude(e => e.EspecialidadNavigation)
+            .Include(a => a.Proyecto)
+            .Where(a => a.Activa)
+            .OrderBy(a => a.Empleado.Nombre)
+            .ThenBy(a => a.Empleado.Apellido)
+            .ThenBy(a => a.Proyecto.Nombre)
+            .ToListAsync();
+    }
+
     public async Task AgregarAsync(EmpleadoProyectoAsignacion asignacion)
     {
         await _context.EmpleadoProyectoAsignaciones.AddAsync(asignacion);
