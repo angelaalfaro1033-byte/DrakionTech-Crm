@@ -5,6 +5,7 @@ using DrakionTech.Crm.Business.Interfaces;
 using DrakionTech.Crm.Data.Entities;
 using DrakionTech.Crm.Data.Entities.Enums;
 using DrakionTech.Crm.Data.Repositories;
+using DrakionTech.Crm.Data.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace DrakionTech.Crm.Business.Services;
@@ -13,13 +14,16 @@ public class PublicacionMarketingService : IPublicacionMarketingService
 {
     private readonly IPublicacionMarketingRepository _repository;
     private readonly IMapper _mapper;
+    private readonly ICurrentUserContext? _currentUserContext;
 
     public PublicacionMarketingService(
         IPublicacionMarketingRepository repository,
-        IMapper mapper)
+        IMapper mapper,
+        ICurrentUserContext? currentUserContext = null)
     {
         _repository = repository;
         _mapper = mapper;
+        _currentUserContext = currentUserContext;
     }
 
     public async Task<List<PublicacionMarketingDto>> ObtenerTodosAsync()
@@ -99,15 +103,19 @@ public class PublicacionMarketingService : IPublicacionMarketingService
 
     public async Task ActualizarAsync(ActualizarPublicacionMarketingDto dto)
     {
-        var publicacion = await _repository.ObtenerPorIdAsync(dto.Id);
+        var publicacion = await _repository.ObtenerPorIdAsync(dto.Id)
+            ?? throw new InvalidOperationException("Publicación no encontrada.");
 
-        if (publicacion is null)
-            throw new KeyNotFoundException($"Publicación {dto.Id} no encontrada.");
+        if (publicacion.FechaPublicacionProgramada.Date != dto.FechaPublicacionProgramada.Date)
+        {
+            publicacion.Recordatorio3DiasEnviado = false;
+            publicacion.RecordatorioDiaPublicacionEnviado = false;
+            publicacion.AlertaRetrasoEnviada = false;
+        }
 
         _mapper.Map(dto, publicacion);
 
         publicacion.RedesSociales.Clear();
-
         foreach (var red in dto.RedesSociales)
         {
             publicacion.RedesSociales.Add(new PublicacionRedSocial
@@ -120,7 +128,6 @@ public class PublicacionMarketingService : IPublicacionMarketingService
         }
 
         publicacion.Archivos.Clear();
-
         foreach (var archivo in dto.Archivos)
         {
             publicacion.Archivos.Add(new ArchivoPublicacionMarketing
@@ -133,7 +140,6 @@ public class PublicacionMarketingService : IPublicacionMarketingService
         }
 
         publicacion.FechaActualizacion = DateTime.UtcNow;
-
         await _repository.ActualizarAsync(publicacion);
     }
 

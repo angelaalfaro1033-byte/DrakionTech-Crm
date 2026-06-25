@@ -64,7 +64,7 @@ public class MarketingRecordatorioService : IMarketingRecordatorioService
                 pub.FechaPublicacionProgramada.Date == diasAntes)
             {
                 await _email.EnviarPlantillaAsync(correo,
-                    "marketing-recordatorio-dia-anterior",
+                    "marketing-recordatorio-3-dias",
                     new Dictionary<string, string>
                     {
                         ["nombre"] = pub.Nombre,

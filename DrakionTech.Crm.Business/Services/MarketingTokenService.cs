@@ -29,7 +29,7 @@ public class MarketingTokenService : IMarketingTokenService
 
         var token = new JwtSecurityToken(
             claims: [new Claim("pub", publicacionId.ToString())],
-            expires: DateTime.UtcNow.AddDays(7),
+            expires: DateTime.UtcNow.AddDays(2),
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
