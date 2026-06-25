@@ -1,22 +1,23 @@
 using DrakionTech.Crm.Business;
+using DrakionTech.Crm.Business.Configurations;
 using DrakionTech.Crm.Business.Interfaces;
 using DrakionTech.Crm.Business.Mapping;
 using DrakionTech.Crm.Business.Options;
 using DrakionTech.Crm.Business.Services;
-using DrakionTech.Crm.Data;
-using DrakionTech.Crm.Web.Components;
-using DrakionTech.Crm.Data.Repositories;
-using static GoogleDriveService;
-using DrakionTech.Crm.Data.Repositories.Interfaces;
 using DrakionTech.Crm.Business.Services.Email;
-using DrakionTech.Crm.Business.Configurations;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
-using System.Security.Claims;
+using DrakionTech.Crm.Business.Services.Marketing;
+using DrakionTech.Crm.Data;
 using DrakionTech.Crm.Data.Entities;
 using DrakionTech.Crm.Data.Entities.Enums;
+using DrakionTech.Crm.Data.Repositories;
+using DrakionTech.Crm.Data.Repositories.Interfaces;
 using DrakionTech.Crm.Data.Services;
+using DrakionTech.Crm.Web.Components;
 using DrakionTech.Crm.Web.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Security.Claims;
+using static GoogleDriveService;
 // BUILDER
 var builder = WebApplication.CreateBuilder(args);
 
@@ -82,6 +83,9 @@ builder.Services.AddScoped<IEmpleadoProyectoAsignacionService, EmpleadoProyectoA
 //MARKETING
 builder.Services.AddScoped<IPublicacionMarketingRepository, PublicacionMarketingRepository>();
 builder.Services.AddScoped<IPublicacionMarketingService, PublicacionMarketingService>();
+builder.Services.AddScoped<IMarketingRecordatorioService, MarketingRecordatorioService>();
+builder.Services.AddScoped<IMarketingTokenService, MarketingTokenService>();
+builder.Services.AddHostedService<MarketingRecordatorioJob>();
 
 //Roles
 builder.Services.AddScoped<IRolUsuarioService, RolUsuarioService>();

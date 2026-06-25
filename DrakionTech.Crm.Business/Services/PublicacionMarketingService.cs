@@ -3,6 +3,7 @@ using DrakionTech.Crm.Business.Common;
 using DrakionTech.Crm.Business.DTOs.Marketing;
 using DrakionTech.Crm.Business.Interfaces;
 using DrakionTech.Crm.Data.Entities;
+using DrakionTech.Crm.Data.Entities.Enums;
 using DrakionTech.Crm.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -302,5 +303,20 @@ public class PublicacionMarketingService : IPublicacionMarketingService
         publicacionActual.FechaActualizacion = DateTime.UtcNow;
 
         await _repository.ActualizarAsync(publicacionActual);
+    }
+
+    public async Task ActualizarEstadoAsync(int id, EstadoPublicacionMarketing nuevoEstado, string? observacion)
+    {
+        var pub = await _repository.ObtenerPorIdAsync(id)
+            ?? throw new InvalidOperationException("Publicación no encontrada.");
+
+        pub.Estado = nuevoEstado;
+
+        if (!string.IsNullOrWhiteSpace(observacion))
+            pub.Observaciones = string.IsNullOrWhiteSpace(pub.Observaciones)
+                ? observacion
+                : $"{pub.Observaciones}\n\n[{DateTime.Today:dd/MM/yyyy}] {observacion}";
+
+        await _repository.ActualizarAsync(pub);
     }
 }
