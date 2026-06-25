@@ -69,16 +69,12 @@
         }
     </div>
 
-    <div class="d-flex gap-2">
+    <div class="form-actions">
         <button type="submit" class="btn btn-primary d-flex align-items-center gap-2"
                 disabled="@(guardando || nombreDuplicado || errorResponsable is not null)">
             @if (guardando)
             {
                 <span class="spinner-border spinner-border-sm"></span>
-            }
-            else
-            {
-                <i class="bi bi-check-lg"></i>
             }
             @(AreaId.HasValue ? "Guardar cambios" : "Crear área")
         </button>

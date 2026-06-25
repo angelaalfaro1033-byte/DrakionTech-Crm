@@ -66,11 +66,11 @@ else
                             <th>Teléfono</th>
                             <th>Rol</th>
                             <th>Última actualización</th>
-                            <th></th>
+                            <th class="text-end">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var contacto in contactosFiltrados!)
+                        @foreach (var contacto in _paginaActual)
                         {
                             <tr>
                                 <td class="col-primary">@contacto.NombreCompleto</td>
@@ -100,6 +100,10 @@ else
                         }
                     </tbody>
                 </table>
+
+                <Paginacion PaginaActual="_pagina"
+                            TotalPaginas="_totalPaginas"
+                            OnPaginaChanged="IrAPagina" />
             </div>
         }
     </EmpresaComponente>
@@ -112,6 +116,11 @@ else
 
     private IEnumerable<ContactoDto>? contactos;
     private IEnumerable<ContactoDto>? contactosFiltrados;
+
+    private int _pagina = 1;
+    private const int TamañoPagina = 10;
+    private int _totalPaginas;
+    private IEnumerable<ContactoDto> _paginaActual = new List<ContactoDto>();
 
     private List<string> roles = new();
 
@@ -151,6 +160,9 @@ else
             .Distinct()
             .OrderBy(r => r)
             .ToList();
+
+        contactosFiltrados = contactos;
+        AplicarFiltros();
     }
 
     private void AplicarFiltros()
@@ -162,19 +174,33 @@ else
         if (!string.IsNullOrWhiteSpace(busqueda))
         {
             var texto = busqueda.ToLower();
-
             query = query.Where(c =>
                 (c.NombreCompleto != null && c.NombreCompleto.ToLower().Contains(texto)) ||
                 (c.Email != null && c.Email.ToLower().Contains(texto)) ||
-                (c.Telefono != null && c.Telefono.ToLower().Contains(texto))
-            );
+                (c.Telefono != null && c.Telefono.ToLower().Contains(texto)));
         }
 
         if (!string.IsNullOrWhiteSpace(rolSeleccionado))
-        {
             query = query.Where(c => c.RolNombre == rolSeleccionado);
-        }
 
         contactosFiltrados = query.ToList();
+
+        _pagina = 1;
+        ActualizarPagina();
+    }
+
+    private void ActualizarPagina()
+    {
+        var total = contactosFiltrados?.Count() ?? 0;
+        _totalPaginas = (int)Math.Ceiling((double)total / TamañoPagina);
+        _paginaActual = (contactosFiltrados ?? Enumerable.Empty<ContactoDto>())
+            .Skip((_pagina - 1) * TamañoPagina)
+            .Take(TamañoPagina);
+    }
+
+    private void IrAPagina(int pagina)
+    {
+        _pagina = pagina;
+        ActualizarPagina();
     }
 }
