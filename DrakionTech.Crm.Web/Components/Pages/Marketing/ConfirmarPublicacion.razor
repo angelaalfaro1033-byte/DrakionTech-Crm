@@ -1,0 +1,135 @@
+﻿@page "/marketing/confirmar-publicacion/{Token}"
+@using DrakionTech.Crm.Business.Services.Marketing
+@using DrakionTech.Crm.Business.Interfaces
+@using DrakionTech.Crm.Data.Entities.Enums
+
+@inject IMarketingTokenService TokenService
+@inject IPublicacionMarketingService MarketingService
+@inject NavigationManager Nav
+
+<div style="max-width:520px;margin:60px auto;font-family:sans-serif">
+
+    @if (_cargando)
+    {
+        <div class="ui-empty">
+            <div class="spinner-border spinner-border-sm mb-2"></div>
+            <p>Validando enlace…</p>
+        </div>
+    }
+    else if (_invalido)
+    {
+        <div class="alert alert-danger text-center">
+            <i class="bi bi-x-circle d-block fs-2 mb-2"></i>
+            El enlace no es válido o ha expirado.
+        </div>
+    }
+    else if (_guardado)
+    {
+        <div class="alert alert-success text-center">
+            <i class="bi bi-check-circle d-block fs-2 mb-2"></i>
+            <strong>¡Listo!</strong> El estado de <em>@_nombre</em> fue actualizado correctamente.
+        </div>
+    }
+    else
+    {
+        <div class="form-card">
+            <div class="form-header">
+                <h1>Actualizar publicación</h1>
+                <p>@_nombre</p>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(_error))
+            {
+                <div class="alert alert-danger">@_error</div>
+            }
+
+            <div class="form-section">
+                <div class="mb-3">
+                    <label class="form-label">Nuevo estado</label>
+                    <select class="form-select" @bind="_nuevoEstado">
+                        <option value="@EstadoPublicacionMarketing.Publicada">Publicada</option>
+                        <option value="@EstadoPublicacionMarketing.Cancelada">Cancelada</option>
+                        <option value="@EstadoPublicacionMarketing.Programada">Sigue programada</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Observación (opcional)</label>
+                    <textarea class="form-control" rows="3"
+                              @bind="_observacion"
+                              placeholder="Ej: Se publicó con un día de retraso por ajustes de diseño…"></textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-primary" @onclick="GuardarAsync" disabled="@_guardando">
+                    @if (_guardando)
+                    {
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                    }
+                    Guardar
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Token { get; set; } = string.Empty;
+
+    private bool _cargando = true;
+    private bool _invalido;
+    private bool _guardado;
+    private bool _guardando;
+    private string? _error;
+    private string _nombre = string.Empty;
+    private int _publicacionId;
+    private EstadoPublicacionMarketing _nuevoEstado = EstadoPublicacionMarketing.Publicada;
+    private string? _observacion;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var id = TokenService.ValidarToken(Token);
+
+        if (id is null)
+        {
+            _invalido = true;
+            _cargando = false;
+            return;
+        }
+
+        _publicacionId = id.Value;
+        var pub = await MarketingService.ObtenerPorIdAsync(_publicacionId);
+
+        if (pub is null)
+        {
+            _invalido = true;
+            _cargando = false;
+            return;
+        }
+
+        _nombre = pub.Nombre;
+        _cargando = false;
+    }
+
+    private async Task GuardarAsync()
+    {
+        _guardando = true;
+        _error = null;
+
+        try
+        {
+            await MarketingService.ActualizarEstadoAsync(
+                _publicacionId, _nuevoEstado, _observacion);
+            _guardado = true;
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _guardando = false;
+        }
+    }
+}
