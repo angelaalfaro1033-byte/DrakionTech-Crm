@@ -33,6 +33,14 @@ public class MarketingRecordatorioService : IMarketingRecordatorioService
 
     public async Task ProcesarRecordatoriosAsync(CancellationToken ct = default)
     {
+        var zonaColumbia = TimeZoneInfo.GetSystemTimeZones()
+            .FirstOrDefault(z => z.Id == "America/Bogota" || z.Id == "SA Pacific Standard Time")
+            ?? TimeZoneInfo.Utc;
+        var horaActual = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, zonaColumbia).Hour;
+
+        if (horaActual < 8 || horaActual >= 18)
+            return;
+
         var hoy = DateTime.Today;
         var ayer = hoy.AddDays(-1);
         var diasAntes = hoy.AddDays(3);
