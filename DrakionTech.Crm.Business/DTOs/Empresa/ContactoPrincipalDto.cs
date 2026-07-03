@@ -4,6 +4,8 @@ namespace DrakionTech.Crm.Business.DTOs.Empresa
 {
     public class ContactoPrincipalDto
     {
+        public int? Id { get; set; }
+
         [Required(ErrorMessage = "El nombre del contacto es obligatorio")]
         public string Nombre { get; set; } = null!;
 

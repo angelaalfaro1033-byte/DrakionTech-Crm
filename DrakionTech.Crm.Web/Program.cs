@@ -5,6 +5,7 @@ using DrakionTech.Crm.Business.Mapping;
 using DrakionTech.Crm.Business.Options;
 using DrakionTech.Crm.Business.Services;
 using DrakionTech.Crm.Business.Services.Email;
+using DrakionTech.Crm.Business.Services.Empresas;
 using DrakionTech.Crm.Business.Services.Marketing;
 using DrakionTech.Crm.Data;
 using DrakionTech.Crm.Data.Entities;
@@ -60,6 +61,10 @@ builder.Services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
 builder.Services.AddScoped<IEmailTemplateRenderer, EmailTemplateRenderer>();
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+
+// ANIVERSARIO DE EMPRESA (correo automático de felicitación)
+builder.Services.AddScoped<IEmpresaAniversarioService, EmpresaAniversarioService>();
+builder.Services.AddHostedService<EmpresaAniversarioJob>();
 
 
 // WHATSAPP
