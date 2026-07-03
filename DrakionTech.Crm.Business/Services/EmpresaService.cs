@@ -187,22 +187,54 @@ namespace DrakionTech.Crm.Business.Services
                 }
             }
 
-            var contactosNoPrincipales = empresa.Contactos.Where(c => !c.EsPrincipal).ToList();
-            _db.Contactos.RemoveRange(contactosNoPrincipales);
-
-            foreach (var ca in dto.ContactosAdicionales.Where(c => c.Nombre != null))
+            foreach (var dtoContacto in dto.ContactosAdicionales)
             {
-                empresa.Contactos.Add(new Contacto
+                var contacto = empresa.Contactos
+                    .FirstOrDefault(c => c.Id == dtoContacto.Id && !c.EsPrincipal);
+
+                if (contacto == null)
                 {
-                    Nombre = ca.Nombre,
-                    Apellido = ca.Apellido ?? string.Empty,
-                    Cargo = ca.Cargo,
-                    Email = ca.Email,
-                    Telefono = ca.Telefono,
-                    RolContactoId = ca.RolContactoId ?? 1,
-                    EsPrincipal = false,
-                    FechaCreacion = DateTime.UtcNow
-                });
+                    empresa.Contactos.Add(new Contacto
+                    {
+                        Nombre = dtoContacto.Nombre,
+                        Apellido = dtoContacto.Apellido,
+                        Cargo = dtoContacto.Cargo,
+                        Email = dtoContacto.Email,
+                        Telefono = dtoContacto.Telefono,
+                        RolContactoId = dtoContacto.RolContactoId ?? 1,
+                        EsPrincipal = false,
+                        FechaCreacion = DateTime.UtcNow
+                    });
+
+                    continue;
+                }
+
+                contacto.Nombre = dtoContacto.Nombre;
+                contacto.Apellido = dtoContacto.Apellido;
+                contacto.Cargo = dtoContacto.Cargo;
+                contacto.Email = dtoContacto.Email;
+                contacto.Telefono = dtoContacto.Telefono;
+                contacto.RolContactoId = dtoContacto.RolContactoId ?? 1;
+            }
+
+            var idsDto = dto.ContactosAdicionales
+                .Where(c => c.Id.HasValue)
+                .Select(c => c.Id!.Value)
+                .ToHashSet();
+
+            var contactosEliminar = empresa.Contactos
+                .Where(c => !c.EsPrincipal && !idsDto.Contains(c.Id))
+                .ToList();
+
+            foreach (var contacto in contactosEliminar)
+            {
+                bool tieneActividades = await _db.Actividades
+                    .AnyAsync(a => a.ContactoId == contacto.Id, ct);
+
+                if (tieneActividades)
+                    throw new Exception($"No puede eliminar el contacto '{contacto.Nombre}' porque tiene actividades asociadas.");
+
+                _db.Contactos.Remove(contacto);
             }
 
             await _db.SaveChangesAsync(ct);

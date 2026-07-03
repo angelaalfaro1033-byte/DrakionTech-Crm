@@ -25,5 +25,7 @@ public enum TipoEventoHistorialEmpresa
     ObservacionRegistrada = 21,
     DocumentoAsociado = 22,
     ComunicacionRegistrada = 23,
+    AniversarioEmpresaEnviado = 24,
+    AniversarioEmpresaFallido = 25,
     Otro = 99
 }

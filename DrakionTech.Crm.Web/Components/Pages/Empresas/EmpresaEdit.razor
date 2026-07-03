@@ -437,6 +437,7 @@
             Seguimiento = empresa.Seguimiento,
             ContactoPrincipal = principal is null ? new() : new ContactoPrincipalDto
             {
+                Id = principal.Id,
                 Nombre = principal.Nombre,
                 Apellido = principal.Apellido,
                 Cargo = principal.Cargo,
@@ -448,6 +449,7 @@
                 .Where(c => !c.EsPrincipal)
                 .Select(c => new ContactoAdicionalDto
                 {
+                    Id = c.Id,
                     Nombre = c.Nombre,
                     Apellido = c.Apellido,
                     Cargo = c.Cargo,
