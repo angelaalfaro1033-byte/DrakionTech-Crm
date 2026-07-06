@@ -88,17 +88,7 @@
     </div>
 </div>
 
-<div class="ui-toolbar">
-    <div>
-        <label class="form-label">Tipo de reporte</label>
-        <select class="form-select" value="@_tipoReporte" @onchange="CambiarTipoReporte">
-            <option value="@TipoReporteTodas">Todas las asignaciones</option>
-            <option value="@TipoReporteSinAsignacion">Sin asignación</option>
-            <option value="@TipoReporteMultiples">Múltiples proyectos</option>
-            <option value="@TipoReporteDistribucion">Distribución de carga</option>
-        </select>
-    </div>
-</div>
+
 
 <FiltroTabla TItem="AsignacionProyectoListDto"
              PlaceholderBusqueda="Buscar empleado, proyecto o rol..."
@@ -110,11 +100,21 @@
     <div class="alert alert-warning">
         @foreach (var reporte in ReportesSobrecargados)
         {
-            <div>AtenciÃ³n: @reporte.EmpleadoNombre tiene una carga asignada de @FormatearPorcentaje(reporte.PorcentajeAsignado)%.</div>
+            <div>Atención: @reporte.EmpleadoNombre tiene una carga asignada de @FormatearPorcentaje(reporte.PorcentajeAsignado)%.</div>
         }
     </div>
 }
-
+<div class="ui-toolbar">
+    <div>
+        <label class="form-label">Tipo de reporte</label>
+        <select class="form-select" value="@_tipoReporte" @onchange="CambiarTipoReporte">
+            <option value="@TipoReporteTodas">Todas las asignaciones</option>
+            <option value="@TipoReporteSinAsignacion">Sin asignación</option>
+            <option value="@TipoReporteMultiples">Múltiples proyectos</option>
+            <option value="@TipoReporteDistribucion">Distribución de carga</option>
+        </select>
+    </div>
+</div>
 <div class="ui-card">
     @if (_cargando)
     {
@@ -175,7 +175,7 @@
                             <td>@RenderCapacidad(asignacion.PorcentajeAsignado)</td>
                             <td>
                                 <span class="badge @ObtenerBadgeCarga(asignacion.EstadoCarga)">@asignacion.EstadoCarga</span>
-                                <span class="badge @(asignacion.Activa ? "badge-success" : "badge-secondary")">@asignacion.Estado</span>
+                             
                             </td>
                             <td><AuditLastUpdated AuditInfo="asignacion.AuditInfo" /></td>
                             <td>
