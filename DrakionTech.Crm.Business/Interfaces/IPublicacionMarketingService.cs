@@ -1,5 +1,6 @@
 ﻿using DrakionTech.Crm.Business.Common;
 using DrakionTech.Crm.Business.DTOs.Marketing;
+using DrakionTech.Crm.Data.Entities.Enums;
 
 namespace DrakionTech.Crm.Business.Interfaces;
 
@@ -32,4 +33,5 @@ public interface IPublicacionMarketingService
     Task CrearMetricaAsync(CrearMetricaPublicacionDto dto);
 
     Task ActualizarMetricaAsync(ActualizarMetricaPublicacionDto dto);
+    Task ActualizarEstadoAsync(int id, EstadoPublicacionMarketing nuevoEstado, string? observacion);
 }
