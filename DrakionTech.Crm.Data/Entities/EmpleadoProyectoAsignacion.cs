@@ -9,6 +9,7 @@ public class EmpleadoProyectoAsignacion : DrakionTech.Crm.Data.Entities.Base.Aud
     public Proyecto Proyecto { get; set; } = null!;
     public DateTime FechaInicio { get; set; }
     public DateTime? FechaFin { get; set; }
+    public decimal PorcentajeDedicacion { get; set; } = 100m;
     public bool Activa { get; set; } = true;
     public string? RolEnProyecto { get; set; }
     public string? Observaciones { get; set; }

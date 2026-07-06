@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DrakionTech.Crm.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260605232501_NuevasEtapasYProyectos")]
-    partial class NuevasEtapasYProyectos
+    [Migration("20260706180633_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,6 +39,12 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<int?>("ContactoId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("EmpresaId")
                         .HasColumnType("int");
 
@@ -59,6 +65,12 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.Property<DateTime>("Inicio")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Notas")
                         .HasMaxLength(2000)
@@ -86,11 +98,15 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.HasIndex("ContactoId");
 
+                    b.HasIndex("CreatedByUserId");
+
                     b.HasIndex("EmpresaId");
 
                     b.HasIndex("EstadoActividadId");
 
                     b.HasIndex("Inicio");
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.HasIndex("OportunidadId");
 
@@ -113,19 +129,94 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<int>("UsuarioId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("EsResponsable")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
 
                     b.Property<int?>("UsuarioInternoId")
                         .HasColumnType("int");
 
                     b.HasKey("ActividadId", "UsuarioId");
 
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
+
                     b.HasIndex("UsuarioId");
 
                     b.HasIndex("UsuarioInternoId");
 
                     b.ToTable("ActividadUsuarios");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.ArchivoPublicacionMarketing", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ArchivoIdExterno")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("FechaActualizacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("MimeType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PublicacionMarketingId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
+
+                    b.HasIndex("PublicacionMarketingId");
+
+                    b.ToTable("ArchivosPublicacionMarketing");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Area", b =>
@@ -139,6 +230,12 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<bool>("Activa")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Descripcion")
                         .HasColumnType("nvarchar(max)");
 
@@ -148,6 +245,12 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<DateTime?>("FechaModificacion")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -156,6 +259,10 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.HasIndex("ResponsableId");
 
@@ -170,6 +277,18 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -179,6 +298,10 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.HasIndex("PaisId");
 
@@ -503,6 +626,12 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<string>("Cargo")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .HasMaxLength(320)
                         .HasColumnType("nvarchar(320)");
@@ -524,6 +653,12 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<DateTime?>("FechaVinculacion")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -539,7 +674,11 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedByUserId");
+
                     b.HasIndex("EmpresaId");
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.HasIndex("RolContactoId");
 
@@ -557,6 +696,18 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<bool>("Activo")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -567,6 +718,10 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.ToTable("EmailTemplates", (string)null);
 
@@ -604,6 +759,12 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -620,6 +781,12 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -643,10 +810,14 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedByUserId");
+
                     b.HasIndex("Email")
                         .IsUnique();
 
                     b.HasIndex("EspecialidadId");
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.HasIndex("NumeroDocumento")
                         .IsUnique()
@@ -657,6 +828,79 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.ToTable("Empleados", (string)null);
                 });
 
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.EmpleadoProyectoAsignacion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EmpleadoId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("FechaFin")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaInicio")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Observaciones")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<decimal>("PorcentajeDedicacion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(5,2)")
+                        .HasDefaultValue(100m);
+
+                    b.Property<int>("ProyectoId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RolEnProyecto")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
+
+                    b.HasIndex("EmpleadoId", "Activa")
+                        .HasDatabaseName("IX_EmpleadoProyectoAsignaciones_Empleado_Activa");
+
+                    b.HasIndex("EmpleadoId", "ProyectoId")
+                        .HasDatabaseName("IX_EmpleadoProyectoAsignaciones_Empleado_Proyecto");
+
+                    b.HasIndex("ProyectoId", "Activa")
+                        .HasDatabaseName("IX_EmpleadoProyectoAsignaciones_Proyecto_Activa");
+
+                    b.HasIndex("EmpleadoId", "ProyectoId", "Activa")
+                        .IsUnique()
+                        .HasDatabaseName("UX_EmpleadoProyectoAsignaciones_Activa")
+                        .HasFilter("[Activa] = 1");
+
+                    b.ToTable("EmpleadoProyectoAsignaciones", (string)null);
+                });
+
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.EmpleadoSalario", b =>
                 {
                     b.Property<int>("Id")
@@ -664,6 +908,12 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
 
                     b.Property<int>("EmpleadoId")
                         .HasColumnType("int");
@@ -674,13 +924,23 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<DateTime>("FechaRegistro")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("Salario")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedByUserId");
+
                     b.HasIndex("EmpleadoId")
                         .IsUnique();
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.ToTable("EmpleadoSalarios", (string)null);
                 });
@@ -703,6 +963,12 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Descripcion")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
@@ -722,6 +988,12 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.Property<bool>("HaTrabajadoAntes")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -774,6 +1046,10 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.HasIndex("CiudadId");
 
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
+
                     b.HasIndex("PaisId");
 
                     b.HasIndex("SectorEmpresaId");
@@ -796,15 +1072,31 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<int>("EmpresaId")
                         .HasColumnType("int");
 
                     b.Property<bool>("EsPrincipal")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedByUserId");
+
                     b.HasIndex("EmpresaId");
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.ToTable("EmpresaCorreos", (string)null);
                 });
@@ -820,9 +1112,21 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<bool>("Activo")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Descripcion")
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -833,6 +1137,10 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.HasIndex("RolUsuarioId");
 
@@ -847,12 +1155,28 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.HasIndex("Nombre")
                         .IsUnique();
@@ -893,12 +1217,28 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<bool>("Activo")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.HasIndex("Nombre");
 
@@ -927,6 +1267,12 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("FechaRegistro")
                         .HasColumnType("datetime2");
 
@@ -937,6 +1283,12 @@ namespace DrakionTech.Crm.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Nombre")
                         .HasColumnType("nvarchar(max)");
 
@@ -946,7 +1298,11 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedByUserId");
+
                     b.HasIndex("GoogleEventoId");
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.ToTable("GoogleEventoArchivos");
                 });
@@ -959,6 +1315,12 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<int>("EtapaAnterior")
                         .HasColumnType("int");
 
@@ -970,6 +1332,12 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
 
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<int>("OportunidadId")
                         .HasColumnType("int");
 
@@ -978,9 +1346,76 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
+
                     b.HasIndex("OportunidadId");
 
                     b.ToTable("HistorialCambiosOportunidad", (string)null);
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.HistorialEmpresa", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaveEvento")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("DatosAdicionales")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DescripcionEvento")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FechaEvento")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ModuloOrigen")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RegistroOrigenId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TipoEvento")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TituloEvento")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int?>("UsuarioResponsableId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UsuarioResponsableNombre")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClaveEvento")
+                        .IsUnique();
+
+                    b.HasIndex("UsuarioResponsableId");
+
+                    b.HasIndex("EmpresaId", "FechaEvento");
+
+                    b.HasIndex("EmpresaId", "ModuloOrigen", "FechaEvento");
+
+                    b.HasIndex("EmpresaId", "TipoEvento", "FechaEvento");
+
+                    b.ToTable("HistorialEmpresas", (string)null);
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.HistorialEtapaProyecto", b =>
@@ -991,6 +1426,12 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<int>("EtapaAnterior")
                         .HasColumnType("int");
 
@@ -999,6 +1440,12 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.Property<DateTime>("FechaCambio")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Observaciones")
                         .HasColumnType("nvarchar(max)");
@@ -1014,9 +1461,78 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
+
                     b.HasIndex("ProyectoId");
 
                     b.ToTable("HistorialesEtapaProyecto");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.MetricaPublicacion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Alcance")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("ContactoAreaComercial")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("FechaActualizacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaRegistro")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Observaciones")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("PublicacionMarketingId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Reacciones")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RedSocial")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Visualizaciones")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
+
+                    b.HasIndex("PublicacionMarketingId");
+
+                    b.ToTable("MetricasPublicacion", (string)null);
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Oportunidad", b =>
@@ -1028,6 +1544,12 @@ namespace DrakionTech.Crm.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("ContactoPrincipalId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
                         .HasColumnType("int");
 
                     b.Property<string>("Descripcion")
@@ -1047,6 +1569,12 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<DateTime?>("FechaEstimadaCierre")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("NombreProyecto")
                         .IsRequired()
                         .HasMaxLength(250)
@@ -1059,9 +1587,73 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.HasIndex("ContactoPrincipalId");
 
+                    b.HasIndex("CreatedByUserId");
+
                     b.HasIndex("EmpresaId");
 
+                    b.HasIndex("ModifiedByUserId");
+
                     b.ToTable("Oportunidades", (string)null);
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.PagoProyecto", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DescripcionRecordatorio")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int?>("DiasAnticipacionRecordatorio")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FechaPago")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaProgramada")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FechaUltimaModificacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProyectoId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Valor")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
+
+                    b.HasIndex("ProyectoId");
+
+                    b.ToTable("PagosProyecto", (string)null);
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Pais", b =>
@@ -1077,12 +1669,28 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasMaxLength(5)
                         .HasColumnType("nvarchar(5)");
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.ToTable("Paises", (string)null);
 
@@ -1192,6 +1800,18 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -1201,6 +1821,10 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.HasIndex("PaisId");
 
@@ -1322,10 +1946,22 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("FechaCarga")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
 
                     b.Property<string>("NombreArchivo")
                         .IsRequired()
@@ -1350,6 +1986,10 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
+
                     b.HasIndex("OportunidadId");
 
                     b.ToTable("Propuestas", (string)null);
@@ -1364,6 +2004,12 @@ namespace DrakionTech.Crm.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AreaId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
                         .HasColumnType("int");
 
                     b.Property<string>("Descripcion")
@@ -1395,14 +2041,14 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<DateTime>("FechaInicio")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("FechaPago")
-                        .HasColumnType("datetime2");
-
                     b.Property<DateTime?>("FechaUltimaModificacion")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal?>("MontoPagado")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -1418,29 +2064,173 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<decimal?>("PresupuestoTotal")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("RecordatorioPago")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("ResponsableId")
                         .HasColumnType("int");
 
                     b.Property<string>("Soporte")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("SupervisorId")
+                    b.Property<int?>("SupervisorExternoId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SupervisorInternoId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AreaId");
 
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
+
                     b.HasIndex("OportunidadId");
 
                     b.HasIndex("ResponsableId");
 
-                    b.HasIndex("SupervisorId");
+                    b.HasIndex("SupervisorExternoId");
+
+                    b.HasIndex("SupervisorInternoId");
 
                     b.ToTable("Proyectos", (string)null);
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.PublicacionMarketing", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("AlertaRetrasoEnviada")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("CopyUtilizado")
+                        .IsRequired()
+                        .HasMaxLength(5000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DescripcionCampania")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("EnvioAutomatico")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Estado")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("FechaActualizacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaPublicacionProgramada")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FechaPublicacionReal")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Observaciones")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<bool>("Recordatorio3DiasEnviado")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("RecordatorioDiaPublicacionEnviado")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ResponsableId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
+
+                    b.HasIndex("ResponsableId");
+
+                    b.ToTable("PublicacionesMarketing", (string)null);
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.PublicacionRedSocial", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("CostoPauta")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("DiasPauta")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("FechaActualizacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PublicacionMarketingId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RedSocial")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("TienePauta")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
+
+                    b.HasIndex("PublicacionMarketingId", "RedSocial")
+                        .IsUnique();
+
+                    b.ToTable("PublicacionRedesSociales", (string)null);
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.RolContacto", b =>
@@ -1451,12 +2241,28 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.ToTable("RolesContacto");
 
@@ -1544,12 +2350,28 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<bool>("Activo")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.ToTable("RolesUsuario");
 
@@ -1576,12 +2398,28 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.HasIndex("Nombre")
                         .IsUnique();
@@ -1669,12 +2507,28 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.ToTable("SectoresEmpresa", (string)null);
 
@@ -1709,12 +2563,28 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.ToTable("SubsectoresEmpresa", (string)null);
                 });
@@ -1730,9 +2600,21 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<bool>("Activo")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Descripcion")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -1740,6 +2622,10 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasColumnType("nvarchar(150)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.HasIndex("Nombre");
 
@@ -1806,6 +2692,12 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<int?>("AreaId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -1819,6 +2711,12 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -1840,8 +2738,12 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.HasIndex("AreaId");
 
+                    b.HasIndex("CreatedByUserId");
+
                     b.HasIndex("Email")
                         .IsUnique();
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.HasIndex("RolId");
 
@@ -1863,6 +2765,12 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
@@ -1875,6 +2783,12 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<string>("IdentityUserId")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -1889,7 +2803,11 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.HasIndex("Activo");
 
+                    b.HasIndex("CreatedByUserId");
+
                     b.HasIndex("Email");
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.ToTable("UsuarioInterno", (string)null);
                 });
@@ -1901,6 +2819,12 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Descripcion")
                         .HasColumnType("nvarchar(max)");
@@ -1930,6 +2854,12 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Property<DateTime?>("LastUpdatedGoogle")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("Sincronizado")
                         .HasColumnType("bit");
 
@@ -1943,9 +2873,13 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedByUserId");
+
                     b.HasIndex("GoogleEventId")
                         .IsUnique()
                         .HasFilter("[GoogleEventId] IS NOT NULL");
+
+                    b.HasIndex("ModifiedByUserId");
 
                     b.ToTable("GoogleEventos", (string)null);
                 });
@@ -1977,6 +2911,11 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasForeignKey("ContactoId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("DrakionTech.Crm.Data.Entities.Empresa", "Empresa")
                         .WithMany("Actividades")
                         .HasForeignKey("EmpresaId")
@@ -1987,6 +2926,11 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasForeignKey("EstadoActividadId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("DrakionTech.Crm.Data.Entities.Oportunidad", "Oportunidad")
                         .WithMany()
@@ -2013,9 +2957,13 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.Navigation("Contacto");
 
+                    b.Navigation("CreatedByUser");
+
                     b.Navigation("Empresa");
 
                     b.Navigation("EstadoActividad");
+
+                    b.Navigation("ModifiedByUser");
 
                     b.Navigation("Oportunidad");
 
@@ -2032,6 +2980,16 @@ namespace DrakionTech.Crm.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "Usuario")
                         .WithMany()
                         .HasForeignKey("UsuarioId")
@@ -2044,37 +3002,104 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.Navigation("Actividad");
 
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
+
                     b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.ArchivoPublicacionMarketing", b =>
+                {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.PublicacionMarketing", "PublicacionMarketing")
+                        .WithMany("Archivos")
+                        .HasForeignKey("PublicacionMarketingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
+
+                    b.Navigation("PublicacionMarketing");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Area", b =>
                 {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "Responsable")
                         .WithMany()
                         .HasForeignKey("ResponsableId")
                         .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
 
                     b.Navigation("Responsable");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Ciudad", b =>
                 {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("DrakionTech.Crm.Data.Entities.Pais", "Pais")
                         .WithMany("Ciudades")
                         .HasForeignKey("PaisId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
+
                     b.Navigation("Pais");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Contacto", b =>
                 {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("DrakionTech.Crm.Data.Entities.Empresa", "Empresa")
                         .WithMany("Contactos")
                         .HasForeignKey("EmpresaId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("DrakionTech.Crm.Data.Entities.RolContacto", "RolContacto")
                         .WithMany()
@@ -2082,37 +3107,119 @@ namespace DrakionTech.Crm.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.Navigation("CreatedByUser");
+
                     b.Navigation("Empresa");
+
+                    b.Navigation("ModifiedByUser");
 
                     b.Navigation("RolContacto");
                 });
 
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.EmailTemplate", b =>
+                {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
+                });
+
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Empleado", b =>
                 {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("DrakionTech.Crm.Data.Entities.Especialidad", "EspecialidadNavigation")
                         .WithMany()
                         .HasForeignKey("EspecialidadId")
                         .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("DrakionTech.Crm.Data.Entities.RolUsuario", "RolUsuario")
                         .WithMany()
                         .HasForeignKey("RolUsuarioId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.Navigation("CreatedByUser");
+
                     b.Navigation("EspecialidadNavigation");
+
+                    b.Navigation("ModifiedByUser");
 
                     b.Navigation("RolUsuario");
                 });
 
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.EmpleadoProyectoAsignacion", b =>
+                {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Empleado", "Empleado")
+                        .WithMany("AsignacionesProyecto")
+                        .HasForeignKey("EmpleadoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Proyecto", "Proyecto")
+                        .WithMany("AsignacionesEmpleado")
+                        .HasForeignKey("ProyectoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("Empleado");
+
+                    b.Navigation("ModifiedByUser");
+
+                    b.Navigation("Proyecto");
+                });
+
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.EmpleadoSalario", b =>
                 {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("DrakionTech.Crm.Data.Entities.Empleado", "Empleado")
                         .WithOne("Salario")
                         .HasForeignKey("DrakionTech.Crm.Data.Entities.EmpleadoSalario", "EmpleadoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
+
                     b.Navigation("Empleado");
+
+                    b.Navigation("ModifiedByUser");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Empresa", b =>
@@ -2122,6 +3229,16 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasForeignKey("CiudadId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("DrakionTech.Crm.Data.Entities.Pais", "Pais")
                         .WithMany()
@@ -2141,6 +3258,10 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.Navigation("Ciudad");
 
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
+
                     b.Navigation("Pais");
 
                     b.Navigation("SectorEmpresa");
@@ -2150,57 +3271,204 @@ namespace DrakionTech.Crm.Data.Migrations
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.EmpresaCorreo", b =>
                 {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("DrakionTech.Crm.Data.Entities.Empresa", "Empresa")
                         .WithMany("Correos")
                         .HasForeignKey("EmpresaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
+
                     b.Navigation("Empresa");
+
+                    b.Navigation("ModifiedByUser");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Especialidad", b =>
                 {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("DrakionTech.Crm.Data.Entities.RolUsuario", "RolUsuario")
                         .WithMany()
                         .HasForeignKey("RolUsuarioId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
+
                     b.Navigation("RolUsuario");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Estado", b =>
+                {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.EstadoActividad", b =>
+                {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.GoogleEventoArchivo", b =>
                 {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("GoogleEvento", "GoogleEvento")
                         .WithMany("Archivos")
                         .HasForeignKey("GoogleEventoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
+
                     b.Navigation("GoogleEvento");
+
+                    b.Navigation("ModifiedByUser");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.HistorialCambioOportunidad", b =>
                 {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("DrakionTech.Crm.Data.Entities.Oportunidad", "Oportunidad")
                         .WithMany("HistorialCambios")
                         .HasForeignKey("OportunidadId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
+
                     b.Navigation("Oportunidad");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.HistorialEmpresa", b =>
+                {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Empresa", "Empresa")
+                        .WithMany("HistorialesEmpresa")
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "UsuarioResponsable")
+                        .WithMany()
+                        .HasForeignKey("UsuarioResponsableId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Empresa");
+
+                    b.Navigation("UsuarioResponsable");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.HistorialEtapaProyecto", b =>
                 {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("DrakionTech.Crm.Data.Entities.Proyecto", "Proyecto")
                         .WithMany()
                         .HasForeignKey("ProyectoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
+
                     b.Navigation("Proyecto");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.MetricaPublicacion", b =>
+                {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.PublicacionMarketing", "PublicacionMarketing")
+                        .WithMany("Metricas")
+                        .HasForeignKey("PublicacionMarketingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
+
+                    b.Navigation("PublicacionMarketing");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Oportunidad", b =>
@@ -2210,35 +3478,119 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasForeignKey("ContactoPrincipalId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("DrakionTech.Crm.Data.Entities.Empresa", "Empresa")
                         .WithMany("Oportunidades")
                         .HasForeignKey("EmpresaId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("ContactoPrincipal");
 
+                    b.Navigation("CreatedByUser");
+
                     b.Navigation("Empresa");
+
+                    b.Navigation("ModifiedByUser");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.PagoProyecto", b =>
+                {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Proyecto", "Proyecto")
+                        .WithMany("Pagos")
+                        .HasForeignKey("ProyectoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
+
+                    b.Navigation("Proyecto");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Pais", b =>
+                {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.PrefijoTelefonico", b =>
                 {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("DrakionTech.Crm.Data.Entities.Pais", "Pais")
                         .WithMany("PrefijosTelefonicos")
                         .HasForeignKey("PaisId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
+
                     b.Navigation("Pais");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Propuesta", b =>
                 {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("DrakionTech.Crm.Data.Entities.Oportunidad", "Oportunidad")
                         .WithMany("Propuestas")
                         .HasForeignKey("OportunidadId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
 
                     b.Navigation("Oportunidad");
                 });
@@ -2251,6 +3603,16 @@ namespace DrakionTech.Crm.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("DrakionTech.Crm.Data.Entities.Oportunidad", "Oportunidad")
                         .WithMany("Proyectos")
                         .HasForeignKey("OportunidadId")
@@ -2262,17 +3624,181 @@ namespace DrakionTech.Crm.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "Supervisor")
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Contacto", "SupervisorExterno")
                         .WithMany()
-                        .HasForeignKey("SupervisorId");
+                        .HasForeignKey("SupervisorExternoId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "SupervisorInterno")
+                        .WithMany()
+                        .HasForeignKey("SupervisorInternoId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Area");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
 
                     b.Navigation("Oportunidad");
 
                     b.Navigation("Responsable");
 
-                    b.Navigation("Supervisor");
+                    b.Navigation("SupervisorExterno");
+
+                    b.Navigation("SupervisorInterno");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.PublicacionMarketing", b =>
+                {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "Responsable")
+                        .WithMany()
+                        .HasForeignKey("ResponsableId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
+
+                    b.Navigation("Responsable");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.PublicacionRedSocial", b =>
+                {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.PublicacionMarketing", "PublicacionMarketing")
+                        .WithMany("RedesSociales")
+                        .HasForeignKey("PublicacionMarketingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
+
+                    b.Navigation("PublicacionMarketing");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.RolContacto", b =>
+                {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.RolUsuario", b =>
+                {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Sector", b =>
+                {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.SectorEmpresa", b =>
+                {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.SubsectorEmpresa", b =>
+                {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.TipoActividad", b =>
+                {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Usuario", b =>
@@ -2282,6 +3808,16 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasForeignKey("AreaId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("DrakionTech.Crm.Data.Entities.RolUsuario", "Rol")
                         .WithMany()
                         .HasForeignKey("RolId")
@@ -2290,7 +3826,45 @@ namespace DrakionTech.Crm.Data.Migrations
 
                     b.Navigation("Area");
 
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
+
                     b.Navigation("Rol");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.UsuarioInterno", b =>
+                {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
+                });
+
+            modelBuilder.Entity("GoogleEvento", b =>
+                {
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("DrakionTech.Crm.Data.Entities.Usuario", "ModifiedByUser")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("ModifiedByUser");
                 });
 
             modelBuilder.Entity("SectorEmpresaSubsectorEmpresa", b =>
@@ -2322,6 +3896,8 @@ namespace DrakionTech.Crm.Data.Migrations
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Empleado", b =>
                 {
+                    b.Navigation("AsignacionesProyecto");
+
                     b.Navigation("Salario");
                 });
 
@@ -2332,6 +3908,8 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Navigation("Contactos");
 
                     b.Navigation("Correos");
+
+                    b.Navigation("HistorialesEmpresa");
 
                     b.Navigation("Oportunidades");
                 });
@@ -2355,6 +3933,22 @@ namespace DrakionTech.Crm.Data.Migrations
                     b.Navigation("Ciudades");
 
                     b.Navigation("PrefijosTelefonicos");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.Proyecto", b =>
+                {
+                    b.Navigation("AsignacionesEmpleado");
+
+                    b.Navigation("Pagos");
+                });
+
+            modelBuilder.Entity("DrakionTech.Crm.Data.Entities.PublicacionMarketing", b =>
+                {
+                    b.Navigation("Archivos");
+
+                    b.Navigation("Metricas");
+
+                    b.Navigation("RedesSociales");
                 });
 
             modelBuilder.Entity("DrakionTech.Crm.Data.Entities.SectorEmpresa", b =>

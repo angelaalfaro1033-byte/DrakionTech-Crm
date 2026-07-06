@@ -62,6 +62,11 @@
                     <InputDate class="form-control" @bind-Value="_modelo.FechaInicio" />
                 </div>
                 <div class="mb-3">
+                    <label class="form-label">Porcentaje de dedicación</label>
+                    <InputNumber class="form-control" @bind-Value="_modelo.PorcentajeDedicacion" min="1" max="100" step="1" />
+                    <ValidationMessage For="() => _modelo.PorcentajeDedicacion" />
+                </div>
+                <div class="mb-3">
                     <label class="form-label">Rol en proyecto</label>
                     <InputText class="form-control" @bind-Value="_modelo.RolEnProyecto" />
                 </div>
@@ -100,6 +105,16 @@
              MostrarFiltroEstado="@EsReporteTodas"
              OnFiltroChanged="AplicarFiltro" />
 
+@if (TieneSobrecargas)
+{
+    <div class="alert alert-warning">
+        @foreach (var reporte in ReportesSobrecargados)
+        {
+            <div>AtenciÃ³n: @reporte.EmpleadoNombre tiene una carga asignada de @FormatearPorcentaje(reporte.PorcentajeAsignado)%.</div>
+        }
+    </div>
+}
+
 <div class="ui-card">
     @if (_cargando)
     {
@@ -125,13 +140,17 @@
                     @if (EsReporteTodas)
                     {
                         <th>Proyecto</th>
+                        <th>Dedicación</th>
                         <th>Inicio</th>
                         <th>Fin</th>
+                        <th>Carga colaborador</th>
                     }
                     else
                     {
                         <th>Proyectos activos</th>
+                        <th>% Asignado</th>
                         <th>Proyectos</th>
+                        <th>Capacidad</th>
                     }
                     <th>Estado</th>
                     @if (EsReporteTodas)
@@ -150,9 +169,12 @@
                             <td class="col-primary">@asignacion.EmpleadoNombre</td>
                             <td class="col-secondary">@(asignacion.RolEnProyecto ?? "-")</td>
                             <td class="col-secondary">@asignacion.ProyectoNombre</td>
+                            <td>@FormatearPorcentaje(asignacion.PorcentajeDedicacion)%</td>
                             <td>@asignacion.FechaInicio.ToShortDateString()</td>
                             <td>@(asignacion.FechaFin?.ToShortDateString() ?? "-")</td>
+                            <td>@RenderCapacidad(asignacion.PorcentajeAsignado)</td>
                             <td>
+                                <span class="badge @ObtenerBadgeCarga(asignacion.EstadoCarga)">@asignacion.EstadoCarga</span>
                                 <span class="badge @(asignacion.Activa ? "badge-success" : "badge-secondary")">@asignacion.Estado</span>
                             </td>
                             <td><AuditLastUpdated AuditInfo="asignacion.AuditInfo" /></td>
@@ -180,7 +202,9 @@
                             <td class="col-primary">@reporte.EmpleadoNombre</td>
                             <td class="col-secondary">@(reporte.Rol ?? "-")</td>
                             <td>@reporte.CantidadProyectos</td>
+                            <td>@FormatearPorcentaje(reporte.PorcentajeAsignado)%</td>
                             <td class="col-secondary">@(string.IsNullOrWhiteSpace(reporte.Proyectos) ? "-" : reporte.Proyectos)</td>
+                            <td>@RenderCapacidad(reporte.PorcentajeAsignado)</td>
                             <td>
                                 <span class="badge @ObtenerBadgeReporte(reporte.Estado)">@reporte.Estado</span>
                             </td>
@@ -218,6 +242,9 @@
 
     private bool EsReporteTodas => _tipoReporte == TipoReporteTodas;
     private bool TieneRegistros => EsReporteTodas ? _asignaciones.Any() : _reportes.Any();
+    private IEnumerable<ReporteAsignacionProyectoDto> ReportesSobrecargados => _reportes
+        .Where(r => r.Estado == "Sobrecargado");
+    private bool TieneSobrecargas => !EsReporteTodas && ReportesSobrecargados.Any();
     private string MensajeSinRegistros => EsReporteTodas
         ? "No hay asignaciones registradas."
         : "No hay registros para el reporte seleccionado.";
@@ -268,6 +295,7 @@
                 {
                     Id = _editandoAsignacionId.Value,
                     FechaInicio = _modelo.FechaInicio,
+                    PorcentajeDedicacion = _modelo.PorcentajeDedicacion,
                     RolEnProyecto = _modelo.RolEnProyecto,
                     Observaciones = _modelo.Observaciones
                 });
@@ -295,6 +323,7 @@
             EmpleadoId = asignacion.EmpleadoId,
             ProyectoId = asignacion.ProyectoId,
             FechaInicio = asignacion.FechaInicio,
+            PorcentajeDedicacion = asignacion.PorcentajeDedicacion,
             RolEnProyecto = asignacion.RolEnProyecto,
             Observaciones = asignacion.Observaciones
         };
@@ -435,15 +464,48 @@
 
     private static CrearAsignacionProyectoDto NuevoModelo() => new()
     {
-        FechaInicio = DateTime.UtcNow
+        FechaInicio = DateTime.UtcNow,
+        PorcentajeDedicacion = 100m
     };
 
     private static string ObtenerBadgeReporte(string estado) => estado switch
     {
         "Disponible" => "badge-success",
-        "Baja" => "badge-secondary",
-        "Media" => "badge-secondary",
-        "Alta" => "badge-danger",
+        "Parcial" => "badge-primary",
+        "Completo" => "badge-secondary",
+        "Sobrecargado" => "badge-danger",
         _ => "badge-secondary"
     };
+
+    private static string ObtenerBadgeCarga(string estado) => ObtenerBadgeReporte(estado);
+
+    private static string ObtenerClaseBarra(decimal porcentaje) => porcentaje switch
+    {
+        0 => "bg-success",
+        < 100 => "bg-primary",
+        100 => "bg-secondary",
+        _ => "bg-danger"
+    };
+
+    private static decimal ObtenerAnchoBarra(decimal porcentaje) => Math.Min(100m, Math.Max(0m, porcentaje));
+
+    private static string FormatearPorcentaje(decimal porcentaje)
+    {
+        return porcentaje % 1 == 0
+            ? porcentaje.ToString("0")
+            : porcentaje.ToString("0.##");
+    }
+
+    private RenderFragment RenderCapacidad(decimal porcentaje) => @<div>
+        <div class="progress" style="height: 8px;">
+            <div class="progress-bar @ObtenerClaseBarra(porcentaje)"
+                 role="progressbar"
+                 style="width: @ObtenerAnchoBarra(porcentaje)%"
+                 aria-valuenow="@ObtenerAnchoBarra(porcentaje)"
+                 aria-valuemin="0"
+                 aria-valuemax="100">
+            </div>
+        </div>
+        <small class="text-muted">@FormatearPorcentaje(porcentaje)% asignado</small>
+    </div>;
 }

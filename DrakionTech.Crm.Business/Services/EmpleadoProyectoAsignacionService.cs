@@ -1,5 +1,6 @@
 using DrakionTech.Crm.Business.Common;
 using DrakionTech.Crm.Business.DTOs.AsignacionProyecto;
+using DrakionTech.Crm.Business.Exceptions;
 using DrakionTech.Crm.Business.Interfaces;
 using DrakionTech.Crm.Data.Context;
 using DrakionTech.Crm.Data.Entities;
@@ -12,6 +13,7 @@ public class EmpleadoProyectoAsignacionService : IEmpleadoProyectoAsignacionServ
 {
     private readonly IEmpleadoProyectoAsignacionRepository _repository;
     private readonly ApplicationDbContext _context;
+    private const decimal CapacidadMaxima = 100m;
 
     public EmpleadoProyectoAsignacionService(
         IEmpleadoProyectoAsignacionRepository repository,
@@ -43,8 +45,10 @@ public class EmpleadoProyectoAsignacionService : IEmpleadoProyectoAsignacionServ
             .ThenBy(a => a.Empleado.Nombre)
             .ToListAsync();
 
+        var porcentajesAsignados = await ObtenerPorcentajesAsignadosAsync();
+
         return asignaciones
-            .Select(MapToDto)
+            .Select(a => MapToDto(a, porcentajesAsignados.GetValueOrDefault(a.EmpleadoId)))
             .ToList();
     }
 
@@ -53,7 +57,9 @@ public class EmpleadoProyectoAsignacionService : IEmpleadoProyectoAsignacionServ
         var asignacion = await _repository.ObtenerPorIdAsync(id)
             ?? throw new KeyNotFoundException($"Asignacion {id} no encontrada.");
 
-        return MapToDto(asignacion);
+        var porcentajeAsignado = await ObtenerPorcentajeAsignadoAsync(asignacion.EmpleadoId);
+
+        return MapToDto(asignacion, porcentajeAsignado);
     }
 
     public async Task<List<ReporteAsignacionProyectoDto>> ObtenerSinAsignacionAsync()
@@ -67,6 +73,7 @@ public class EmpleadoProyectoAsignacionService : IEmpleadoProyectoAsignacionServ
                 EmpleadoNombre = $"{e.Nombre} {e.Apellido}".Trim(),
                 Rol = ObtenerRolEmpleado(e),
                 CantidadProyectos = 0,
+                PorcentajeAsignado = 0,
                 Estado = "Disponible"
             })
             .ToList();
@@ -79,14 +86,22 @@ public class EmpleadoProyectoAsignacionService : IEmpleadoProyectoAsignacionServ
         return asignaciones
             .GroupBy(a => a.Empleado)
             .Where(g => g.Count() > 1)
-            .Select(g => new ReporteAsignacionProyectoDto
+            .Select(g =>
             {
-                EmpleadoId = g.Key.Id,
-                EmpleadoNombre = $"{g.Key.Nombre} {g.Key.Apellido}".Trim(),
-                Rol = ObtenerRolEmpleado(g.Key),
-                CantidadProyectos = g.Count(),
-                Proyectos = string.Join(", ", g.Select(a => a.Proyecto.Nombre).OrderBy(nombre => nombre)),
-                Estado = ClasificarCarga(g.Count())
+                var porcentajeAsignado = g.Sum(a => a.PorcentajeDedicacion);
+
+                return new ReporteAsignacionProyectoDto
+                {
+                    EmpleadoId = g.Key.Id,
+                    EmpleadoNombre = $"{g.Key.Nombre} {g.Key.Apellido}".Trim(),
+                    Rol = ObtenerRolEmpleado(g.Key),
+                    CantidadProyectos = g.Count(),
+                    PorcentajeAsignado = porcentajeAsignado,
+                    Proyectos = string.Join(", ", g
+                        .Select(a => $"{a.Proyecto.Nombre} ({FormatearPorcentaje(a.PorcentajeDedicacion)}%)")
+                        .OrderBy(nombre => nombre)),
+                    Estado = ClasificarCarga(porcentajeAsignado)
+                };
             })
             .OrderByDescending(r => r.CantidadProyectos)
             .ThenBy(r => r.EmpleadoNombre)
@@ -113,6 +128,7 @@ public class EmpleadoProyectoAsignacionService : IEmpleadoProyectoAsignacionServ
             {
                 var asignacionesEmpleado = asignacionesPorEmpleado.GetValueOrDefault(e.Id) ?? new List<EmpleadoProyectoAsignacion>();
                 var cantidad = asignacionesEmpleado.Count;
+                var porcentajeAsignado = asignacionesEmpleado.Sum(a => a.PorcentajeDedicacion);
 
                 return new ReporteAsignacionProyectoDto
                 {
@@ -120,8 +136,11 @@ public class EmpleadoProyectoAsignacionService : IEmpleadoProyectoAsignacionServ
                     EmpleadoNombre = $"{e.Nombre} {e.Apellido}".Trim(),
                     Rol = ObtenerRolEmpleado(e),
                     CantidadProyectos = cantidad,
-                    Proyectos = string.Join(", ", asignacionesEmpleado.Select(a => a.Proyecto.Nombre).OrderBy(nombre => nombre)),
-                    Estado = ClasificarCarga(cantidad)
+                    PorcentajeAsignado = porcentajeAsignado,
+                    Proyectos = string.Join(", ", asignacionesEmpleado
+                        .Select(a => $"{a.Proyecto.Nombre} ({FormatearPorcentaje(a.PorcentajeDedicacion)}%)")
+                        .OrderBy(nombre => nombre)),
+                    Estado = ClasificarCarga(porcentajeAsignado)
                 };
             })
             .ToList();
@@ -131,6 +150,8 @@ public class EmpleadoProyectoAsignacionService : IEmpleadoProyectoAsignacionServ
     {
         await ValidarEmpleadoYProyectoAsync(dto.EmpleadoId, dto.ProyectoId);
         ValidarFechas(dto.FechaInicio, null);
+        ValidarPorcentajeDedicacion(dto.PorcentajeDedicacion);
+        await ValidarCapacidadAsync(dto.EmpleadoId, dto.PorcentajeDedicacion);
 
         var asignacionActiva = await _repository.ObtenerActivaAsync(dto.EmpleadoId, dto.ProyectoId);
         if (asignacionActiva is not null)
@@ -141,6 +162,7 @@ public class EmpleadoProyectoAsignacionService : IEmpleadoProyectoAsignacionServ
             EmpleadoId = dto.EmpleadoId,
             ProyectoId = dto.ProyectoId,
             FechaInicio = dto.FechaInicio,
+            PorcentajeDedicacion = dto.PorcentajeDedicacion,
             Activa = true,
             RolEnProyecto = dto.RolEnProyecto,
             Observaciones = dto.Observaciones
@@ -155,10 +177,16 @@ public class EmpleadoProyectoAsignacionService : IEmpleadoProyectoAsignacionServ
             ?? throw new KeyNotFoundException($"Asignacion {dto.Id} no encontrada.");
 
         ValidarFechas(dto.FechaInicio, dto.FechaFin);
+        ValidarPorcentajeDedicacion(dto.PorcentajeDedicacion);
+
+        var quedaActiva = !dto.FechaFin.HasValue;
+        if (quedaActiva)
+            await ValidarCapacidadAsync(asignacion.EmpleadoId, dto.PorcentajeDedicacion, asignacion.Id);
 
         asignacion.FechaInicio = dto.FechaInicio;
         asignacion.FechaFin = dto.FechaFin;
-        asignacion.Activa = !dto.FechaFin.HasValue;
+        asignacion.PorcentajeDedicacion = dto.PorcentajeDedicacion;
+        asignacion.Activa = quedaActiva;
         asignacion.RolEnProyecto = dto.RolEnProyecto;
         asignacion.Observaciones = dto.Observaciones;
 
@@ -198,6 +226,8 @@ public class EmpleadoProyectoAsignacionService : IEmpleadoProyectoAsignacionServ
             return;
 
         await ValidarEmpleadoYProyectoAsync(asignacion.EmpleadoId, asignacion.ProyectoId);
+        ValidarPorcentajeDedicacion(asignacion.PorcentajeDedicacion);
+        await ValidarCapacidadAsync(asignacion.EmpleadoId, asignacion.PorcentajeDedicacion, asignacion.Id);
 
         var asignacionActiva = await _repository.ObtenerActivaAsync(asignacion.EmpleadoId, asignacion.ProyectoId);
         if (asignacionActiva is not null && asignacionActiva.Id != asignacion.Id)
@@ -233,7 +263,52 @@ public class EmpleadoProyectoAsignacionService : IEmpleadoProyectoAsignacionServ
             throw new InvalidOperationException("La fecha de finalizacion no puede ser anterior a la fecha de inicio.");
     }
 
-    private static AsignacionProyectoListDto MapToDto(EmpleadoProyectoAsignacion a) => new()
+    private static void ValidarPorcentajeDedicacion(decimal porcentaje)
+    {
+        if (porcentaje <= 0 || porcentaje > CapacidadMaxima)
+            throw new ReglaNegocioException("El porcentaje de dedicacion debe estar entre 1 y 100.");
+    }
+
+    private async Task ValidarCapacidadAsync(
+        int empleadoId,
+        decimal porcentajeDedicacion,
+        int? asignacionIdExcluida = null)
+    {
+        var porcentajeActual = await _context.EmpleadoProyectoAsignaciones
+            .Where(a => a.EmpleadoId == empleadoId && a.Activa)
+            .Where(a => !asignacionIdExcluida.HasValue || a.Id != asignacionIdExcluida.Value)
+            .SumAsync(a => a.PorcentajeDedicacion);
+
+        var porcentajeTotal = porcentajeActual + porcentajeDedicacion;
+        if (porcentajeTotal <= CapacidadMaxima)
+            return;
+
+        var empleadoNombre = await _context.Empleados
+            .Where(e => e.Id == empleadoId)
+            .Select(e => (e.Nombre + " " + e.Apellido).Trim())
+            .FirstOrDefaultAsync() ?? "El colaborador";
+
+        throw new ReglaNegocioException(
+            $"{empleadoNombre} quedaria con una carga asignada de {FormatearPorcentaje(porcentajeTotal)}%, superando el 100% permitido.");
+    }
+
+    private async Task<Dictionary<int, decimal>> ObtenerPorcentajesAsignadosAsync()
+    {
+        return await _context.EmpleadoProyectoAsignaciones
+            .Where(a => a.Activa)
+            .GroupBy(a => a.EmpleadoId)
+            .Select(g => new { EmpleadoId = g.Key, Porcentaje = g.Sum(a => a.PorcentajeDedicacion) })
+            .ToDictionaryAsync(x => x.EmpleadoId, x => x.Porcentaje);
+    }
+
+    private async Task<decimal> ObtenerPorcentajeAsignadoAsync(int empleadoId)
+    {
+        return await _context.EmpleadoProyectoAsignaciones
+            .Where(a => a.EmpleadoId == empleadoId && a.Activa)
+            .SumAsync(a => a.PorcentajeDedicacion);
+    }
+
+    private static AsignacionProyectoListDto MapToDto(EmpleadoProyectoAsignacion a, decimal porcentajeAsignado) => new()
     {
         Id = a.Id,
         EmpleadoId = a.EmpleadoId,
@@ -242,6 +317,8 @@ public class EmpleadoProyectoAsignacionService : IEmpleadoProyectoAsignacionServ
         ProyectoNombre = a.Proyecto.Nombre,
         FechaInicio = a.FechaInicio,
         FechaFin = a.FechaFin,
+        PorcentajeDedicacion = a.PorcentajeDedicacion,
+        PorcentajeAsignado = porcentajeAsignado,
         Activa = a.Activa,
         RolEnProyecto = a.RolEnProyecto,
         Observaciones = a.Observaciones,
@@ -254,11 +331,18 @@ public class EmpleadoProyectoAsignacionService : IEmpleadoProyectoAsignacionServ
             ?? empleado.RolUsuario?.Nombre;
     }
 
-    private static string ClasificarCarga(int cantidadProyectos) => cantidadProyectos switch
+    private static string ClasificarCarga(decimal porcentajeAsignado) => porcentajeAsignado switch
     {
         0 => "Disponible",
-        1 => "Baja",
-        2 => "Media",
-        _ => "Alta"
+        < 100 => "Parcial",
+        100 => "Completo",
+        _ => "Sobrecargado"
     };
+
+    private static string FormatearPorcentaje(decimal porcentaje)
+    {
+        return porcentaje % 1 == 0
+            ? porcentaje.ToString("0")
+            : porcentaje.ToString("0.##");
+    }
 }

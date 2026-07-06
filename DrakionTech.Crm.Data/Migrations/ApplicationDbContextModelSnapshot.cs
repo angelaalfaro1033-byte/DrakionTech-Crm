@@ -863,6 +863,11 @@ namespace DrakionTech.Crm.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<decimal>("PorcentajeDedicacion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(5,2)")
+                        .HasDefaultValue(100m);
+
                     b.Property<int>("ProyectoId")
                         .HasColumnType("int");
 

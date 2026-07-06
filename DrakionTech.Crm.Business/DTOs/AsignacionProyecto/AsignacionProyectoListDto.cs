@@ -9,8 +9,17 @@ public class AsignacionProyectoListDto : DrakionTech.Crm.Business.DTOs.IHasAudit
     public string ProyectoNombre { get; set; } = string.Empty;
     public DateTime FechaInicio { get; set; }
     public DateTime? FechaFin { get; set; }
+    public decimal PorcentajeDedicacion { get; set; }
+    public decimal PorcentajeAsignado { get; set; }
     public bool Activa { get; set; }
     public string Estado => Activa ? "Activa" : "Finalizada";
+    public string EstadoCarga => PorcentajeAsignado switch
+    {
+        0 => "Disponible",
+        < 100 => "Parcial",
+        100 => "Completo",
+        _ => "Sobrecargado"
+    };
     public string? RolEnProyecto { get; set; }
     public string? Observaciones { get; set; }
     public DrakionTech.Crm.Business.DTOs.AuditInfoDto? AuditInfo { get; set; }

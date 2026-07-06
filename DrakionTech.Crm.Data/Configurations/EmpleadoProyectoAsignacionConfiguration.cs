@@ -15,6 +15,11 @@ public class EmpleadoProyectoAsignacionConfiguration : IEntityTypeConfiguration<
         builder.Property(a => a.FechaInicio)
             .IsRequired();
 
+        builder.Property(a => a.PorcentajeDedicacion)
+            .HasColumnType("decimal(5,2)")
+            .HasDefaultValue(100m)
+            .IsRequired();
+
         builder.Property(a => a.Activa)
             .HasDefaultValue(true);
 
