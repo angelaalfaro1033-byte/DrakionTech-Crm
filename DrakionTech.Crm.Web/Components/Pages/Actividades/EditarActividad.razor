@@ -3,9 +3,11 @@
 @inject IActividadService ActividadService
 @inject IContactoService ContactoService
 @inject IOportunidadService OportunidadService
+@inject IUsuarioService UsuarioService
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthStateProvider
 @using DrakionTech.Crm.Web.Extensions
+@using DrakionTech.Crm.Business.DTOs.Usuario
 @using Microsoft.AspNetCore.Components.Authorization
 
 <div class="form-card">
@@ -47,8 +49,30 @@
                 <div class="mb-3">
                     <label class="form-label">Fecha</label>
                     <InputDate class="form-control"
+                           Type="@InputDateType.DateTimeLocal"
                                @bind-Value="modelo.Fecha" />
                 </div>
+
+            <div class="mb-3">
+                <label class="form-label">Fecha de vencimiento</label>
+                <InputDate class="form-control"
+                           Type="@InputDateType.DateTimeLocal" 
+                                @bind-Value="modelo.FechaFin" />
+                <div class="form-text">Fecha límite para completar la actividad</div>
+            </div>
+
+            @if (esAdministrador)
+            {
+                <div class="mb-3">
+                    <label class="form-label">Asignar a usuario</label>
+                    <InputSelect class="form-control" @bind-Value="modelo.UsuarioId">
+                        @foreach (var usuario in usuariosActivos)
+                        {
+                            <option value="@usuario.Id">@usuario.Nombre @usuario.Apellido (@usuario.Email)</option>
+                        }
+                    </InputSelect>
+                </div>
+            }
 
                 <!-- Resultado -->
                 <div class="mb-3">
@@ -107,23 +131,29 @@
     private ActualizarActividadDto? modelo;
     private IEnumerable<ContactoDto> contactos = [];
     private IEnumerable<OportunidadDto> oportunidades = [];
+    private List<UsuarioListDto> usuariosActivos = [];
+    private bool esAdministrador;
     private int usuarioId;
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var usuarioId = authState.User.GetUsuarioId();
+        usuarioId = authState.User.GetUsuarioId();
 
         var actividad = await ActividadService.ObtenerPorIdAsync(Id);
+        var usuarioActual = await UsuarioService.ObtenerPorIdAsync(usuarioId);
+        esAdministrador = string.Equals(usuarioActual.Rol, "Administrador", StringComparison.OrdinalIgnoreCase);
+        usuariosActivos = await UsuarioService.ObtenerTodosAsync(soloActivos: true);
 
         modelo = new ActualizarActividadDto
             {
                 TipoActividadId = actividad.TipoActividadId,
                 Fecha = actividad.Fecha,
+                FechaFin = actividad.FechaVencimiento,
                 Resultado = actividad.Resultado ?? string.Empty,
                 Notas = actividad.Notas,
                 ContactoId = actividad.ContactoId,
                 OportunidadId = actividad.OportunidadId,
-                UsuarioId = usuarioId,
+                UsuarioId = actividad.UsuarioId,
                 EstadoActividadId = actividad.EstadoActividadId
             };
 
@@ -133,6 +163,11 @@
     }
     private async Task Guardar()
     {
+        if (!esAdministrador)
+        {
+            modelo!.UsuarioId = usuarioId;
+        }
+
         await ActividadService.ActualizarAsync(Id, modelo!);
         Navigation.NavigateTo($"/empresas/{EmpresaId}/actividades");
     }

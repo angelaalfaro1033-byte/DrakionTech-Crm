@@ -13,7 +13,7 @@
             <p class="page-subtitle">Eventos sincronizados desde Google Calendar</p>
         </div>
 
-        <button class="btn btn-primary" @onclick="Sincronizar">
+        <button class="btn btn-primary" @onclick="Sincronizar" disabled="@cargando">
             Sincronizar
         </button>
     </div>
@@ -88,6 +88,7 @@
 
 @code {
     private List<GoogleEvento> eventos = new();
+    private bool cargando;
 
     protected override async Task OnInitializedAsync()
     {
@@ -101,8 +102,20 @@
 
     private async Task Sincronizar()
     {
-        await SyncService.SincronizarAsync();
-        await CargarEventos();
+        if (cargando)
+            return;
+
+        cargando = true;
+
+        try
+        {
+            await SyncService.SincronizarAsync();
+            await CargarEventos();
+        }
+        finally
+        {
+            cargando = false;
+        }
     }
 
     private string LimpiarHtml(string? html)

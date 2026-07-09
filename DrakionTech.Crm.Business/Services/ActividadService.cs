@@ -1,9 +1,16 @@
 ﻿using AutoMapper;
 using DrakionTech.Crm.Business.DTOs.Actividad;
+using DrakionTech.Crm.Business.DTOs.Empresa;
 using DrakionTech.Crm.Business.Exceptions;
 using DrakionTech.Crm.Business.Interfaces;
+using DrakionTech.Crm.Business.Services;
 using DrakionTech.Crm.Data.Entities;
+using DrakionTech.Crm.Data.Entities.Enums;
 using DrakionTech.Crm.Data.Repositories;
+using DrakionTech.Crm.Data.Repositories.Interfaces;
+using DrakionTech.Crm.Data.Seed;
+using DrakionTech.Crm.Data.Services;
+using Microsoft.Extensions.Logging;
 
 namespace DrakionTech.Crm.Business.Services
 {
@@ -18,6 +25,11 @@ namespace DrakionTech.Crm.Business.Services
         private readonly IEstadoActividadRepository _estadoActividadRepository;
         private readonly ITipoActividadRepository _tipoActividadRepository;
         private readonly IWhatsAppNotificationService _whatsapp;
+        private readonly IActividadGoogleCalendarService _googleCalendarService;
+        private readonly IHistorialEmpresaService _historialService;
+        private readonly IUsuarioRepository _usuarioRepository;
+        private readonly ICurrentUserContext _currentUserContext;
+        private readonly ILogger<ActividadService> _logger;
         private const int EstadoProgramadaId = 1;
         private const int EstadoCompletadaId = 2;
 
@@ -28,8 +40,13 @@ namespace DrakionTech.Crm.Business.Services
              IContactoRepository contactoRepository,
              IOportunidadRepository oportunidadRepository,
              ITipoActividadRepository tipoActividadRepository,
-             IWhatsAppNotificationService whatsapp
-         )  
+             IWhatsAppNotificationService whatsapp,
+             IActividadGoogleCalendarService googleCalendarService,
+             IHistorialEmpresaService historialService,
+             IUsuarioRepository usuarioRepository,
+             ICurrentUserContext currentUserContext,
+             ILogger<ActividadService> logger
+         )
         {
             _actividadRepository = actividadRepository;
             _mapper = mapper;
@@ -38,6 +55,11 @@ namespace DrakionTech.Crm.Business.Services
             _oportunidadRepository = oportunidadRepository;
             _tipoActividadRepository = tipoActividadRepository;
             _whatsapp = whatsapp;
+            _googleCalendarService = googleCalendarService;
+            _historialService = historialService;
+            _usuarioRepository = usuarioRepository;
+            _currentUserContext = currentUserContext;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<TipoActividadDto>> ObtenerTiposActividadAsync(CancellationToken ct = default)
@@ -55,8 +77,12 @@ namespace DrakionTech.Crm.Business.Services
         public async Task<int> CrearAsync(CrearActividadDto dto, CancellationToken ct = default)
         {
             var actividad = _mapper.Map<Actividad>(dto);
+            actividad.UsuarioId = await ResolverUsuarioAsignadoAsync(dto.UsuarioId, ct);
 
             await _actividadRepository.AgregarAsync(actividad, ct);
+
+            // Sincronizar con Google Calendar
+            await SincronizarConGoogleCalendarAsync(actividad, null, ct);
 
             try
             {
@@ -67,7 +93,7 @@ namespace DrakionTech.Crm.Business.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error WhatsApp: {ex.Message}");
+                _logger.LogWarning(ex, "Error al enviar WhatsApp para Actividad {ActividadId}", actividad.Id);
             }
 
             return actividad.Id;
@@ -81,9 +107,19 @@ namespace DrakionTech.Crm.Business.Services
             var actividad = await _actividadRepository.ObtenerPorIdAsync(actividadId, ct)
                 ?? throw new EntidadNoEncontradaException("Actividad", actividadId);
 
+            var tienEventoGoogleCalendar = !string.IsNullOrWhiteSpace(actividad.ExternalCalendarEventId);
+            var usuarioAnteriorId = actividad.UsuarioId;
+
             _mapper.Map(dto, actividad);
+            actividad.UsuarioId = await ResolverUsuarioAsignadoAsync(dto.UsuarioId, ct);
 
             await _actividadRepository.ActualizarAsync(actividad, ct);
+
+            // Sincronizar cambios con Google Calendar si existe evento vinculado
+            if (tienEventoGoogleCalendar)
+            {
+                await SincronizarConGoogleCalendarAsync(actividad, usuarioAnteriorId, ct);
+            }
         }
 
         public async Task<ActividadDto> ObtenerPorIdAsync(
@@ -179,6 +215,143 @@ namespace DrakionTech.Crm.Business.Services
             actividad.Fin = DateTime.UtcNow;
 
             await _actividadRepository.ActualizarAsync(actividad, ct);
+        }
+
+        private async Task SincronizarConGoogleCalendarAsync(
+            Actividad actividad,
+            int? usuarioAnteriorId,
+            CancellationToken ct)
+        {
+            try
+            {
+                // Cargar relaciones necesarias para construir el título del evento.
+                if (actividad.EmpresaId.HasValue)
+                {
+                    actividad.Empresa = await _empresaRepository.ObtenerPorIdAsync(actividad.EmpresaId.Value, ct);
+                }
+                if (actividad.TipoActividadId > 0)
+                {
+                    actividad.TipoActividad = await _tipoActividadRepository.ObtenerPorIdAsync(actividad.TipoActividadId, ct);
+                }
+                if (actividad.ContactoId.HasValue)
+                {
+                    actividad.Contacto = await _contactoRepository.ObtenerPorIdAsync(actividad.ContactoId.Value, ct);
+                }
+                if (actividad.OportunidadId.HasValue)
+                {
+                    actividad.Oportunidad = await _oportunidadRepository.ObtenerPorIdAsync(actividad.OportunidadId.Value, ct);
+                }
+
+                string? googleEventId = null;
+
+                if (string.IsNullOrWhiteSpace(actividad.ExternalCalendarEventId))
+                {
+                    // Crear nuevo evento en Google Calendar
+                    googleEventId = await _googleCalendarService.CrearEventoAsync(actividad, ct);
+                    actividad.ExternalCalendarEventId = googleEventId;
+
+                    // Actualizar la actividad con el ID del evento
+                    await _actividadRepository.ActualizarAsync(actividad, ct);
+
+                    // Registrar en historial
+                    if (actividad.EmpresaId.HasValue)
+                    {
+                        await _historialService.RegistrarAsync(new RegistrarHistorialEmpresaDto
+                        {
+                            EmpresaId = actividad.EmpresaId.Value,
+                            TipoEvento = TipoEventoHistorialEmpresa.ActividadSincronizadaGoogleCalendar,
+                            TituloEvento = "Actividad sincronizada a Google Calendar",
+                            DescripcionEvento = $"La actividad '{actividad.TipoActividad?.Nombre}' ha sido creada en Google Calendar. ID del evento: {googleEventId}",
+                            ModuloOrigen = ModuloOrigenHistorialEmpresa.Actividades,
+                            RegistroOrigenId = actividad.Id,
+                            ClaveEvento = $"actividad-google-{actividad.Id}"
+                        }, ct);
+                    }
+
+                    _logger.LogInformation(
+                        "Actividad {ActividadId} sincronizada a Google Calendar. EventId: {EventId}",
+                        actividad.Id, googleEventId);
+                }
+                else
+                {
+                    // Actualizar o mover el evento existente en Google Calendar
+                    var actualizado = await _googleCalendarService.ActualizarEventoAsync(
+                        actividad,
+                        usuarioAnteriorId ?? actividad.UsuarioId,
+                        ct);
+
+                    if (!string.IsNullOrWhiteSpace(actualizado)
+                        && actualizado != actividad.ExternalCalendarEventId)
+                    {
+                        actividad.ExternalCalendarEventId = actualizado;
+                        await _actividadRepository.ActualizarAsync(actividad, ct);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(actualizado) && actividad.EmpresaId.HasValue)
+                    {
+                        await _historialService.RegistrarAsync(new RegistrarHistorialEmpresaDto
+                        {
+                            EmpresaId = actividad.EmpresaId.Value,
+                            TipoEvento = TipoEventoHistorialEmpresa.ActividadSincronizadaGoogleCalendar,
+                            TituloEvento = "Actividad actualizada en Google Calendar",
+                            DescripcionEvento = $"La actividad '{actividad.TipoActividad?.Nombre}' ha sido actualizada en Google Calendar.",
+                            ModuloOrigen = ModuloOrigenHistorialEmpresa.Actividades,
+                            RegistroOrigenId = actividad.Id,
+                            ClaveEvento = $"actividad-google-update-{actividad.Id}-{DateTime.UtcNow:yyyyMMddHHmmss}"
+                        }, ct);
+                    }
+
+                    _logger.LogInformation(
+                        "Actividad {ActividadId} actualizada en Google Calendar",
+                        actividad.Id);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "Error al sincronizar Actividad {ActividadId} con Google Calendar",
+                    actividad.Id);
+
+                // Registrar el error en historial si la actividad pertenece a una empresa
+                if (actividad.EmpresaId.HasValue)
+                {
+                    try
+                    {
+                        await _historialService.RegistrarAsync(new RegistrarHistorialEmpresaDto
+                        {
+                            EmpresaId = actividad.EmpresaId.Value,
+                            TipoEvento = TipoEventoHistorialEmpresa.ActividadSincronizacionGoogleCalendarFallida,
+                            TituloEvento = "Falló la sincronización con Google Calendar",
+                            DescripcionEvento = $"No se pudo sincronizar la actividad con Google Calendar. Detalle: {ex.Message}",
+                            ModuloOrigen = ModuloOrigenHistorialEmpresa.Actividades,
+                            RegistroOrigenId = actividad.Id,
+                            ClaveEvento = $"actividad-google-error-{actividad.Id}-{DateTime.UtcNow:yyyyMMddHHmmss}"
+                        }, ct);
+                    }
+                    catch (Exception logEx)
+                    {
+                        _logger.LogError(logEx, "Error al registrar fallo de sincronización en historial");
+                    }
+                }
+
+                // No lanzar la excepción para permitir que la actividad se cree/actualice aunque falle Google Calendar
+                // Opcionalmente puedes lanzar aquí si prefieres que la creación falle
+            }
+        }
+
+        private async Task<int> ResolverUsuarioAsignadoAsync(int usuarioSolicitadoId, CancellationToken ct)
+        {
+            var usuarioActualId = _currentUserContext.UserId;
+            if (!usuarioActualId.HasValue)
+                return usuarioSolicitadoId;
+
+            var usuarioActual = await _usuarioRepository.GetByIdAsync(usuarioActualId.Value);
+            if (usuarioActual?.RolId == SeedIds.RolUsuarioAdministrador && usuarioSolicitadoId > 0)
+            {
+                return usuarioSolicitadoId;
+            }
+
+            return usuarioActualId.Value;
         }
 
         private static string CalcularTiempoRelativo(DateTime fechaVenc, DateTime ahora)

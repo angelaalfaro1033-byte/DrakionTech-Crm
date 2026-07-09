@@ -27,7 +27,9 @@ namespace DrakionTech.Crm.Business
             services.AddScoped<IPrefijoTelefonicoService, PrefijoTelefonicoService>();
             services.AddScoped<IUsuarioInternoService, UsuarioInternoService>();
             services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
+            services.AddScoped<GoogleDriveAuthService>();
             services.AddScoped<GoogleEventoSyncService>();
+            services.AddScoped<IActividadGoogleCalendarService, ActividadGoogleCalendarService>();
             services.AddScoped<IRolUsuarioService, RolUsuarioService>();
             services.AddScoped<IEspecialidadService, EspecialidadService>();
             services.AddScoped<IAccountService, AccountService>();

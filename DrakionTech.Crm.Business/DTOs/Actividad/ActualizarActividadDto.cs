@@ -19,10 +19,9 @@ namespace DrakionTech.Crm.Business.DTOs.Actividad
         [Required]
         public DateTime Fecha { get; set; }
 
-        [MaxLength(1000)]
-
         public DateTime? FechaFin { get; set; }
 
+        [MaxLength(1000)]
         public string? Resultado { get; set; }
 
         [MaxLength(2000)]

@@ -27,5 +27,7 @@ public enum TipoEventoHistorialEmpresa
     ComunicacionRegistrada = 23,
     AniversarioEmpresaEnviado = 24,
     AniversarioEmpresaFallido = 25,
+    ActividadSincronizadaGoogleCalendar = 26,
+    ActividadSincronizacionGoogleCalendarFallida = 27,
     Otro = 99
 }

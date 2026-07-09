@@ -106,6 +106,7 @@ builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<AzureBlobService>();
 builder.Services.AddScoped<GoogleAuthService>();
 builder.Services.AddScoped<GoogleEventoReadService>();
+builder.Services.AddScoped<GoogleEventoSyncService>();
 builder.Services.AddScoped<GoogleDriveService>();
 
 // SERVICIOS UI
