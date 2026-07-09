@@ -1,7 +1,9 @@
 ﻿@page "/empresas/{EmpresaId:int}/contactos/crear"
 @attribute [Authorize]
 @inject IContactoService ContactoService
+@inject IPrefijoTelefonicoService PrefijoTelefonicoService
 @inject NavigationManager Navigation
+@using DrakionTech.Crm.Business.DTOs.PrefijoTelefonico
 
 <div class="form-card">
 
@@ -42,8 +44,17 @@
 
             <div class="mb-3">
                 <label class="form-label">Teléfono</label>
-                <InputText class="form-control"
-                           @bind-Value="modelo.Telefono" />
+                <div class="input-group">
+                    <PhonePrefixSelector Prefijos="prefijosTelefonicos"
+                                         CodigoSeleccionado="@prefijoTelefonicoCodigo"
+                                         CodigoSeleccionadoChanged="codigo => prefijoTelefonicoCodigo = codigo" />
+                    <InputText class="form-control"
+                               placeholder="Número"
+                               inputmode="numeric"
+                               pattern="[0-9]*"
+                               oninput="this.value=this.value.replace(/\D/g,'')"
+                               @bind-Value="modelo.Telefono" />
+                </div>
             </div>
 
             <div class="mb-3">
@@ -69,10 +80,15 @@
 
     private CrearContactoDto modelo = new();
     private List<CatalogoDto> roles = new();
+    private List<PrefijoTelefonicoDto> prefijosTelefonicos = new();
+    private string? prefijoTelefonicoCodigo;
 
     protected override async Task OnInitializedAsync()
     {
         modelo.EmpresaId = EmpresaId;
+
+        prefijosTelefonicos = (await PrefijoTelefonicoService.ObtenerTodosAsync()).ToList();
+        prefijoTelefonicoCodigo = ObtenerPrefijoDefault()?.Codigo;
 
         roles = (await ContactoService.ObtenerRolesContactoAsync()).ToList();
 
@@ -82,7 +98,29 @@
 
     private async Task Guardar()
     {
+        modelo.Telefono = CombinarPrefijoYNumero(prefijoTelefonicoCodigo, modelo.Telefono);
         await ContactoService.CrearAsync(modelo);
         Navigation.NavigateTo($"/empresas/{EmpresaId}/contactos");
+    }
+
+    private PrefijoTelefonicoDto? ObtenerPrefijoDefault()
+        => prefijosTelefonicos.FirstOrDefault(p => p.Codigo == "+57")
+            ?? prefijosTelefonicos.FirstOrDefault();
+
+    private static string? CombinarPrefijoYNumero(string? prefijo, string? telefono)
+    {
+        var numero = SoloDigitos(telefono);
+        if (string.IsNullOrWhiteSpace(numero))
+            return null;
+
+        return $"{prefijo}{numero}";
+    }
+
+    private static string? SoloDigitos(string? valor)
+    {
+        if (string.IsNullOrWhiteSpace(valor))
+            return null;
+
+        return string.Concat(valor.Where(char.IsDigit));
     }
 }

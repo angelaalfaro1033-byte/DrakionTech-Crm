@@ -10,6 +10,7 @@
 @inject NavigationManager Navigation
 @using DrakionTech.Crm.Data.Entities.Enums
 @using DrakionTech.Crm.Business.DTOs.SectorEmpresa
+@using DrakionTech.Crm.Business.DTOs.PrefijoTelefonico
 
 <div class="form-card">
     <div class="form-header">
@@ -109,9 +110,13 @@
                 <div class="col-md-4">
                     <label class="form-label required">Teléfono</label>
                     <div class="input-group">
-                        <input class="form-control" style="max-width:90px"
-                               value="@modelo.PrefijoTelefonicoCodigo" readonly />
+                        <PhonePrefixSelector Prefijos="prefijosTelefonicos"
+                                             CodigoSeleccionado="@modelo.PrefijoTelefonicoCodigo"
+                                             OnSeleccionar="OnPrefijoEmpresaSeleccionado" />
                         <InputText class="form-control" placeholder="Número"
+                                   inputmode="numeric"
+                                   pattern="[0-9]*"
+                                   oninput="this.value=this.value.replace(/\D/g,'')"
                                    @bind-Value="modelo.Telefono" />
                     </div>
                     <ValidationMessage For="() => modelo.Telefono" />
@@ -181,8 +186,17 @@
                 <div class="col-md-4">
                     <label class="form-label">Teléfono del contacto</label>
 
-                    <InputText class="form-control"
-                               @bind-Value="modelo.ContactoPrincipal!.Telefono" />
+                    <div class="input-group">
+                        <PhonePrefixSelector Prefijos="prefijosTelefonicos"
+                                             CodigoSeleccionado="@contactoPrincipalPrefijoCodigo"
+                                             CodigoSeleccionadoChanged="codigo => contactoPrincipalPrefijoCodigo = codigo" />
+                        <InputText class="form-control"
+                                   placeholder="Número"
+                                   inputmode="numeric"
+                                   pattern="[0-9]*"
+                                   oninput="this.value=this.value.replace(/\D/g,'')"
+                                   @bind-Value="modelo.ContactoPrincipal!.Telefono" />
+                    </div>
 
                     <ValidationMessage For="() => modelo.ContactoPrincipal!.Telefono" />
                 </div>
@@ -231,8 +245,17 @@
                     <div class="col-md-4">
                         <label class="form-label">Teléfono</label>
 
-                        <InputText class="form-control"
-                                   @bind-Value="modelo.ContactosAdicionales[idx].Telefono" />
+                        <div class="input-group">
+                            <PhonePrefixSelector Prefijos="prefijosTelefonicos"
+                                                 CodigoSeleccionado="@contactosAdicionalesPrefijos[idx]"
+                                                 CodigoSeleccionadoChanged="codigo => contactosAdicionalesPrefijos[idx] = codigo" />
+                            <InputText class="form-control"
+                                       placeholder="Número"
+                                       inputmode="numeric"
+                                       pattern="[0-9]*"
+                                       oninput="this.value=this.value.replace(/\D/g,'')"
+                                       @bind-Value="modelo.ContactosAdicionales[idx].Telefono" />
+                        </div>
 
                         <ValidationMessage For="() => modelo.ContactosAdicionales[idx].Telefono" />
                     </div>
@@ -363,6 +386,9 @@
     private List<SectorEmpresaDto> sectoresEmpresa = new();
     private List<SubsectorEmpresaDto> subsectoresFiltrados = new();
     private List<CatalogoDto> rolesContacto = new();
+    private List<PrefijoTelefonicoDto> prefijosTelefonicos = new();
+    private string? contactoPrincipalPrefijoCodigo;
+    private List<string?> contactosAdicionalesPrefijos = new();
 
     private string sectorSeleccionadoTexto = string.Empty;
     private string subsectorSeleccionadoTexto = string.Empty;
@@ -377,11 +403,13 @@
     {
         paises = (await PaisService.ObtenerTodosAsync()).ToList();
         if (!paises.Any()) throw new InvalidOperationException("No existen países configurados.");
+        prefijosTelefonicos = (await PrefijoTelefonicoService.ObtenerTodosAsync()).ToList();
 
         modelo.PaisId = paises.First().Id;
         await CargarCiudades(modelo.PaisId);
         modelo.CiudadId = ciudades.First().Id;
         await CargarPrefijo(modelo.PaisId);
+        contactoPrincipalPrefijoCodigo = ObtenerPrefijoDefault()?.Codigo;
 
         sectoresEmpresa = (await SectorEmpresaService.ObtenerTodosAsync()).ToList();
         rolesContacto = (await ContactoService.ObtenerRolesContactoAsync())
@@ -410,8 +438,19 @@
     }
 
     private async Task CargarPrefijo(int paisId)
-        => modelo.PrefijoTelefonicoCodigo =
-            await PrefijoTelefonicoService.ObtenerCodigoPorPaisAsync(paisId);
+    {
+        var prefijo = prefijosTelefonicos.FirstOrDefault(p => p.PaisId == paisId);
+        modelo.PrefijoTelefonicoId = prefijo?.Id;
+        modelo.PrefijoTelefonicoCodigo = prefijo?.Codigo
+            ?? await PrefijoTelefonicoService.ObtenerCodigoPorPaisAsync(paisId);
+    }
+
+    private Task OnPrefijoEmpresaSeleccionado(PrefijoTelefonicoDto prefijo)
+    {
+        modelo.PrefijoTelefonicoId = prefijo.Id;
+        modelo.PrefijoTelefonicoCodigo = prefijo.Codigo;
+        return Task.CompletedTask;
+    }
 
     // Sector
     private async Task OnSectorSeleccionado(SectorEmpresaDto? sector)
@@ -482,13 +521,21 @@
         => modelo.Correos.RemoveAt(index);
 
     private void AgregarContacto()
-    => modelo.ContactosAdicionales.Add(new ContactoAdicionalDto());
+    {
+        modelo.ContactosAdicionales.Add(new ContactoAdicionalDto());
+        contactosAdicionalesPrefijos.Add(ObtenerPrefijoDefault()?.Codigo);
+    }
 
     private void EliminarContacto(int index)
-        => modelo.ContactosAdicionales.RemoveAt(index);
+    {
+        modelo.ContactosAdicionales.RemoveAt(index);
+        contactosAdicionalesPrefijos.RemoveAt(index);
+    }
 
     private async Task HandleValidSubmit()
     {
+        PrepararTelefonosParaGuardar();
+
         if (sectorPendienteNombre is not null)
         {
             var nuevoSector = await SectorEmpresaService.CrearYObtenerAsync(sectorPendienteNombre);
@@ -507,4 +554,42 @@
     }
 
     private void Cancelar() => Navigation.NavigateTo("/empresas");
+
+    private void PrepararTelefonosParaGuardar()
+    {
+        modelo.Telefono = SoloDigitos(modelo.Telefono);
+
+        if (modelo.ContactoPrincipal is not null)
+        {
+            modelo.ContactoPrincipal.Telefono =
+                CombinarPrefijoYNumero(contactoPrincipalPrefijoCodigo, modelo.ContactoPrincipal.Telefono);
+        }
+
+        for (var i = 0; i < modelo.ContactosAdicionales.Count; i++)
+        {
+            modelo.ContactosAdicionales[i].Telefono =
+                CombinarPrefijoYNumero(contactosAdicionalesPrefijos[i], modelo.ContactosAdicionales[i].Telefono);
+        }
+    }
+
+    private PrefijoTelefonicoDto? ObtenerPrefijoDefault()
+        => prefijosTelefonicos.FirstOrDefault(p => p.Codigo == "+57")
+            ?? prefijosTelefonicos.FirstOrDefault();
+
+    private static string? CombinarPrefijoYNumero(string? prefijo, string? telefono)
+    {
+        var numero = SoloDigitos(telefono);
+        if (string.IsNullOrWhiteSpace(numero))
+            return null;
+
+        return $"{prefijo}{numero}";
+    }
+
+    private static string? SoloDigitos(string? valor)
+    {
+        if (string.IsNullOrWhiteSpace(valor))
+            return null;
+
+        return string.Concat(valor.Where(char.IsDigit));
+    }
 }

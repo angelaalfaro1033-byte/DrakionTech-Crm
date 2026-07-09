@@ -1,0 +1,129 @@
+@using DrakionTech.Crm.Business.DTOs.PrefijoTelefonico
+
+<div style="position:relative;max-width:@MaxWidth;flex:0 0 @MaxWidth;">
+    @if (!editando)
+    {
+        <input class="form-control"
+               style="max-width:@MaxWidth"
+               value="@CodigoSeleccionado"
+               readonly
+               @onclick="IniciarBusqueda"
+               @onfocus="IniciarBusqueda" />
+    }
+    else
+    {
+        <input class="form-control"
+               style="max-width:@MaxWidth"
+               placeholder="+57"
+               value="@busqueda"
+               @oninput="OnInput"
+               @onfocus="Abrir"
+               @onblur="CerrarConDelay"
+               autocomplete="off" />
+    }
+
+    @if (abierto)
+    {
+        <div class="list-group shadow-sm"
+             style="position:absolute;z-index:1050;top:100%;left:0;min-width:220px;max-height:220px;overflow-y:auto;">
+            @if (!prefijosFiltrados.Any())
+            {
+                <div class="list-group-item small text-muted">Sin resultados</div>
+            }
+            else
+            {
+                @foreach (var prefijo in prefijosFiltrados)
+                {
+                    <button type="button"
+                            class="list-group-item list-group-item-action d-flex justify-content-between gap-2"
+                            @onclick="() => Seleccionar(prefijo)">
+                        <span>@prefijo.Nombre</span>
+                        <span>@prefijo.Codigo</span>
+                    </button>
+                }
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public List<PrefijoTelefonicoDto> Prefijos { get; set; } = new();
+    [Parameter] public string? CodigoSeleccionado { get; set; }
+    [Parameter] public EventCallback<string?> CodigoSeleccionadoChanged { get; set; }
+    [Parameter] public EventCallback<PrefijoTelefonicoDto> OnSeleccionar { get; set; }
+    [Parameter] public string MaxWidth { get; set; } = "90px";
+
+    private string busqueda = string.Empty;
+    private bool abierto;
+    private bool editando;
+
+    private List<PrefijoTelefonicoDto> prefijosFiltrados => Prefijos
+        .Where(p => Coincide(p, busqueda))
+        .OrderBy(p => p.Nombre)
+        .ThenBy(p => p.Codigo)
+        .ToList();
+
+    private void OnInput(ChangeEventArgs e)
+    {
+        busqueda = e.Value?.ToString() ?? string.Empty;
+        abierto = true;
+    }
+
+    private void IniciarBusqueda()
+    {
+        editando = true;
+        busqueda = string.Empty;
+        abierto = true;
+    }
+
+    private void Abrir()
+    {
+        abierto = true;
+    }
+
+    private async Task CerrarConDelay()
+    {
+        await Task.Delay(200);
+        abierto = false;
+        editando = false;
+        busqueda = string.Empty;
+    }
+
+    private async Task Seleccionar(PrefijoTelefonicoDto prefijo)
+    {
+        CodigoSeleccionado = prefijo.Codigo;
+        abierto = false;
+        editando = false;
+        busqueda = string.Empty;
+
+        await CodigoSeleccionadoChanged.InvokeAsync(prefijo.Codigo);
+        await OnSeleccionar.InvokeAsync(prefijo);
+    }
+
+    private static bool Coincide(PrefijoTelefonicoDto prefijo, string filtro)
+    {
+        if (string.IsNullOrWhiteSpace(filtro))
+            return true;
+
+        var normalizado = Normalizar(filtro);
+        var codigo = Normalizar(prefijo.Codigo);
+        var codigoSinMas = Normalizar(prefijo.Codigo.Replace("+", string.Empty));
+        var nombre = Normalizar(prefijo.Nombre);
+
+        return codigo.Contains(normalizado)
+            || codigoSinMas.Contains(normalizado)
+            || nombre.Contains(normalizado);
+    }
+
+    private static string Normalizar(string texto)
+    {
+        if (string.IsNullOrWhiteSpace(texto))
+            return string.Empty;
+
+        return string.Concat(
+            texto.Trim().ToLowerInvariant()
+                .Normalize(System.Text.NormalizationForm.FormD)
+                .Where(c => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c)
+                    != System.Globalization.UnicodeCategory.NonSpacingMark));
+    }
+}

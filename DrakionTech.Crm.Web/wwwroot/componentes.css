@@ -120,6 +120,7 @@
 .ui-table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 720px;
 }
 
     .ui-table th {
@@ -133,6 +134,23 @@
     .ui-table td {
         padding: 14px 12px;
         border-bottom: 1px solid #f3f4f6;
+    }
+
+.dt-table-responsive {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+}
+
+    .dt-table-responsive table {
+        margin-bottom: 0;
+    }
+
+    .dt-table-responsive .table {
+        min-width: 720px;
     }
 
 /* Botones de acción en la tabla */

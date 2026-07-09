@@ -1,7 +1,9 @@
 ﻿@page "/contactos/editar/{ContactoId:int}"
 @attribute [Authorize]
 @inject IContactoService ContactoService
+@inject IPrefijoTelefonicoService PrefijoTelefonicoService
 @inject NavigationManager Navigation
+@using DrakionTech.Crm.Business.DTOs.PrefijoTelefonico
 
 <div class="form-card">
 
@@ -51,8 +53,17 @@
 
             <div class="mb-3">
                 <label class="form-label">Teléfono</label>
-                <InputText class="form-control"
-                           @bind-Value="modelo.Telefono" />
+                <div class="input-group">
+                    <PhonePrefixSelector Prefijos="prefijosTelefonicos"
+                                         CodigoSeleccionado="@prefijoTelefonicoCodigo"
+                                         CodigoSeleccionadoChanged="codigo => prefijoTelefonicoCodigo = codigo" />
+                    <InputText class="form-control"
+                               placeholder="Número"
+                               inputmode="numeric"
+                               pattern="[0-9]*"
+                               oninput="this.value=this.value.replace(/\D/g,'')"
+                               @bind-Value="modelo.Telefono" />
+                </div>
             </div>
 
             <div class="mb-3">
@@ -78,12 +89,15 @@
 
     private ActualizarContactoDto? modelo;
     private List<CatalogoDto> roles = new();
+    private List<PrefijoTelefonicoDto> prefijosTelefonicos = new();
+    private string? prefijoTelefonicoCodigo;
 
     private int empresaId; // Cambiado a int
     private string empresaNombre = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
+        prefijosTelefonicos = (await PrefijoTelefonicoService.ObtenerTodosAsync()).ToList();
         roles = (await ContactoService.ObtenerRolesContactoAsync()).ToList();
 
         var contacto = await ContactoService.ObtenerPorIdAsync(ContactoId);
@@ -91,19 +105,60 @@
         empresaId = contacto.EmpresaId;
         empresaNombre = contacto.EmpresaNombre;
 
+        var telefono = SepararTelefono(contacto.Telefono);
+
         modelo = new ActualizarContactoDto
             {
                 Nombre = contacto.Nombre,
                 Apellido = contacto.Apellido,
                 Email = contacto.Email,
-                Telefono = contacto.Telefono,
+                Telefono = telefono.Numero,
                 RolContactoId = contacto.RolContactoId // Ahora int
             };
+        prefijoTelefonicoCodigo = telefono.PrefijoCodigo;
     }
 
     private async Task Guardar()
     {
+        modelo!.Telefono = CombinarPrefijoYNumero(prefijoTelefonicoCodigo, modelo.Telefono);
         await ContactoService.ActualizarAsync(ContactoId, modelo!);
         Navigation.NavigateTo($"/empresas/{empresaId}/contactos");
+    }
+
+    private (string? PrefijoCodigo, string? Numero) SepararTelefono(string? telefono)
+    {
+        var prefijoDefault = ObtenerPrefijoDefault()?.Codigo;
+        if (string.IsNullOrWhiteSpace(telefono))
+            return (prefijoDefault, null);
+
+        var prefijo = prefijosTelefonicos
+            .OrderByDescending(p => p.Codigo.Length)
+            .FirstOrDefault(p => telefono.StartsWith(p.Codigo, StringComparison.Ordinal));
+
+        if (prefijo is null)
+            return (prefijoDefault, SoloDigitos(telefono));
+
+        return (prefijo.Codigo, SoloDigitos(telefono[prefijo.Codigo.Length..]));
+    }
+
+    private PrefijoTelefonicoDto? ObtenerPrefijoDefault()
+        => prefijosTelefonicos.FirstOrDefault(p => p.Codigo == "+57")
+            ?? prefijosTelefonicos.FirstOrDefault();
+
+    private static string? CombinarPrefijoYNumero(string? prefijo, string? telefono)
+    {
+        var numero = SoloDigitos(telefono);
+        if (string.IsNullOrWhiteSpace(numero))
+            return null;
+
+        return $"{prefijo}{numero}";
+    }
+
+    private static string? SoloDigitos(string? valor)
+    {
+        if (string.IsNullOrWhiteSpace(valor))
+            return null;
+
+        return string.Concat(valor.Where(char.IsDigit));
     }
 }

@@ -56,6 +56,140 @@
         box-shadow: 0 0 0 0.15rem rgba(42, 62, 244, 0.15);
     }
 
+.dt-original-select,
+.dt-original-phone-input {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+.dt-searchable-select {
+    position: relative;
+    width: 100%;
+}
+
+.dt-searchable-input {
+    width: 100%;
+    cursor: text;
+    background-color: #fff;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23374151' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 12px 12px;
+    padding-right: 2.25rem;
+}
+
+.dt-searchable-panel,
+.dt-phone-panel {
+    display: none;
+    position: absolute;
+    z-index: 1100;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
+    max-height: 260px;
+    overflow: hidden;
+}
+
+.dt-searchable-select[data-open="true"] .dt-searchable-panel,
+.dt-phone-input[data-open="true"] .dt-phone-panel {
+    display: block;
+}
+
+.dt-searchable-option,
+.dt-phone-option {
+    display: block;
+    width: 100%;
+    border: 0;
+    background: #fff;
+    color: #1f2937;
+    font: inherit;
+    font-size: 0.9rem;
+    text-align: left;
+    padding: 0.58rem 0.75rem;
+    cursor: pointer;
+}
+
+    .dt-searchable-option:hover,
+    .dt-phone-option:hover,
+    .dt-searchable-option.is-active,
+    .dt-phone-option.is-active {
+        background: #f0f4ff;
+        color: var(--primary, #2A3EF4);
+    }
+
+.dt-searchable-empty {
+    color: #6b7280;
+    font-size: 0.88rem;
+    padding: 0.75rem;
+}
+
+.dt-phone-input {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+}
+
+.dt-phone-prefix {
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.dt-phone-prefix-button {
+    height: 100%;
+    min-width: 104px;
+    border: 1px solid #dee2e6;
+    border-right: 0;
+    border-radius: 8px 0 0 8px;
+    background: #f9fafb;
+    color: #374151;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.6rem 0.7rem;
+    white-space: nowrap;
+}
+
+.dt-phone-input > .form-control {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.dt-phone-input:focus-within .dt-phone-prefix-button {
+    border-color: var(--primary, #2A3EF4);
+    box-shadow: 0 0 0 0.15rem rgba(42, 62, 244, 0.15);
+}
+
+.dt-phone-panel {
+    top: calc(100% + 4px);
+    right: auto;
+    width: min(320px, calc(100vw - 2rem));
+}
+
+.dt-phone-search {
+    width: calc(100% - 16px);
+    margin: 8px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 0.88rem;
+    padding: 0.5rem 0.6rem;
+}
+
+.dt-phone-list {
+    max-height: 210px;
+    overflow-y: auto;
+}
+
 .form-actions {
     margin-top: 1.5rem;
     display: flex;

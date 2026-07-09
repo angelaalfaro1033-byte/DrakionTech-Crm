@@ -1,7 +1,9 @@
-﻿@using DrakionTech.Crm.Business.DTOs.Usuario
+@using DrakionTech.Crm.Business.DTOs.Usuario
 @using DrakionTech.Crm.Business.DTOs.RolUsuario
+@using DrakionTech.Crm.Business.DTOs.PrefijoTelefonico
+@inject IPrefijoTelefonicoService PrefijoTelefonicoService
 
-<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
+<EditForm Model="@Model" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
 
     @if (tieneErrores)
@@ -31,7 +33,17 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">Teléfono</label>
-                <InputText @bind-Value="Model.Telefono" class="form-control" placeholder="Ej: +57 300 000 0000" />
+                <div class="input-group">
+                    <PhonePrefixSelector Prefijos="prefijosTelefonicos"
+                                         CodigoSeleccionado="@prefijoTelefonicoCodigo"
+                                         CodigoSeleccionadoChanged="codigo => prefijoTelefonicoCodigo = codigo" />
+                    <InputText @bind-Value="Model.Telefono"
+                               class="form-control"
+                               placeholder="Número"
+                               inputmode="numeric"
+                               pattern="[0-9]*"
+                               oninput="this.value=this.value.replace(/\D/g,'')" />
+                </div>
                 <ValidationMessage For="@(() => Model.Telefono)" class="validation-message mt-1" />
             </div>
         </div>
@@ -73,4 +85,80 @@
     [Parameter] public string TextoBoton { get; set; } = "Guardar";
 
     private bool tieneErrores = false;
+    private List<PrefijoTelefonicoDto> prefijosTelefonicos = new();
+    private string? prefijoTelefonicoCodigo;
+    private CrearUsuarioDto? modeloParseado;
+    private bool prefijosCargados;
+
+    protected override Task OnInitializedAsync()
+    {
+        PrepararTelefonoParaEditar();
+        return Task.CompletedTask;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!prefijosCargados && Roles.Any())
+        {
+            prefijosTelefonicos = (await PrefijoTelefonicoService.ObtenerTodosAsync()).ToList();
+            prefijosCargados = true;
+        }
+
+        if (modeloParseado is null || !ReferenceEquals(modeloParseado, Model))
+            PrepararTelefonoParaEditar();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        Model.Telefono = CombinarPrefijoYNumero(prefijoTelefonicoCodigo, Model.Telefono);
+        await OnValidSubmit.InvokeAsync();
+    }
+
+    private void PrepararTelefonoParaEditar()
+    {
+        if (!prefijosTelefonicos.Any())
+            return;
+
+        var telefono = SepararTelefono(Model.Telefono);
+        prefijoTelefonicoCodigo = telefono.PrefijoCodigo;
+        Model.Telefono = telefono.Numero;
+        modeloParseado = Model;
+    }
+
+    private (string? PrefijoCodigo, string? Numero) SepararTelefono(string? telefono)
+    {
+        var prefijoDefault = ObtenerPrefijoDefault()?.Codigo;
+        if (string.IsNullOrWhiteSpace(telefono))
+            return (prefijoDefault, null);
+
+        var prefijo = prefijosTelefonicos
+            .OrderByDescending(p => p.Codigo.Length)
+            .FirstOrDefault(p => telefono.StartsWith(p.Codigo, StringComparison.Ordinal));
+
+        if (prefijo is null)
+            return (prefijoDefault, SoloDigitos(telefono));
+
+        return (prefijo.Codigo, SoloDigitos(telefono[prefijo.Codigo.Length..]));
+    }
+
+    private PrefijoTelefonicoDto? ObtenerPrefijoDefault()
+        => prefijosTelefonicos.FirstOrDefault(p => p.Codigo == "+57")
+            ?? prefijosTelefonicos.FirstOrDefault();
+
+    private static string? CombinarPrefijoYNumero(string? prefijo, string? telefono)
+    {
+        var numero = SoloDigitos(telefono);
+        if (string.IsNullOrWhiteSpace(numero))
+            return null;
+
+        return $"{prefijo}{numero}";
+    }
+
+    private static string? SoloDigitos(string? valor)
+    {
+        if (string.IsNullOrWhiteSpace(valor))
+            return null;
+
+        return string.Concat(valor.Where(char.IsDigit));
+    }
 }
