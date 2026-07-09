@@ -3,10 +3,10 @@ using Google.Apis.Services;
 
 public class GoogleDriveService
 {
-    private readonly GoogleAuthService _authService;
+    private readonly GoogleDriveAuthService _authService;
     private DriveService _driveService;
 
-    public GoogleDriveService(GoogleAuthService authService)
+    public GoogleDriveService(GoogleDriveAuthService authService)
     {
         _authService = authService;
     }

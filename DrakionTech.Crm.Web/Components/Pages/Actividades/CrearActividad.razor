@@ -4,9 +4,11 @@
 @inject IActividadService ActividadService
 @inject IContactoService ContactoService
 @inject IOportunidadService OportunidadService
+@inject IUsuarioService UsuarioService
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthStateProvider
 @using DrakionTech.Crm.Web.Extensions
+@using DrakionTech.Crm.Business.DTOs.Usuario
 @using Microsoft.AspNetCore.Components.Authorization
 
 <div class="form-card">
@@ -47,6 +49,7 @@
             <div class="mb-3">
                 <label class="form-label">Fecha</label>
                 <InputDate TValue="DateTime"
+                       Type="@InputDateType.DateTimeLocal"
                            class="form-control"
                            @bind-Value="modelo.Fecha" />
             </div>
@@ -55,10 +58,24 @@
             <div class="mb-3">
                 <label class="form-label">Fecha de vencimiento</label>
                 <InputDate TValue="DateTime?"
+                       Type="@InputDateType.DateTimeLocal"
                            class="form-control"
                            @bind-Value="modelo.FechaFin" />
                 <div class="form-text">Fecha límite para completar la actividad</div>
             </div>
+
+            @if (esAdministrador)
+            {
+                <div class="mb-3">
+                    <label class="form-label">Asignar a usuario</label>
+                    <InputSelect class="form-control" @bind-Value="modelo.UsuarioId">
+                        @foreach (var usuario in usuariosActivos)
+                        {
+                            <option value="@usuario.Id">@usuario.Nombre @usuario.Apellido (@usuario.Email)</option>
+                        }
+                    </InputSelect>
+                </div>
+            }
 
             <!-- Resultado -->
             <div class="mb-3">
@@ -115,6 +132,8 @@
     private CrearActividadDto modelo = new();
     private IEnumerable<ContactoDto> contactos = [];
     private IEnumerable<OportunidadDto> oportunidades = [];
+    private List<UsuarioListDto> usuariosActivos = [];
+    private bool esAdministrador;
     private int usuarioId;
 
     protected override async Task OnInitializedAsync()
@@ -122,8 +141,13 @@
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         usuarioId = authState.User.GetUsuarioId();
 
+        var usuarioActual = await UsuarioService.ObtenerPorIdAsync(usuarioId);
+        esAdministrador = string.Equals(usuarioActual.Rol, "Administrador", StringComparison.OrdinalIgnoreCase);
+
+        usuariosActivos = await UsuarioService.ObtenerTodosAsync(soloActivos: true);
+
         modelo.EmpresaId = EmpresaId;
-        modelo.Fecha = DateTime.Today;
+        modelo.Fecha = DateTime.Now;
         modelo.EstadoActividadId = 1;
         modelo.UsuarioId = usuarioId;
 

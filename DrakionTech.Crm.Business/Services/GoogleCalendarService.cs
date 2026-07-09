@@ -21,9 +21,9 @@ namespace DrakionTech.Crm.Business.Services
             _driveService = driveService;
         }
 
-        public async Task<List<GoogleEventoDto>> GetEventosAsync()
+        public async Task<List<GoogleEventoDto>> GetEventosAsync(int? usuarioId = null)
         {
-            var service = await GetCalendarServiceAsync();
+            var service = await GetCalendarServiceAsync(usuarioId);
 
             var request = service.Events.List("primary");
             request.MaxResults = 20;
@@ -37,6 +37,9 @@ namespace DrakionTech.Crm.Business.Services
 
             foreach (var e in events.Items)
             {
+                if (EsEventoCumpleanos(e))
+                    continue;
+
                 var archivos = new List<string>();
 
                 if (e.Attachments != null)
@@ -80,12 +83,59 @@ namespace DrakionTech.Crm.Business.Services
             return lista;
         }
 
-        public async Task<string> CrearEventoAsync(CrearGoogleEventoDto dto)
+        public async Task<string> CrearEventoAsync(CrearGoogleEventoDto dto, int? usuarioId = null)
         {
-            var service = await GetCalendarServiceAsync();
+            var service = await GetCalendarServiceAsync(usuarioId);
 
+            var newEvent = await BuildEventAsync(dto);
+
+            var request = service.Events.Insert(newEvent, "primary");
+
+            request.SupportsAttachments = true;
+
+            if (dto.EsVirtual)
+            {
+                request.ConferenceDataVersion = 1;
+            }
+
+            var createdEvent = await request.ExecuteAsync();
+
+            return createdEvent.Id;
+        }
+
+        public async Task<string> ActualizarEventoAsync(string googleEventId, CrearGoogleEventoDto dto, int? usuarioId = null)
+        {
+            var service = await GetCalendarServiceAsync(usuarioId);
+
+            var eventoActualizado = await BuildEventAsync(dto);
+
+            var request = service.Events.Update(eventoActualizado, "primary", googleEventId);
+
+            request.SupportsAttachments = true;
+
+            if (dto.EsVirtual)
+            {
+                request.ConferenceDataVersion = 1;
+            }
+
+            var updatedEvent = await request.ExecuteAsync();
+
+            return updatedEvent.Id;
+        }
+
+        public async Task<bool> EliminarEventoAsync(string googleEventId, int? usuarioId = null)
+        {
+            var service = await GetCalendarServiceAsync(usuarioId);
+
+            var request = service.Events.Delete("primary", googleEventId);
+            await request.ExecuteAsync();
+
+            return true;
+        }
+
+        private async Task<Event> BuildEventAsync(CrearGoogleEventoDto dto)
+        {
             var attachments = new List<EventAttachment>();
-
             var attendees = new List<EventAttendee>();
 
             if (dto.CorreosEmpleados != null && dto.CorreosEmpleados.Any())
@@ -120,7 +170,7 @@ namespace DrakionTech.Crm.Business.Services
                 }
             }
 
-            var newEvent = new Event
+            var evento = new Event
             {
                 Summary = dto.Titulo,
                 Description = dto.Descripcion,
@@ -143,7 +193,7 @@ namespace DrakionTech.Crm.Business.Services
 
             if (dto.EsVirtual)
             {
-                newEvent.ConferenceData = new ConferenceData
+                evento.ConferenceData = new ConferenceData
                 {
                     CreateRequest = new CreateConferenceRequest
                     {
@@ -156,28 +206,18 @@ namespace DrakionTech.Crm.Business.Services
                 };
             }
 
-            var request = service.Events.Insert(newEvent, "primary");
-
-            request.SupportsAttachments = true;
-
-            if (dto.EsVirtual)
-            {
-                request.ConferenceDataVersion = 1;
-            }
-
-            var createdEvent = await request.ExecuteAsync();
-
-            var meetLink = createdEvent?.ConferenceData?
-                .EntryPoints?
-                .FirstOrDefault(x => x.EntryPointType == "video")?
-                .Uri;
-
-            return meetLink ?? createdEvent.Id;
+            return evento;
         }
 
-            private async Task<CalendarService> GetCalendarServiceAsync()
+        private static bool EsEventoCumpleanos(Event e)
         {
-            var credential = await _authService.GetCredentialAsync();
+            return string.Equals(e.EventType, "birthday", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(e.Summary, "Happy birthday!", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private async Task<CalendarService> GetCalendarServiceAsync(int? usuarioId = null)
+        {
+            var credential = await _authService.GetCredentialAsync(usuarioId);
 
             return new CalendarService(new BaseClientService.Initializer()
             {

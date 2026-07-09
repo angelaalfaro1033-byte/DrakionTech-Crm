@@ -1,33 +1,37 @@
-﻿using Google.Apis.Auth.OAuth2;
+using Google.Apis.Auth.OAuth2;
 using Google.Apis.Calendar.v3;
-using Google.Apis.Drive.v3;
 using Google.Apis.Util.Store;
+using DrakionTech.Crm.Data.Services;
 
 public class GoogleAuthService
 {
-    private UserCredential? _credential;
+    private readonly ICurrentUserContext _currentUserContext;
+    private readonly Dictionary<string, UserCredential> _credentials = new();
 
-    public async Task<UserCredential> GetCredentialAsync()
+    public GoogleAuthService(ICurrentUserContext currentUserContext)
     {
-        if (_credential != null)
-            return _credential;
+        _currentUserContext = currentUserContext;
+    }
 
-        var scopes = new[]
-        {
-            CalendarService.Scope.Calendar,
-            DriveService.Scope.DriveFile
-        };
+    public async Task<UserCredential> GetCredentialAsync(int? usuarioId = null)
+    {
+        var scopes = new[] { CalendarService.Scope.Calendar };
 
-        var userId = Environment.UserName;
+        var userId = (usuarioId ?? _currentUserContext.UserId)?.ToString()
+            ?? Environment.UserName;
 
-        _credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
+        if (_credentials.TryGetValue(userId, out var cachedCredential))
+            return cachedCredential;
+
+        var credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
             GoogleClientSecrets.FromFile("credentials.json").Secrets,
             scopes,
-            "user_" + userId,
+            "calendar_" + userId,
             CancellationToken.None,
-            new FileDataStore("tokens", true)
+            new FileDataStore("tokens-calendar", true)
         );
 
-        return _credential;
+        _credentials[userId] = credential;
+        return credential;
     }
 }

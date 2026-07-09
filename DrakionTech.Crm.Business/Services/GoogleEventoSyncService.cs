@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 public class GoogleEventoSyncService
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
     private readonly IGoogleCalendarService _googleService;
     private readonly AzureBlobService _azureBlobService;
     private readonly GoogleDriveService _driveService;
@@ -15,12 +15,12 @@ public class GoogleEventoSyncService
     private static readonly Regex FileIdRegex2 = new(@"[?&]id=([a-zA-Z0-9_-]+)", RegexOptions.Compiled);
 
     public GoogleEventoSyncService(
-        ApplicationDbContext context,
+        IDbContextFactory<ApplicationDbContext> contextFactory,
         IGoogleCalendarService googleService,
         AzureBlobService azureBlobService,
         GoogleDriveService driveService)
     {
-        _context = context;
+        _contextFactory = contextFactory;
         _googleService = googleService;
         _azureBlobService = azureBlobService;
         _driveService = driveService;
@@ -28,6 +28,8 @@ public class GoogleEventoSyncService
 
     public async Task SincronizarAsync()
     {
+        await using var _context = await _contextFactory.CreateDbContextAsync();
+
         var eventosGoogle = await _googleService.GetEventosAsync();
 
         var eventosDb = await _context.GoogleEventos

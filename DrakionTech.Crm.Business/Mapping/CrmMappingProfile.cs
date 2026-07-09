@@ -87,6 +87,17 @@ namespace DrakionTech.Crm.Business.Mapping
                 .ForMember(d => d.Inicio, o => o.MapFrom(s => s.Fecha))
                 .ForMember(d => d.Fin, o => o.MapFrom(s => s.FechaFin));
 
+            CreateMap<ActualizarActividadDto, Actividad>()
+                .ForMember(d => d.Inicio, o => o.MapFrom(s => s.Fecha))
+                .ForMember(d => d.Fin, o => o.MapFrom(s => s.FechaFin))
+                .ForMember(d => d.Id, o => o.Ignore())
+                .ForMember(d => d.EmpresaId, o => o.Ignore())
+                .ForMember(d => d.FechaCreacion, o => o.Ignore())
+                .ForMember(d => d.CreatedByUserId, o => o.Ignore())
+                .ForMember(d => d.CreatedAt, o => o.Ignore())
+                .ForMember(d => d.ModifiedByUserId, o => o.Ignore())
+                .ForMember(d => d.ModifiedAt, o => o.Ignore());
+
             CreateMap<Actividad, ActividadDto>()
                 .ForMember(d => d.AuditInfo,
                     o => o.MapFrom(s => MapAuditInfo(s)))
