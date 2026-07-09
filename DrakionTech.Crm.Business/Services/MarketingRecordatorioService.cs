@@ -72,7 +72,7 @@ public class MarketingRecordatorioService : IMarketingRecordatorioService
                 pub.FechaPublicacionProgramada.Date == diasAntes)
             {
                 await _email.EnviarPlantillaAsync(correo,
-                    "marketing-recordatorio-3-dias",
+                    "RecordatorioPublicacion3Dias",
                     new Dictionary<string, string>
                     {
                         ["nombre"] = pub.Nombre,
@@ -88,7 +88,7 @@ public class MarketingRecordatorioService : IMarketingRecordatorioService
                 pub.FechaPublicacionProgramada.Date == hoy)
             {
                 await _email.EnviarPlantillaAsync(correo,
-                    "marketing-recordatorio-hoy",
+                    "RecordatorioPublicacionHoy",
                     new Dictionary<string, string>
                     {
                         ["nombre"] = pub.Nombre,
@@ -107,7 +107,7 @@ public class MarketingRecordatorioService : IMarketingRecordatorioService
                 var urlFormulario = $"{_baseUrl}/marketing/confirmar-publicacion/{token}";
 
                 await _email.EnviarPlantillaAsync(correo,
-                    "marketing-alerta-retraso",
+                    "AlertaRetrasoPublicacion",
                     new Dictionary<string, string>
                     {
                         ["nombre"] = pub.Nombre,

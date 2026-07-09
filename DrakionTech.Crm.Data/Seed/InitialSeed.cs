@@ -413,7 +413,246 @@ namespace DrakionTech.Crm.Data.Seed
 </html>
 ",
                     Activo = true
-                }
+                },
+                new EmailTemplate
+                {
+                    Id = 2,
+                    Nombre = "RecordatorioPublicacion3Dias",
+                    TemplateHtml = @"
+<!DOCTYPE html>
+<html>
+<head><meta charset='utf-8'/><meta name='viewport' content='width=device-width,initial-scale=1.0'/></head>
+<body style='margin:0;padding:0;background-color:#f5f4f0;font-family:Arial,sans-serif;'>
+  <table width='100%' cellpadding='0' cellspacing='0' style='background-color:#f5f4f0;padding:40px 0;'>
+    <tr><td align='center'>
+      <table width='560' cellpadding='0' cellspacing='0' style='background-color:#ffffff;border-radius:20px;border:1px solid #e8e6e0;overflow:hidden;'>
+        <tr>
+          <td style='background-color:#111827;padding:32px 40px;text-align:center;'>
+            <p style='margin:0;font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;'>DrakionTech CRM</p>
+            <p style='margin:6px 0 0;font-size:13px;color:#9ca3af;'>Plataforma de gestión comercial</p>
+          </td>
+        </tr>
+        <tr>
+          <td align='center' style='padding:36px 40px 0;'>
+            <div style='width:64px;height:64px;background-color:#fff7ed;border-radius:16px;text-align:center;line-height:64px;'>
+              <span style='font-size:30px;'>📅</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style='padding:24px 40px 16px;text-align:center;'>
+            <h1 style='margin:0 0 10px;font-size:24px;font-weight:700;color:#111827;letter-spacing:-0.4px;'>Recordatorio: publicación en 3 días 👋</h1>
+            <p style='margin:0;font-size:15px;color:#6b7280;line-height:1.7;'>
+              Hola <strong>{{responsable}}</strong>, el <strong>{{fecha}}</strong> está programada<br/>
+              la publicación <strong>{{nombre}}</strong>.<br/><br/>
+              Tienes 3 días para tener todo listo. ¡A prepararse!
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style='padding:0 40px;'>
+            <div style='height:1px;background-color:#f3f4f6;'></div>
+          </td>
+        </tr>
+        <tr>
+          <td style='padding:24px 40px;text-align:center;'>
+            <p style='margin:0;font-size:12px;color:#9ca3af;line-height:1.6;'>
+              Este correo fue enviado automáticamente por DrakionTech CRM.<br/>
+              Si no deberías recibirlo, puedes ignorar este mensaje.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>",
+                    Activo = true
+                },
+new EmailTemplate
+{
+    Id = 3,
+    Nombre = "RecordatorioPublicacionHoy",
+    TemplateHtml = @"
+<!DOCTYPE html>
+<html>
+<head><meta charset='utf-8'/><meta name='viewport' content='width=device-width,initial-scale=1.0'/></head>
+<body style='margin:0;padding:0;background-color:#f5f4f0;font-family:Arial,sans-serif;'>
+  <table width='100%' cellpadding='0' cellspacing='0' style='background-color:#f5f4f0;padding:40px 0;'>
+    <tr><td align='center'>
+      <table width='560' cellpadding='0' cellspacing='0' style='background-color:#ffffff;border-radius:20px;border:1px solid #e8e6e0;overflow:hidden;'>
+        <tr>
+          <td style='background-color:#111827;padding:32px 40px;text-align:center;'>
+            <p style='margin:0;font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;'>DrakionTech CRM</p>
+            <p style='margin:6px 0 0;font-size:13px;color:#9ca3af;'>Plataforma de gestión comercial</p>
+          </td>
+        </tr>
+        <tr>
+          <td align='center' style='padding:36px 40px 0;'>
+            <div style='width:64px;height:64px;background-color:#fff7ed;border-radius:16px;text-align:center;line-height:64px;'>
+              <span style='font-size:30px;'>🚀</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style='padding:24px 40px 16px;text-align:center;'>
+            <h1 style='margin:0 0 10px;font-size:24px;font-weight:700;color:#111827;letter-spacing:-0.4px;'>¡Hoy es el día! 🎉</h1>
+            <p style='margin:0;font-size:15px;color:#6b7280;line-height:1.7;'>
+              Hola <strong>{{responsable}}</strong>, hoy <strong>{{fecha}}</strong><br/>
+              debes publicar <strong>{{nombre}}</strong>.<br/><br/>
+              ¡Mucho éxito con el lanzamiento!
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style='padding:0 40px;'>
+            <div style='height:1px;background-color:#f3f4f6;'></div>
+          </td>
+        </tr>
+        <tr>
+          <td style='padding:24px 40px;text-align:center;'>
+            <p style='margin:0;font-size:12px;color:#9ca3af;line-height:1.6;'>
+              Este correo fue enviado automáticamente por DrakionTech CRM.<br/>
+              Si no deberías recibirlo, puedes ignorar este mensaje.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>",
+    Activo = true
+},
+new EmailTemplate
+{
+    Id = 4,
+    Nombre = "AlertaRetrasoPublicacion",
+    TemplateHtml = @"
+<!DOCTYPE html>
+<html>
+<head><meta charset='utf-8'/><meta name='viewport' content='width=device-width,initial-scale=1.0'/></head>
+<body style='margin:0;padding:0;background-color:#f5f4f0;font-family:Arial,sans-serif;'>
+  <table width='100%' cellpadding='0' cellspacing='0' style='background-color:#f5f4f0;padding:40px 0;'>
+    <tr><td align='center'>
+      <table width='560' cellpadding='0' cellspacing='0' style='background-color:#ffffff;border-radius:20px;border:1px solid #e8e6e0;overflow:hidden;'>
+        <tr>
+          <td style='background-color:#111827;padding:32px 40px;text-align:center;'>
+            <p style='margin:0;font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;'>DrakionTech CRM</p>
+            <p style='margin:6px 0 0;font-size:13px;color:#9ca3af;'>Plataforma de gestión comercial</p>
+          </td>
+        </tr>
+        <tr>
+          <td align='center' style='padding:36px 40px 0;'>
+            <div style='width:64px;height:64px;background-color:#fff7ed;border-radius:16px;text-align:center;line-height:64px;'>
+              <span style='font-size:30px;'>⚠️</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style='padding:24px 40px 16px;text-align:center;'>
+            <h1 style='margin:0 0 10px;font-size:24px;font-weight:700;color:#111827;letter-spacing:-0.4px;'>Publicación pendiente</h1>
+            <p style='margin:0;font-size:15px;color:#6b7280;line-height:1.7;'>
+              Hola <strong>{{responsable}}</strong>, la publicación<br/>
+              <strong>{{nombre}}</strong><br/>
+              estaba programada para el <strong>{{fecha}}</strong><br/>
+              y aún figura como <strong>Programada</strong>.<br/><br/>
+              Por favor actualiza su estado.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td align='center' style='padding:28px 40px;'>
+            <a href='{{url_formulario}}'
+               style='display:inline-block;background-color:#111827;color:#ffffff;text-decoration:none;font-size:15px;font-weight:600;padding:14px 36px;border-radius:12px;letter-spacing:0.01em;'>
+              Actualizar estado →
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td style='padding:0 40px 24px;text-align:center;'>
+            <p style='margin:0;font-size:12px;color:#9ca3af;line-height:1.6;'>
+              Si el botón no funciona, copia y pega este enlace en tu navegador:<br/>
+              <span style='color:#2563eb;word-break:break-all;'>{{url_formulario}}</span>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style='padding:0 40px;'>
+            <div style='height:1px;background-color:#f3f4f6;'></div>
+          </td>
+        </tr>
+        <tr>
+          <td style='padding:24px 40px;text-align:center;'>
+            <p style='margin:0;font-size:12px;color:#9ca3af;line-height:1.6;'>
+              Este correo fue enviado automáticamente por DrakionTech CRM.<br/>
+              Si no deberías recibirlo, puedes ignorar este mensaje.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>",
+    Activo = true
+},
+new EmailTemplate
+{
+    Id = 5,
+    Nombre = "AniversarioEmpresa",
+    TemplateHtml = @"
+<!DOCTYPE html>
+<html>
+<head><meta charset='utf-8'/><meta name='viewport' content='width=device-width,initial-scale=1.0'/></head>
+<body style='margin:0;padding:0;background-color:#f5f4f0;font-family:Arial,sans-serif;'>
+  <table width='100%' cellpadding='0' cellspacing='0' style='background-color:#f5f4f0;padding:40px 0;'>
+    <tr><td align='center'>
+      <table width='560' cellpadding='0' cellspacing='0' style='background-color:#ffffff;border-radius:20px;border:1px solid #e8e6e0;overflow:hidden;'>
+        <tr>
+          <td style='background-color:#111827;padding:32px 40px;text-align:center;'>
+            <p style='margin:0;font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;'>DrakionTech CRM</p>
+            <p style='margin:6px 0 0;font-size:13px;color:#9ca3af;'>Plataforma de gestión comercial</p>
+          </td>
+        </tr>
+        <tr>
+          <td align='center' style='padding:36px 40px 0;'>
+            <div style='width:64px;height:64px;background-color:#fff7ed;border-radius:16px;text-align:center;line-height:64px;'>
+              <span style='font-size:30px;'>🎉</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style='padding:24px 40px 16px;text-align:center;'>
+            <h1 style='margin:0 0 10px;font-size:24px;font-weight:700;color:#111827;letter-spacing:-0.4px;'>¡Feliz aniversario, {{nombre_empresa}}! 🎂</h1>
+            <p style='margin:0;font-size:15px;color:#6b7280;line-height:1.7;'>
+              Hoy <strong>{{fecha}}</strong> celebramos <strong>{{anios}} año(s)</strong><br/>
+              de la fundación de <strong>{{nombre_empresa}}</strong>.<br/><br/>
+              Desde DrakionTech CRM queremos agradecerles por su confianza<br/>
+              y desearles muchos más años de éxitos. ¡Felicitaciones! 🥳
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style='padding:0 40px;'>
+            <div style='height:1px;background-color:#f3f4f6;'></div>
+          </td>
+        </tr>
+        <tr>
+          <td style='padding:24px 40px;text-align:center;'>
+            <p style='margin:0;font-size:12px;color:#9ca3af;line-height:1.6;'>
+              Este correo fue enviado automáticamente por DrakionTech CRM.<br/>
+              Si no deberías recibirlo, puedes ignorar este mensaje.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>",
+    Activo = true
+}
             );
         }
     }

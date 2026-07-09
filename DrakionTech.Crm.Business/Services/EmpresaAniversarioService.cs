@@ -15,7 +15,7 @@ public interface IEmpresaAniversarioService
 
 public class EmpresaAniversarioService : IEmpresaAniversarioService
 {
-    private const string NombrePlantilla = "empresa-aniversario";
+    private const string NombrePlantilla = "AniversarioEmpresa";
 
     private readonly IEmpresaRepository _empresaRepository;
     private readonly IEmailService _emailService;
